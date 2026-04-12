@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= pageTitle %> | Gateway</title>
+    <link rel="stylesheet" href="<%= basePath %>/styles/main.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header class="page-header">
+        <div>
+          <h1>Aplicações</h1>
+          <p class="subtitle">Bem-vindo, <%= user?.username || 'utilizador' %></p>
+        </div>
+
+        <form method="post" action="<%= basePath %>/logout">
+          <button type="submit" class="button-secondary">Sair</button>
+        </form>
+      </header>
+
+      <section class="card">
+        <h2>Disponíveis</h2>
+        <ul class="app-list">
+          <% apps.forEach((app) => { %>
+          <li>
+            <span><%= app.name %></span>
+            <a href="<%= app.url %>">Abrir</a>
+          </li>
+          <% }) %>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>

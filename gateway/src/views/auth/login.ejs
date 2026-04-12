@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= pageTitle %> | Gateway</title>
+    <link rel="stylesheet" href="<%= basePath %>/styles/main.css" />
+  </head>
+  <body>
+    <main class="container">
+      <section class="card">
+        <h1>Gateway</h1>
+        <p class="subtitle">Autenticação de acesso</p>
+
+        <% if (errorMessage) { %>
+        <p class="error"><%= errorMessage %></p>
+        <% } %>
+
+        <form method="post" action="<%= basePath %>/login" class="form">
+          <label for="username">Utilizador</label>
+          <input id="username" name="username" type="text" required />
+
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" required />
+
+          <button type="submit">Entrar</button>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>
