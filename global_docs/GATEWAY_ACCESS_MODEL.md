@@ -24,7 +24,7 @@ Browser
 │                                      │
 │  ┌──────────────────────────────┐    │
 │  │  express-session (MySQL)     │    │
-│  │  cookie: session_token (JWT) │    │
+│  │  cookie: session_token        │    │
 │  └──────────────────────────────┘    │
 │                                      │
 │  Rotas de auth:                      │
@@ -70,7 +70,7 @@ Ficheiro: `src/config/runtime.js`
 | Variável de ambiente | Descrição                                  | Exemplo             |
 |---------------------|--------------------------------------------|---------------------|
 | `PORT`              | Porta em que o gateway escuta              | `6000`              |
-| `BASE_PATH_DEV`     | Prefixo de rota em desenvolvimento         | `/apps/pdms-new`    |
+| `BASE_PATH_DEV`     | Prefixo de rota em desenvolvimento         | `/pdms-new`         |
 | `BASE_PATH_PROD`    | Prefixo de rota em produção (via PM2/Nginx)| `/pdms`             |
 | `SESSION_SECRET`    | Segredo para assinar sessões Express       | (valor secreto)     |
 | `DB_HOST/PORT/USER/PASSWORD/NAME` | Ligação à base de dados    | —                   |

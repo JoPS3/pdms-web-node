@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= pageTitle %></title>
+  <link rel="stylesheet" href="<%= basePath %>/styles/style.css" />
+</head>
+<body>
+  <main class="mobile-main" data-mapas-table-filter-scope="auditoriaLogs">
+    <h1>Auditoria</h1>
+    <p>Utilizador: <strong><%= user?.userName || 'N/A' %></strong></p>
+    <p>
+      <a href="<%= basePath %>/">Inicio Mapas</a> |
+      <a href="<%= basePath %>/diario-caixa">Diario</a> |
+      <a href="<%= gatewayBasePath %>/apps">Launcher</a>
+    </p>
+
+    <form method="get" action="<%= basePath %>/auditoria-logs" data-grid-form>
+      <input type="hidden" name="page" value="<%= page %>" data-page-input />
+      <input type="hidden" name="pageSize" value="<%= pageSize %>" />
+      <input type="hidden" name="sortBy" value="<%= sortBy %>" />
+      <input type="hidden" name="sortDir" value="<%= sortDir %>" />
+
+      <% Object.entries(tableFilters || {}).forEach(([key, values]) => { %>
+        <% if (Array.isArray(values) && values.length > 0) { %>
+          <% values.forEach((value) => { %>
+            <input type="hidden" name="tf<%= key[0].toUpperCase() + key.slice(1) %>" value="<%= value %>" data-table-filter-input />
+          <% }) %>
+        <% } else if (Array.isArray(values) && values.length === 0) { %>
+          <input type="hidden" name="tf<%= key[0].toUpperCase() + key.slice(1) %>" value="__EMPTY__" data-table-filter-input />
+        <% } %>
+      <% }) %>
+
+      <div data-table-filter-options-host hidden>
+        <script type="application/json" data-table-filter-options-json><%- JSON.stringify(tableFilterOptions || {}).replace(/</g, '\\u003c') %></script>
+      </div>
+
+      <div class="users-table-filter-summary" data-table-filter-summary>
+        <div class="pagination-info" data-table-filter-summary-text>
+          Total de logs: <strong><%= total %></strong>
+        </div>
+        <button type="button" class="btn btn-muted users-table-filter-summary-clear" data-table-filter-clear-all>Limpar filtros</button>
+      </div>
+
+      <div class="table-wrap">
+        <table data-table-filter-root>
+          <thead>
+            <tr>
+              <th>UUID</th>
+              <th data-table-filter-key="createdAtDate"><div class="table-filter-head"><span>Data/Hora</span><button type="button" class="table-filter-toggle" data-table-filter-toggle="createdAtDate"></button></div></th>
+              <th data-table-filter-key="tableName"><div class="table-filter-head"><span>Tabela</span><button type="button" class="table-filter-toggle" data-table-filter-toggle="tableName"></button></div></th>
+              <th data-table-filter-key="recordId"><div class="table-filter-head"><span>Registo</span><button type="button" class="table-filter-toggle" data-table-filter-toggle="recordId"></button></div></th>
+              <th data-table-filter-key="action"><div class="table-filter-head"><span>Ação</span><button type="button" class="table-filter-toggle" data-table-filter-toggle="action"></button></div></th>
+              <th data-table-filter-key="userId"><div class="table-filter-head"><span>User</span><button type="button" class="table-filter-toggle" data-table-filter-toggle="userId"></button></div></th>
+              <th>Payload</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (!rows || rows.length === 0) { %>
+              <tr><td colspan="7">Sem logs.</td></tr>
+            <% } %>
+            <% (rows || []).forEach((row) => { %>
+              <% let payloadText = row.payload; try { payloadText = JSON.stringify(JSON.parse(row.payload), null, 2); } catch (_) {} %>
+              <tr class="data-row">
+                <td><%= row.id %></td>
+                <td><%= row.createdAt ? new Date(row.createdAt).toISOString().replace('T', ' ').slice(0, 19) : '' %></td>
+                <td><%= row.tableName %></td>
+                <td><%= row.recordId %></td>
+                <td><%= row.action %></td>
+                <td><%= row.userId %></td>
+                <td><pre><%= payloadText %></pre></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </form>
+  </main>
+  <script src="<%= basePath %>/scripts/shell.js"></script>
+</body>
+</html>

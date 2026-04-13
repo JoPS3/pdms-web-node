@@ -4,6 +4,8 @@ const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 
 const { requireGatewayAuth } = require('./middlewares/auth.middleware');
+const internalRoutes = require('./routes');
+const mapasController = require('./controllers/mapas.controller');
 
 const app = express();
 const isDev = process.env.NODE_ENV === 'development';
@@ -36,10 +38,9 @@ app.use((req, res, next) => {
 // Estáticos servidos antes do middleware de auth
 app.use(basePath, express.static(path.join(__dirname, 'public')));
 
-// Rota pública (sem auth)
-app.get(basePath + '/health', (req, res) => {
-  res.json({ status: 'ok', app: 'mapas' });
-});
+// Rotas técnicas/públicas e integrações internas
+app.use(basePath, internalRoutes);
+app.use('/', internalRoutes);
 
 // Middleware de autenticação para rotas protegidas
 app.use(basePath, requireGatewayAuth);
@@ -51,13 +52,13 @@ app.get(basePath + '/', (req, res) => {
       name: 'Diario de Caixa',
       description: 'Registo e consulta de movimentos de caixa',
       icon: '📒',
-      url: `${basePath}/dashboard`
+      url: `${basePath}/diario-caixa`
     },
     {
       name: 'Auditoria',
       description: 'Analise de logs e validacao operacional',
       icon: '🧾',
-      url: '#'
+      url: `${basePath}/auditoria-logs`
     }
   ];
 
@@ -69,12 +70,8 @@ app.get(basePath + '/', (req, res) => {
   });
 });
 
-app.get(basePath + '/dashboard', (req, res) => {
-  res.render('dashboard', {
-    title: 'Dashboard',
-    user: req.user
-  });
-});
+app.get(basePath + '/diario-caixa', mapasController.getDiarioCaixaPage);
+app.get(basePath + '/auditoria-logs', mapasController.getAuditoriaLogsPage);
 
 // 404 Handler
 app.use((req, res) => {

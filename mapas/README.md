@@ -47,11 +47,25 @@ Arquivo local: `.env`
 5. Se valido, popula `req.user` e segue para a rota.
 6. Se invalido, redireciona para `<gatewayBasePath>/login`.
 
+### APIs internas (integracao entre apps)
+
+As rotas internas usam o mesmo servico de autenticacao do gateway.
+
+- Nao usam mais `X-Internal-Token`.
+- Aceitam `session_token` por cookie **ou** `Authorization: Bearer <session_token>`.
+- O middleware valida sempre no gateway antes de executar a operacao.
+- Em sucesso, `req.user` fica disponivel para auditoria (`userName`, `id`, etc.).
+
 ## Rotas atuais
 
 - `GET <basePath>/health` (publica)
 - `GET <basePath>/` (protegida)
-- `GET <basePath>/dashboard` (protegida)
+- `GET <basePath>/diario-caixa` (protegida)
+- `GET <basePath>/auditoria-logs` (protegida)
+- `POST <basePath>/internal/diario-caixa/upsert` (sessao gateway obrigatoria)
+- `POST <basePath>/internal/diario-caixa/existence` (sessao gateway obrigatoria)
+- `POST <basePath>/internal/auditoria/log` (sessao gateway obrigatoria)
+- `POST <basePath>/internal/auditoria/query` (sessao gateway obrigatoria)
 
 ## Scripts
 

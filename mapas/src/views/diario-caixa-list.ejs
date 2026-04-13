@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= pageTitle %></title>
+  <link rel="stylesheet" href="<%= basePath %>/styles/style.css" />
+</head>
+<body>
+  <main class="mobile-main" data-mapas-table-filter-scope="diarioCaixa">
+    <h1>Diario de Caixa</h1>
+    <p>Utilizador: <strong><%= user?.userName || 'N/A' %></strong></p>
+    <p>
+      <a href="<%= basePath %>/">Inicio Mapas</a> |
+      <a href="<%= basePath %>/auditoria-logs">Auditoria</a> |
+      <a href="<%= gatewayBasePath %>/apps">Launcher</a>
+    </p>
+
+    <form method="get" action="<%= basePath %>/diario-caixa" data-grid-form>
+      <input type="hidden" name="page" value="<%= pagination.currentPage %>" data-page-input />
+      <input type="hidden" name="pageSize" value="<%= pagination.pageSize %>" />
+      <input type="hidden" name="sortBy" value="<%= sortBy %>" />
+      <input type="hidden" name="sortDir" value="<%= sortDir %>" />
+
+      <% Object.entries(tableFilters || {}).forEach(([key, values]) => { %>
+        <% if (Array.isArray(values) && values.length > 0) { %>
+          <% values.forEach((value) => { %>
+            <input type="hidden" name="tf<%= key[0].toUpperCase() + key.slice(1) %>" value="<%= value %>" data-table-filter-input />
+          <% }) %>
+        <% } else if (Array.isArray(values) && values.length === 0) { %>
+          <input type="hidden" name="tf<%= key[0].toUpperCase() + key.slice(1) %>" value="__EMPTY__" data-table-filter-input />
+        <% } %>
+      <% }) %>
+
+      <div data-table-filter-options-host hidden>
+        <script type="application/json" data-table-filter-options-json><%- JSON.stringify(tableFilterOptions || {}).replace(/</g, '\\u003c') %></script>
+      </div>
+
+      <div class="users-table-filter-summary" data-table-filter-summary>
+        <div class="pagination-info" data-table-filter-summary-text>
+          A mostrar <strong><%= pagination.from %>-<%= pagination.to %></strong> de <strong><%= pagination.totalRecords %></strong> movimentos.
+        </div>
+        <button type="button" class="btn btn-muted users-table-filter-summary-clear" data-table-filter-clear-all>Limpar filtros</button>
+      </div>
+
+      <div class="table-wrap">
+        <table data-table-filter-root>
+          <thead>
+            <tr>
+              <th data-table-filter-key="data"><div class="table-filter-head"><span>Data</span><button type="button" class="table-filter-toggle" data-table-filter-toggle="data"></button></div></th>
+              <th data-table-filter-key="codigoEntidade"><div class="table-filter-head"><span>Entidade</span><button type="button" class="table-filter-toggle" data-table-filter-toggle="codigoEntidade"></button></div></th>
+              <th data-table-filter-key="docEntidade"><div class="table-filter-head"><span>Doc Ent.</span><button type="button" class="table-filter-toggle" data-table-filter-toggle="docEntidade"></button></div></th>
+              <th>Doc Int.</th>
+              <th data-table-filter-key="codigoTipo"><div class="table-filter-head"><span>Tipo</span><button type="button" class="table-filter-toggle" data-table-filter-toggle="codigoTipo"></button></div></th>
+              <th data-table-filter-key="centroCustos"><div class="table-filter-head"><span>Centro</span><button type="button" class="table-filter-toggle" data-table-filter-toggle="centroCustos"></button></div></th>
+              <th data-table-filter-key="mapa"><div class="table-filter-head"><span>Mapa</span><button type="button" class="table-filter-toggle" data-table-filter-toggle="mapa"></button></div></th>
+              <th>Valor</th>
+              <th data-table-filter-key="creditoDebito"><div class="table-filter-head"><span>C/D</span><button type="button" class="table-filter-toggle" data-table-filter-toggle="creditoDebito"></button></div></th>
+              <th data-table-filter-key="conta"><div class="table-filter-head"><span>Conta</span><button type="button" class="table-filter-toggle" data-table-filter-toggle="conta"></button></div></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (!rows || rows.length === 0) { %>
+              <tr><td colspan="10">Sem registos.</td></tr>
+            <% } %>
+            <% (rows || []).forEach((row) => { %>
+              <tr class="data-row">
+                <td><%= row.data ? new Date(row.data).toISOString().slice(0, 10) : '' %></td>
+                <td><%= row.codigo_entidade %></td>
+                <td><%= row.doc_entidade %></td>
+                <td><%= row.doc_interno %></td>
+                <td><%= row.codigo_tipo %></td>
+                <td><%= row.centro_custos || '' %></td>
+                <td><%= row.mapa %></td>
+                <td><%= Number(row.valor || 0).toFixed(2) %></td>
+                <td><%= row.credito_debito %></td>
+                <td><%= row.conta %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </form>
+  </main>
+  <script src="<%= basePath %>/scripts/shell.js"></script>
+</body>
+</html>

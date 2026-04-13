@@ -16,6 +16,7 @@ Documento global para padronizar a integracao entre o `pdms-gateway` e as apps d
 `GET <gatewayBasePath>/validate-session`
 
 - Cookie enviado: `session_token=<valor>`
+- Alternativa service-to-service: `Authorization: Bearer <session_token>`
 
 ### Resposta valida (200)
 
@@ -44,11 +45,13 @@ Documento global para padronizar a integracao entre o `pdms-gateway` e as apps d
 1. Todas as rotas de negocio devem ser protegidas por middleware de auth.
 2. O middleware deve:
 - Ler cookie `session_token`.
+- Opcionalmente ler `Authorization: Bearer <session_token>` para chamadas entre apps.
 - Chamar `GET /validate-session` no gateway.
 - Em sucesso, popular `req.user`.
 - Em falha, redirecionar para `<gatewayBasePath>/login`.
-3. Rotas publicas permitidas: `health` e estaticos basicos.
-4. Todas as views devem usar `basePath` (sem paths absolutos hardcoded).
+3. Rotas internas de integracao (`/internal/*`) devem usar o mesmo mecanismo de validacao de sessao no gateway.
+4. Rotas publicas permitidas: `health` e estaticos basicos.
+5. Todas as views devem usar `basePath` (sem paths absolutos hardcoded).
 
 ## Regras para launcher no gateway
 
