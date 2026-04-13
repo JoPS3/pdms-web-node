@@ -5,7 +5,7 @@ const appsRoutes = require('./apps.routes');
 
 const router = express.Router();
 
-router.use(authRoutes);
+router.use(authRoutes); // inclui GET /validate-session
 router.use('/apps', appsRoutes);
 
 module.exports = router;

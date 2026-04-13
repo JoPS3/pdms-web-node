@@ -1,33 +1,34 @@
 function listApps(req, res) {
-  // Apps disponíveis (será expandido depois com BD/config)
+  // Apps disponíveis com URLs reais
+  // Em prod, estas URLs podem vir de env vars ou DB
   const apps = [
     { 
       id: 'mapas',
       name: 'Mapas',
       description: 'Gestão de diário de caixa e auditoria',
       icon: '📊',
-      url: '#' 
+      url: `${process.env.BASE_PATH_DEV}/mapas` 
     },
     { 
       id: 'vendas',
       name: 'Vendas',
       description: 'Controlo de vendas e faturação',
       icon: '💰',
-      url: '#' 
+      url: '/vendas' 
     },
     { 
       id: 'compras',
       name: 'Compras',
       description: 'Gestão de compras e fornecedores',
       icon: '📦',
-      url: '#' 
+      url: '/compras' 
     },
     { 
       id: 'rh',
       name: 'RH',
       description: 'Gestão de recursos humanos',
       icon: '👥',
-      url: '#' 
+      url: '/rh' 
     }
   ];
 
