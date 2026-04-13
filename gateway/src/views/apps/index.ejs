@@ -1,35 +1,79 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
+<html lang="pt">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><%= pageTitle %> | Gateway</title>
     <link rel="stylesheet" href="<%= basePath %>/styles/main.css" />
+    <link rel="stylesheet" href="<%= basePath %>/styles/apps-desktop.css" />
   </head>
-  <body>
-    <main class="container">
-      <header class="page-header">
-        <div>
-          <h1>Aplicações</h1>
-          <p class="subtitle">Bem-vindo, <%= user?.username || 'utilizador' %></p>
+  <body class="apps-page">
+    <div class="mobile-shell">
+      <header class="mobile-header">
+        <div class="mobile-header-content">
+          <div>
+            <h1>PDMS</h1>
+          </div>
+          <div class="mobile-user">
+            Bem-vindo, <strong><%= userName %></strong><br />
+            <% if (userRole) { %>
+              <span><%= userRole %></span>
+            <% } %>
+          </div>
+          <form method="post" action="<%= basePath %>/logout" class="mobile-logout">
+            <button type="submit">Sair</button>
+          </form>
         </div>
-
-        <form method="post" action="<%= basePath %>/logout">
-          <button type="submit" class="button-secondary">Sair</button>
-        </form>
       </header>
 
-      <section class="card">
-        <h2>Disponíveis</h2>
-        <ul class="app-list">
+      <main class="mobile-main">
+        <h2>Aplicações Disponíveis</h2>
+
+        <div class="mobile-apps-grid">
           <% apps.forEach((app) => { %>
-          <li>
-            <span><%= app.name %></span>
-            <a href="<%= app.url %>">Abrir</a>
-          </li>
+            <div class="mobile-app-card">
+              <h3><%= app.icon %> <%= app.name %></h3>
+              <p><%= app.description %></p>
+              <a href="<%= app.url %>"><%= app.url === '#' ? 'Em breve' : 'Abrir' %></a>
+            </div>
           <% }) %>
-        </ul>
-      </section>
-    </main>
+        </div>
+      </main>
+
+      <footer class="mobile-footer">
+        <p style="margin: 0;">&copy; 2026 Pedaço Decimal Unipessoal Lda</p>
+      </footer>
+    </div>
+
+    <div class="desktop-shell" aria-label="Desktop de aplicações">
+      <%- include('./partials/desktop-title-bar', { userName, userRole, basePath }) %>
+
+      <main class="desktop-workspace">
+        <%- include('./partials/desktop-icons', { apps }) %>
+      </main>
+
+      <%- include('./partials/desktop-dock', { apps, basePath }) %>
+    </div>
+
+    <script>
+      (function attachDesktopClock() {
+        var clock = document.getElementById('desktopClock');
+
+        if (!clock) {
+          return;
+        }
+
+        function renderTime() {
+          var now = new Date();
+          clock.textContent = now.toLocaleTimeString('pt-PT', {
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+        }
+
+        renderTime();
+        setInterval(renderTime, 1000);
+      })();
+    </script>
   </body>
 </html>

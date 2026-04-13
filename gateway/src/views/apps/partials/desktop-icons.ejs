@@ -1,0 +1,13 @@
+<section class="desktop-icons" aria-label="Atalhos de aplicações">
+  <% apps.forEach((app) => { %>
+    <a
+      class="desktop-icon <%= app.url === '#' ? 'is-disabled' : '' %>"
+      href="<%= app.url %>"
+      title="<%= app.name %>"
+      aria-label="Abrir <%= app.name %>"
+    >
+      <span class="desktop-icon-glyph"><%= app.icon %></span>
+      <span class="desktop-icon-name"><%= app.name %></span>
+    </a>
+  <% }) %>
+</section>

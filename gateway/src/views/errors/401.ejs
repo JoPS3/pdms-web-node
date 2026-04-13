@@ -3,25 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Página não encontrada | Gateway</title>
+    <title>Acesso Negado | Gateway</title>
     <link rel="stylesheet" href="<%= basePath %>/styles/main.css" />
     <link rel="stylesheet" href="<%= basePath %>/styles/errors.css" />
   </head>
   <body>
     <main class="card">
-      <p class="error-code">404</p>
-      <h1 class="error-title">Página não encontrada</h1>
+      <p class="error-code">401</p>
+      <h1 class="error-title">Acesso Negado</h1>
       <p class="error-message">
-        O recurso que está procurando não existe ou foi movido para outro local.
+        Não tem permissão para aceder a este recurso. 
+        <% if (reason === 'unauthorized') { %>
+          A sua sessão pode ter expirado ou não tem os privilégios necessários.
+        <% } else if (reason === 'not_authenticated') { %>
+          Precisa estar autenticado para continuar.
+        <% } %>
       </p>
 
       <div class="action-links">
+        <a href="<%= basePath %>/login">Entrar novamente</a>
         <% if (basePath) { %>
-          <a href="<%= basePath %>">Voltar ao início</a>
+          <a href="<%= basePath %>" class="secondary">Início</a>
         <% } else { %>
-          <a href="/">Voltar ao início</a>
+          <a href="/" class="secondary">Início</a>
         <% } %>
-        <a href="<%= basePath %>/login" class="secondary">Entrar</a>
       </div>
 
       <p class="hint error-hint">

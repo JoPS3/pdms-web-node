@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
+<html lang="pt">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,25 +7,21 @@
     <link rel="stylesheet" href="<%= basePath %>/styles/main.css" />
   </head>
   <body>
-    <main class="container">
-      <section class="card">
-        <h1>Gateway</h1>
-        <p class="subtitle">Autenticação de acesso</p>
+    <main class="card">
+      <h1>Entrar</h1>
+      <form method="post" action="<%= basePath %>/login" id="login-form">
+        <label for="username">Utilizador</label>
+        <input id="username" name="username" autocomplete="username" required autofocus />
 
+        <button type="submit">Continuar</button>
+      </form>
+
+      <div id="status" class="status">
         <% if (errorMessage) { %>
-        <p class="error"><%= errorMessage %></p>
+        <span class="error"><%= errorMessage %></span>
         <% } %>
-
-        <form method="post" action="<%= basePath %>/login" class="form">
-          <label for="username">Utilizador</label>
-          <input id="username" name="username" type="text" required />
-
-          <label for="password">Password</label>
-          <input id="password" name="password" type="password" required />
-
-          <button type="submit">Entrar</button>
-        </form>
-      </section>
+      </div>
+      <p class="hint">Apenas utilizadores autorizados podem entrar. Introduza o seu utilizador para continuar.</p>
     </main>
   </body>
 </html>
