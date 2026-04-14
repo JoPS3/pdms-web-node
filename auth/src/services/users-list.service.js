@@ -32,18 +32,7 @@ async function listUsers(limit = 100) {
   }));
 }
 
-/**
- * List users with pagination and table filters
- */
-async function listUsersWithPagination(
-  page = 1,
-  pageSize = 50,
-  tableFilters = {},
-  sortBy = 'userName',
-  sortDir = 'ASC'
-) {
-  const safePage = Math.max(1, Number(page) || 1);
-  const safePageSize = Math.max(10, Math.min(Number(pageSize) || 50, 200));
+function buildUsersFilteredQueryContext(tableFilters = {}, sortBy = 'userName', sortDir = 'ASC') {
   const safeSortDir = (sortDir === 'DESC') ? 'DESC' : 'ASC';
 
   // Allowed filter keys and sort columns
@@ -61,10 +50,10 @@ async function listUsersWithPagination(
   const sortColumn = sortableFields[safeSortBy];
 
   // Build WHERE conditions
-  let whereConditions = ['u.is_deleted = 0'];
-  let filterParams = [];
+  const whereConditions = ['u.is_deleted = 0'];
+  const filterParams = [];
 
-  for (const [key, values] of Object.entries(tableFilters)) {
+  for (const [key, values] of Object.entries(tableFilters || {})) {
     if (!allowedFilterKeys.includes(key) || !Array.isArray(values) || values.length === 0) {
       continue;
     }
@@ -110,7 +99,28 @@ async function listUsersWithPagination(
     }
   }
 
-  const whereClause = whereConditions.join(' AND ');
+  return {
+    whereClause: whereConditions.join(' AND '),
+    filterParams,
+    safeSortBy,
+    safeSortDir,
+    sortColumn
+  };
+}
+
+/**
+ * List users with pagination and table filters
+ */
+async function listUsersWithPagination(
+  page = 1,
+  pageSize = 50,
+  tableFilters = {},
+  sortBy = 'userName',
+  sortDir = 'ASC'
+) {
+  const safePage = Math.max(1, Number(page) || 1);
+  const safePageSize = Math.max(10, Math.min(Number(pageSize) || 50, 200));
+  const { whereClause, filterParams, safeSortBy, safeSortDir, sortColumn } = buildUsersFilteredQueryContext(tableFilters, sortBy, sortDir);
 
   // Count total records with filters
   const countSql = `
@@ -302,8 +312,45 @@ async function getUsersTableFilterOptions(tableFilters = {}) {
   return options;
 }
 
+async function listUsersForExport(tableFilters = {}, sortBy = 'userName', sortDir = 'ASC') {
+  const { whereClause, filterParams, safeSortBy, safeSortDir, sortColumn } = buildUsersFilteredQueryContext(tableFilters, sortBy, sortDir);
+
+  const rows = await query(
+    `
+      SELECT
+        u.id,
+        u.user_name AS userName,
+        CONCAT_WS(' ', u.first_name, u.last_name) AS fullName,
+        u.email,
+        ur.role,
+        u.is_authorized AS isAuthorized,
+        u.created_at AS createdAt
+      FROM users u
+      LEFT JOIN users_role ur ON ur.id = u.role_id
+      WHERE ${whereClause}
+      ORDER BY ${sortColumn} ${safeSortDir}
+    `,
+    filterParams
+  );
+
+  return {
+    rows: rows.map((row) => ({
+      id: row.id,
+      userName: row.userName || '',
+      fullName: row.fullName || '',
+      email: row.email || '',
+      role: row.role || '',
+      isAuthorized: Boolean(row.isAuthorized),
+      createdAt: row.createdAt || null
+    })),
+    sortBy: safeSortBy,
+    sortDir: safeSortDir
+  };
+}
+
 module.exports = {
   listUsers,
   listUsersWithPagination,
-  getUsersTableFilterOptions
+  getUsersTableFilterOptions,
+  listUsersForExport
 };

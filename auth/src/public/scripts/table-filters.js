@@ -382,6 +382,22 @@
         const sortByInput = form.elements.namedItem('sortBy');
         const sortDirInput = form.elements.namedItem('sortDir');
 
+        function exportFiltered(format) {
+          const actionUrl = String(form.getAttribute('action') || window.location.pathname || '').replace(/\/$/, '');
+          const exportBase = `${actionUrl}/users/export`;
+          const params = new URLSearchParams();
+
+          Array.from(new FormData(form).entries()).forEach(([name, value]) => {
+            if (name === 'openWindow' || name === 'page' || name === 'pageSize') return;
+            if (name === 'sortBy' || name === 'sortDir' || /^tf[A-Z]/.test(name)) {
+              params.append(name, String(value || ''));
+            }
+          });
+
+          params.set('format', format);
+          window.location.assign(`${exportBase}?${params.toString()}`);
+        }
+
         if (action === 'refresh') {
           closeAll();
           submitForm(form);
@@ -406,6 +422,18 @@
           }
           closeAll();
           submitForm(form);
+          return;
+        }
+
+        if (action === 'export-csv') {
+          closeAll();
+          exportFiltered('csv');
+          return;
+        }
+
+        if (action === 'export-odf') {
+          closeAll();
+          exportFiltered('odf');
           return;
         }
 

@@ -8,8 +8,93 @@ const {
 const {
   listUsers,
   listUsersWithPagination,
-  getUsersTableFilterOptions
+  getUsersTableFilterOptions,
+  listUsersForExport
 } = require('../services/users-list.service');
+
+function parseTableFiltersFromQuery(query) {
+  const tableFilters = {};
+  const tfPattern = /^tf([A-Z][a-zA-Z]*)$/;
+  for (const [key, value] of Object.entries(query || {})) {
+    const match = key.match(tfPattern);
+    if (match) {
+      const filterKey = match[1][0].toLowerCase() + match[1].slice(1);
+      tableFilters[filterKey] = Array.isArray(value) ? value : [value];
+    }
+  }
+  return tableFilters;
+}
+
+function escapeCsvCell(value) {
+  const raw = String(value ?? '');
+  if (/[",\n\r]/.test(raw)) {
+    return `"${raw.replace(/"/g, '""')}"`;
+  }
+  return raw;
+}
+
+function createCsv(rows) {
+  const header = ['Utilizador', 'Nome', 'Email', 'Perfil', 'Autorizado'];
+  const lines = [header.map(escapeCsvCell).join(',')];
+
+  rows.forEach((row) => {
+    const values = [
+      row.userName || '',
+      row.fullName || '',
+      row.email || '',
+      row.role || '',
+      row.isAuthorized ? 'Sim' : 'Nao'
+    ];
+    lines.push(values.map(escapeCsvCell).join(','));
+  });
+
+  return lines.join('\n');
+}
+
+function escapeXml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+function createFlatOdf(rows) {
+  const header = ['Utilizador', 'Nome', 'Email', 'Perfil', 'Autorizado'];
+  const allRows = [header].concat(
+    rows.map((row) => [
+      row.userName || '',
+      row.fullName || '',
+      row.email || '',
+      row.role || '',
+      row.isAuthorized ? 'Sim' : 'Nao'
+    ])
+  );
+
+  const xmlRows = allRows.map((cols) => {
+    const xmlCols = cols.map((cell) => (
+      `<table:table-cell office:value-type="string"><text:p>${escapeXml(cell)}</text:p></table:table-cell>`
+    )).join('');
+    return `<table:table-row>${xmlCols}</table:table-row>`;
+  }).join('');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<office:document
+  xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
+  xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0"
+  xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0"
+  office:version="1.2"
+  office:mimetype="application/vnd.oasis.opendocument.spreadsheet">
+  <office:body>
+    <office:spreadsheet>
+      <table:table table:name="Utilizadores">
+        ${xmlRows}
+      </table:table>
+    </office:spreadsheet>
+  </office:body>
+</office:document>`;
+}
 
 async function getHomePage(req, res) {
   const page = Math.max(1, Number(req.query.page) || 1);
@@ -17,16 +102,7 @@ async function getHomePage(req, res) {
   const sortBy = req.query.sortBy || 'userName';
   const sortDir = req.query.sortDir || 'ASC';
 
-  // Parse table filters from query params (tf* pattern)
-  const tableFilters = {};
-  const tfPattern = /^tf([A-Z][a-zA-Z]*)$/;
-  for (const [key, value] of Object.entries(req.query)) {
-    const match = key.match(tfPattern);
-    if (match) {
-      const filterKey = match[1][0].toLowerCase() + match[1].slice(1);
-      tableFilters[filterKey] = Array.isArray(value) ? value : [value];
-    }
-  }
+  const tableFilters = parseTableFiltersFromQuery(req.query);
 
   let usersData = { rows: [], pagination: {}, sortBy, sortDir };
   let tableFilterOptions = {};
@@ -64,6 +140,37 @@ async function getHomePage(req, res) {
     sortBy: usersData.sortBy,
     sortDir: usersData.sortDir
   });
+}
+
+async function exportUsersList(req, res) {
+  const sortBy = req.query.sortBy || 'userName';
+  const sortDir = req.query.sortDir || 'ASC';
+  const format = String(req.query.format || 'csv').toLowerCase();
+  const tableFilters = parseTableFiltersFromQuery(req.query);
+
+  try {
+    const result = await listUsersForExport(tableFilters, sortBy, sortDir);
+    const stamp = new Date().toISOString().slice(0, 10);
+
+    if (format === 'odf') {
+      const body = createFlatOdf(result.rows);
+      res.setHeader('Content-Type', 'application/vnd.oasis.opendocument.spreadsheet; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="auth-utilizadores-filtrados-${stamp}.fods"`);
+      res.status(200).send(body);
+      return;
+    }
+
+    const body = createCsv(result.rows);
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="auth-utilizadores-filtrados-${stamp}.csv"`);
+    res.status(200).send(body);
+  } catch (error) {
+    console.error('[auth] Erro ao exportar utilizadores filtrados:', error.message);
+    res.status(500).json({
+      error: 'export_failed',
+      message: 'Nao foi possivel exportar a listagem filtrada.'
+    });
+  }
 }
 
 function getInternalSessionStatus(req, res) {
@@ -198,5 +305,6 @@ async function changeInternalSessionPassword(req, res) {
 module.exports = {
   getHomePage,
   getInternalSessionStatus,
-  changeInternalSessionPassword
+  changeInternalSessionPassword,
+  exportUsersList
 };
