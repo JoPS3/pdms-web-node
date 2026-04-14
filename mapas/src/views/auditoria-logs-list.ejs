@@ -7,15 +7,23 @@
   <link rel="stylesheet" href="<%= basePath %>/styles/style.css" />
 </head>
 <body>
-  <main class="mobile-main" data-mapas-table-filter-scope="auditoriaLogs">
-    <h1>Auditoria</h1>
-    <p>Utilizador: <strong><%= user?.userName || 'N/A' %></strong></p>
-    <p>
-      <a href="<%= basePath %>/">Inicio Mapas</a> |
-      <a href="<%= basePath %>/diario-caixa">Diario</a> |
-      <a href="<%= gatewayBasePath %>/apps">Launcher</a>
-    </p>
+  <main class="mobile-main">
+    <section class="mobile-unavailable-card">
+      <h1>Auditoria</h1>
+      <p>Funcionalidade disponivel apenas na versao desktop.</p>
+      <p><a href="<%= basePath %>/">Voltar ao inicio</a></p>
+    </section>
 
+    <section class="desktop-only-feature window-canvas" data-mapas-table-filter-scope="auditoriaLogs">
+      <article class="desktop-window desktop-window--overlay">
+        <header class="window-titlebar">
+          <div class="window-title">
+            <h2>Auditoria</h2>
+            <p>Utilizador: <strong><%= user?.userName || 'N/A' %></strong></p>
+          </div>
+        </header>
+
+        <div class="window-content">
     <form method="get" action="<%= basePath %>/auditoria-logs" data-grid-form>
       <input type="hidden" name="page" value="<%= page %>" data-page-input />
       <input type="hidden" name="pageSize" value="<%= pageSize %>" />
@@ -76,6 +84,9 @@
         </table>
       </div>
     </form>
+        </div>
+      </article>
+    </section>
   </main>
   <script src="<%= basePath %>/scripts/shell.js"></script>
 </body>

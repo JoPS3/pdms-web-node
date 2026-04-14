@@ -67,6 +67,22 @@ As rotas internas usam o mesmo servico de autenticacao do gateway.
 - `POST <basePath>/internal/auditoria/log` (sessao gateway obrigatoria)
 - `POST <basePath>/internal/auditoria/query` (sessao gateway obrigatoria)
 
+## UX Desktop (launcher do modulo)
+
+Na pagina inicial desktop do modulo (`GET <basePath>/`):
+
+- O atalho de Diario de Caixa abre em janela flutuante (overlay), sem sair do launcher.
+- A janela pode ser movida por drag no titlebar.
+- A janela pode ser redimensionada por drag no canto inferior direito.
+- O fecho da janela e feito apenas no botao `x` da propria janela.
+- Existe botao de logout no canto superior direito, ao lado do botao de voltar.
+
+### Logout
+
+- O logout do modulo usa o endpoint central do gateway.
+- Acao: `POST <gatewayBasePath>/logout`.
+- Resultado esperado: sessao invalidada no gateway e redirecionamento para login quando necessario.
+
 ## Scripts
 
 - `npm start`

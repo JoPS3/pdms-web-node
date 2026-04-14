@@ -201,6 +201,27 @@ thead th {
   font-size: 0.88rem;
 }
 
+.desktop-only-feature {
+  display: none;
+}
+
+.mobile-unavailable-card {
+  background: #fff;
+  border: 1px solid #d9ceb7;
+  border-radius: 12px;
+  padding: 18px;
+}
+
+@media (min-width: 1024px) {
+  .mobile-unavailable-card {
+    display: none;
+  }
+
+  .desktop-only-feature {
+    display: block;
+  }
+}
+
 .mobile-apps-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -359,6 +380,31 @@ thead th {
     text-decoration: none;
   }
 
+  .titlebar-logout {
+    margin: 0;
+  }
+
+  .titlebar-logout button {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    line-height: 1;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.82);
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+
+  .titlebar-logout button:hover {
+    background: rgba(193, 84, 27, 0.25);
+    border-color: rgba(241, 180, 99, 0.6);
+    color: #fff;
+  }
+
   .desktop-workspace {
     position: fixed;
     top: 48px;
@@ -454,5 +500,117 @@ thead th {
 
   .dock-item-glyph {
     font-size: 1.4rem;
+  }
+
+  .desktop-window-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+  }
+
+  .desktop-window-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(7, 12, 18, 0.42);
+    backdrop-filter: blur(2px);
+  }
+
+  .desktop-floating-window {
+    position: absolute;
+    top: 72px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(1280px, calc(100vw - 80px));
+    height: calc(100vh - 140px);
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 24px 50px rgba(0, 0, 0, 0.34);
+    display: grid;
+    grid-template-rows: 44px 1fr;
+    will-change: left, top;
+    min-width: 700px;
+    min-height: 420px;
+  }
+
+  .desktop-floating-window-titlebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    color: #f3f8ff;
+    background: linear-gradient(180deg, #2f4d6d 0%, #26425f 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+  }
+
+  .desktop-floating-window-close {
+    width: 28px;
+    height: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    color: #fff;
+    background: transparent;
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .desktop-floating-window-frame {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: #fff;
+  }
+
+  .desktop-floating-window-resize {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 22px;
+    height: 22px;
+    border: 0;
+    padding: 0;
+    background:
+      linear-gradient(135deg, transparent 0 45%, rgba(31, 61, 89, 0.28) 46% 54%, transparent 55% 100%),
+      linear-gradient(135deg, transparent 0 60%, rgba(31, 61, 89, 0.45) 61% 69%, transparent 70% 100%),
+      linear-gradient(135deg, transparent 0 75%, rgba(31, 61, 89, 0.6) 76% 84%, transparent 85% 100%);
+    cursor: nwse-resize;
+    z-index: 3;
+  }
+
+  body.desktop-window-open .desktop-dock,
+  body.desktop-window-open .desktop-icons {
+    pointer-events: none;
+  }
+
+  body.desktop-window-dragging,
+  body.desktop-window-dragging * {
+    user-select: none;
+    cursor: grabbing !important;
+  }
+
+  body.desktop-window-resizing,
+  body.desktop-window-resizing * {
+    user-select: none;
+    cursor: nwse-resize !important;
+  }
+
+  body.desktop-window-dragging .desktop-floating-window-frame,
+  body.desktop-window-resizing .desktop-floating-window-frame {
+    pointer-events: none;
+  }
+
+  body.desktop-window-dragging .desktop-window-backdrop,
+  body.desktop-window-resizing .desktop-window-backdrop {
+    backdrop-filter: none;
+    background: rgba(7, 12, 18, 0.32);
+  }
+
+  body.desktop-window-dragging .desktop-floating-window,
+  body.desktop-window-resizing .desktop-floating-window {
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
   }
 }

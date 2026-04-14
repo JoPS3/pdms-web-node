@@ -52,6 +52,7 @@ Documento global para padronizar a integracao entre o `pdms-gateway` e as apps d
 3. Rotas internas de integracao (`/internal/*`) devem usar o mesmo mecanismo de validacao de sessao no gateway.
 4. Rotas publicas permitidas: `health` e estaticos basicos.
 5. Todas as views devem usar `basePath` (sem paths absolutos hardcoded).
+6. Se a sub-app tiver launcher proprio, deve disponibilizar acao de logout para o gateway via `POST <gatewayBasePath>/logout`.
 
 ## Regras para launcher no gateway
 
@@ -83,5 +84,6 @@ Documento global para padronizar a integracao entre o `pdms-gateway` e as apps d
 4. Validar fluxo:
 - login gateway -> abrir app
 - voltar ao launcher
+- logout na sub-app (POST gateway logout)
 - logout -> acesso direto redireciona para login
 5. Atualizar launcher do gateway com URL real da app.

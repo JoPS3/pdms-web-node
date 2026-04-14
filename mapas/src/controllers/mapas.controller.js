@@ -134,8 +134,25 @@ function appendTableFiltersToQueryString(searchParams, tableFilters = {}) {
   });
 }
 
+function ensureAdministrador(req, res) {
+  const role = normalizeText(req.user?.role).toUpperCase();
+  if (role === 'ADMINISTRADOR') {
+    return true;
+  }
+
+  res.status(403).render('error', {
+    title: 'Sem privilégios',
+    error: 'Acesso reservado ao perfil ADMINISTRADOR.'
+  });
+  return false;
+}
+
 async function getDiarioCaixaPage(req, res, next) {
   try {
+    if (!ensureAdministrador(req, res)) {
+      return undefined;
+    }
+
     const query = req.query || {};
     const requestedPage = Math.max(1, Number.parseInt(query.page, 10) || 1);
     const pageSize = Math.min(200, Math.max(25, Number.parseInt(query.pageSize, 10) || 50));
@@ -190,6 +207,10 @@ async function getDiarioCaixaPage(req, res, next) {
 
 async function getAuditoriaLogsPage(req, res, next) {
   try {
+    if (!ensureAdministrador(req, res)) {
+      return undefined;
+    }
+
     const q = req.query || {};
 
     const page = Math.max(1, Number.parseInt(q.page, 10) || 1);
