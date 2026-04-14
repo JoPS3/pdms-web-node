@@ -1,0 +1,20 @@
+<!-- Generic window frame with titlebar, close button, and content slot -->
+<!-- Usage: <%- include('partials/desktop/window-frame', { windowId, windowTitle, windowContent }) %> -->
+
+<div class="desktop-window window-<%= windowId %>" id="window-<%= windowId %>" hidden>
+  <div class="desktop-window-titlebar">
+    <strong class="desktop-window-title"><%= windowTitle %></strong>
+    <button
+      type="button"
+      class="desktop-window-close"
+      data-close-window="<%= windowId %>"
+      aria-label="Fechar janela"
+      title="Fechar"
+    >
+      ×
+    </button>
+  </div>
+  <div class="desktop-window-content">
+    <%- windowContent %>
+  </div>
+</div>

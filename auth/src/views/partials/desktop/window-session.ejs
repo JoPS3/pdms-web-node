@@ -1,0 +1,32 @@
+<!-- Session window: launcher grid with session-related actions -->
+
+<div class="window-session-wrapper">
+  <div class="users-launcher-grid" aria-label="Atalhos de sessão">
+    <!-- Session info icon opens a child window with smaller size -->
+    <button
+      type="button"
+      class="users-launcher-icon"
+      data-open-window="session-info"
+      data-parent-window="session"
+      data-hide-window-on-open="1"
+      title="Detalhes de Sessão"
+    >
+      <span class="users-launcher-glyph">ℹ️</span>
+      <span class="users-launcher-name">Detalhes</span>
+      <span class="users-launcher-caption">Ver info</span>
+    </button>
+
+    <!-- Change password icon -->
+    <a
+      href="#"
+      class="users-launcher-icon is-disabled"
+      aria-disabled="true"
+      title="Mudar Password (em breve)"
+    >
+      <span class="users-launcher-glyph">🔐</span>
+      <span class="users-launcher-name">Mudar Password</span>
+      <span class="users-launcher-caption">Em breve</span>
+    </a>
+  </div>
+</div>
+

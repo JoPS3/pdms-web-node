@@ -24,7 +24,7 @@ test('apps controller renders apps index with user and role info', () => {
   assert.equal(res.viewData.userEmail, 'admin@pedaco.local');
   assert.equal(res.viewData.userRole, 'admin');
   assert.equal(Array.isArray(res.viewData.apps), true);
-  assert.equal(res.viewData.apps.length, 4);
+  assert.equal(res.viewData.apps.length, 5);
 });
 
 test('apps controller uses fallback user values', () => {
@@ -40,4 +40,21 @@ test('apps controller uses fallback user values', () => {
   assert.equal(res.viewData.userName, 'Utilizador');
   assert.equal(res.viewData.userEmail, '');
   assert.equal(res.viewData.userRole, '');
+});
+
+test('apps controller includes autenticacao desktop entry', () => {
+  const req = {
+    session: {
+      user: {}
+    }
+  };
+  const res = createResponseMock();
+
+  listApps(req, res);
+
+  const authApp = res.viewData.apps.find((app) => app.id === 'autenticacao');
+
+  assert.equal(Boolean(authApp), true);
+  assert.equal(authApp.name, 'Autenticação');
+  assert.equal(authApp.icon, '🔐');
 });

@@ -1,0 +1,29 @@
+<!-- Session info view: displays session details in a table (modal style, no navigation) -->
+
+<div class="session-info-body">
+  <table class="session-table">
+    <tbody>
+      <tr>
+        <th>User ID</th>
+        <td><%= session.userId || 'n/d' %></td>
+      </tr>
+      <tr>
+        <th>User Name</th>
+        <td><%= session.userName || 'n/d' %></td>
+      </tr>
+      <tr>
+        <th>Email</th>
+        <td><%= session.email || 'n/d' %></td>
+      </tr>
+      <tr>
+        <th>Role</th>
+        <td><%= session.role || 'n/d' %></td>
+      </tr>
+      <tr>
+        <th>Role ID</th>
+        <td><%= session.roleId || 'n/d' %></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
