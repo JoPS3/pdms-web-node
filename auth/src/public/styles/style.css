@@ -150,12 +150,6 @@ body.in-desktop-iframe .desktop-only-feature {
   color: #3b2d1d;
 }
 
-.table-filter-toggle[aria-expanded="true"] {
-  border-color: #8f471f;
-  background: linear-gradient(180deg, #ffe2c3 0%, #e9a365 100%);
-  color: #4a2208;
-}
-
 .table-filter-toggle.is-filtered {
   border-color: #a34a18;
   background: linear-gradient(180deg, #ffd7b0 0%, #d9772b 100%);
@@ -216,43 +210,6 @@ thead th[data-table-filter-key].is-filtered.is-sorted {
 .table-pagination .btn[disabled] {
   opacity: 0.45;
   cursor: not-allowed;
-}
-
-.year-filter-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.year-filter-label {
-  font-size: 0.8rem;
-  color: var(--muted);
-  white-space: nowrap;
-}
-
-.year-filter-input {
-  width: 70px;
-  padding: 5px 7px;
-  border: 1px solid #b9aa8f;
-  border-radius: 6px;
-  background: #faf7f2;
-  font-size: 0.85rem;
-  text-align: center;
-  -moz-appearance: textfield;
-}
-
-input[type="month"].year-filter-input {
-  width: 112px;
-}
-
-.year-filter-input::-webkit-inner-spin-button,
-.year-filter-input::-webkit-outer-spin-button {
-  opacity: 0.6;
-}
-
-.year-filter-input:focus {
-  outline: 2px solid #b9aa8f;
-  outline-offset: 1px;
 }
 
 table {
@@ -501,6 +458,194 @@ thead th {
 .users-launcher-caption {
   font-size: 0.74rem;
   color: var(--muted);
+}
+
+.password-form-wrap {
+  height: 100%;
+  padding: 16px 14px;
+  overflow: auto;
+}
+
+.password-form {
+  display: grid;
+  gap: 10px;
+}
+
+.password-form h3 {
+  margin: 0 0 6px;
+  font-size: 1rem;
+  color: #2f2a1f;
+}
+
+.password-label {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.password-form input {
+  width: 100%;
+  border: 1px solid #ccbda2;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.88rem;
+  background: #fffdf8;
+}
+
+.password-form input:focus {
+  outline: 2px solid #b98f5e;
+  outline-offset: 1px;
+}
+
+.password-hint {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.password-actions {
+  margin-top: 4px;
+}
+
+.password-submit {
+  border: 1px solid #8d5c2d;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #f0bf84 0%, #d88a3f 100%);
+  color: #2a1a0a;
+  font-weight: 700;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.password-submit:hover {
+  background: linear-gradient(180deg, #f5c993 0%, #dd964e 100%);
+}
+
+.password-feedback {
+  margin: 4px 0 0;
+  min-height: 20px;
+  font-size: 0.82rem;
+}
+
+.password-feedback.is-success {
+  color: #25643a;
+}
+
+.password-feedback.is-error {
+  color: #8a2e2e;
+}
+
+.users-list-wrap {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 14px;
+  overflow: hidden;
+}
+
+.users-list-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--ink);
+}
+
+.users-list-table th,
+.users-list-table td {
+  padding: 8px 10px;
+  text-align: left;
+  font-size: 0.85rem;
+  border-bottom: 1px solid #efe6d6;
+  color: var(--ink);
+}
+
+.users-list-table thead th {
+  position: sticky;
+  top: 0;
+  background: #f6efdf;
+  color: var(--ink);
+  z-index: 1;
+}
+
+.users-list-table .table-filter-head span {
+  color: var(--ink);
+}
+
+.users-list-table tbody tr:hover {
+  background: #fcf6ea;
+}
+
+.users-list-table tbody td {
+  color: #2f2a1f;
+}
+
+.users-list-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 46px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.users-list-badge.is-authorized {
+  background: #d7f0df;
+  color: #205837;
+}
+
+.users-list-badge.is-pending {
+  background: #f5e3c9;
+  color: #7d5525;
+}
+
+/* Table content styling inside desktop windows */
+.desktop-window.window-table-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.desktop-window.window-table-content .desktop-window-content,
+.desktop-window.window-table-content .users-list-wrap,
+.desktop-window.window-table-content [data-grid-form] {
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.desktop-window.window-table-content .users-table-filter-summary {
+  margin: 10px 0;
+}
+
+.desktop-window.window-table-content .table-wrap {
+  flex: 1;
+  min-height: 0;
+}
+
+.desktop-window.window-table-content .pagination-info,
+.desktop-window.window-table-content .btn.btn-muted,
+.desktop-window.window-table-content .table-filter-head,
+.desktop-window.window-table-content th,
+.desktop-window.window-table-content td {
+  font-size: 0.85rem;
+}
+
+.desktop-window.window-table-content th,
+.desktop-window.window-table-content td {
+  padding: 7px 9px;
+}
+
+.desktop-window.window-table-content .users-list-table tbody tr:hover {
+  background: #fcf6ea;
+}
+
+/* Match mapas light-gradient canvas inside all desktop windows. */
+.desktop-window .desktop-window-content {
+  background:
+    radial-gradient(circle at 10% 10%, #fff7e5 0, #fff7e500 45%),
+    radial-gradient(circle at 90% 80%, #ffe7c5 0, #ffe7c500 40%),
+    var(--bg);
 }
 
 @media (min-width: 1024px) {
@@ -841,7 +986,7 @@ thead th {
     border: 1px solid rgba(255, 255, 255, 0.3);
     box-shadow: 0 24px 50px rgba(0, 0, 0, 0.34);
     display: grid;
-    grid-template-rows: 42px 1fr;
+    grid-template-rows: 44px 1fr;
     will-change: left, top;
     min-width: 720px;
     min-height: 460px;
@@ -871,6 +1016,21 @@ thead th {
     min-height: 300px;
   }
 
+  .desktop-window.window-session-password {
+    width: min(560px, calc(100vw - 100px));
+    height: min(480px, calc(100vh - 160px));
+    min-width: 440px;
+    min-height: 340px;
+  }
+
+  .desktop-window.window-users-list {
+    width: min(1040px, calc(100vw - 120px));
+    height: min(640px, calc(100vh - 170px));
+    min-width: 760px;
+    min-height: 420px;
+    grid-template-rows: 44px auto 1fr;
+  }
+
   /* Window titlebar */
   .desktop-window-titlebar {
     display: flex;
@@ -890,24 +1050,20 @@ thead th {
   }
 
   .desktop-window-title {
-    font-weight: 600;
-    font-size: 0.95rem;
-    object-fit: contain;
+    font-weight: 700;
+    font-size: 1rem;
+    line-height: normal;
   }
 
   .desktop-window-close {
     width: 28px;
     height: 28px;
-    display: grid;
-    place-items: center;
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 50%;
     color: #fff;
     background: transparent;
     cursor: pointer;
     line-height: 1;
-    font-size: 1.2rem;
-    font-weight: 300;
     transition: background 120ms ease, border-color 120ms ease;
   }
 

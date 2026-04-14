@@ -1,0 +1,80 @@
+<div class="users-list-wrap">
+  <form method="get" action="<%= basePath %>/" data-grid-form>
+    <input type="hidden" name="openWindow" value="users-list" />
+    <input type="hidden" name="page" value="<%= pagination.currentPage %>" data-page-input />
+    <input type="hidden" name="pageSize" value="<%= pagination.pageSize %>" />
+    <input type="hidden" name="sortBy" value="<%= sortBy %>" />
+    <input type="hidden" name="sortDir" value="<%= sortDir %>" />
+
+    <% Object.entries(tableFilters || {}).forEach(([key, values]) => { %>
+      <% if (Array.isArray(values) && values.length > 0) { %>
+        <% values.forEach((value) => { %>
+          <input type="hidden" name="tf<%= key[0].toUpperCase() + key.slice(1) %>" value="<%= value %>" data-table-filter-input />
+        <% }) %>
+      <% } else if (Array.isArray(values) && values.length === 0) { %>
+        <input type="hidden" name="tf<%= key[0].toUpperCase() + key.slice(1) %>" value="__EMPTY__" data-table-filter-input />
+      <% } %>
+    <% }) %>
+
+    <div data-table-filter-options-host hidden>
+      <script type="application/json" data-table-filter-options-json><%- JSON.stringify(tableFilterOptions || {}).replace(/</g, '\\u003c') %></script>
+    </div>
+
+    <div class="users-table-filter-summary" data-table-filter-summary>
+      <div class="pagination-info" data-table-filter-summary-text>
+        A mostrar <strong><%= pagination.from %>-<%= pagination.to %></strong> de <strong><%= pagination.totalRecords %></strong> utilizadores.
+      </div>
+      <div>
+        <button type="button" class="btn btn-muted users-table-filter-summary-clear" data-table-filter-clear-all>Limpar filtros</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="users-list-table" data-table-filter-root>
+        <thead>
+          <tr>
+            <th data-table-filter-key="userName"><div class="table-filter-head"><span>Utilizador</span><button type="button" class="table-filter-toggle" data-table-filter-toggle="userName"></button></div></th>
+            <th data-table-filter-key="fullName"><div class="table-filter-head"><span>Nome</span><button type="button" class="table-filter-toggle" data-table-filter-toggle="fullName"></button></div></th>
+            <th data-table-filter-key="email"><div class="table-filter-head"><span>Email</span><button type="button" class="table-filter-toggle" data-table-filter-toggle="email"></button></div></th>
+            <th data-table-filter-key="role"><div class="table-filter-head"><span>Perfil</span><button type="button" class="table-filter-toggle" data-table-filter-toggle="role"></button></div></th>
+            <th data-table-filter-key="isAuthorized"><div class="table-filter-head"><span>Autorizado</span><button type="button" class="table-filter-toggle" data-table-filter-toggle="isAuthorized"></button></div></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (!usersList || usersList.length === 0) { %>
+            <tr><td colspan="5">Sem registos.</td></tr>
+          <% } %>
+          <% (usersList || []).forEach((user) => { %>
+            <tr class="data-row">
+              <td><%= user.userName || 'n/d' %></td>
+              <td><%= user.fullName || 'n/d' %></td>
+              <td><%= user.email || 'n/d' %></td>
+              <td><%= user.role || 'n/d' %></td>
+              <td>
+                <span class="users-list-badge <%= user.isAuthorized ? 'is-authorized' : 'is-pending' %>">
+                  <%= user.isAuthorized ? 'Sim' : 'Nao' %>
+                </span>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-pagination" aria-label="Paginacao">
+      <button
+        type="button"
+        class="btn btn-muted"
+        data-page-nav="<%= Math.max(1, pagination.currentPage - 1) %>"
+        <%= pagination.currentPage <= 1 ? 'disabled' : '' %>
+      >Anterior</button>
+      <span class="table-pagination-info">Pagina <strong><%= pagination.currentPage %></strong> de <strong><%= pagination.totalPages %></strong></span>
+      <button
+        type="button"
+        class="btn btn-muted"
+        data-page-nav="<%= Math.min(pagination.totalPages, pagination.currentPage + 1) %>"
+        <%= pagination.currentPage >= pagination.totalPages ? 'disabled' : '' %>
+      >Seguinte</button>
+    </div>
+  </form>
+</div>

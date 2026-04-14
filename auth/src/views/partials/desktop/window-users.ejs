@@ -3,16 +3,18 @@
 <section class="window-users-wrapper">
   <div class="users-launcher-grid" aria-label="Atalhos de utilizadores">
     <!-- Users list icon -->
-    <a
-      href="#"
-      class="users-launcher-icon is-disabled"
-      aria-disabled="true"
-      title="Lista de Utilizadores (em breve)"
+    <button
+      type="button"
+      class="users-launcher-icon"
+      data-open-window="users-list"
+      data-parent-window="users"
+      data-hide-window-on-open="1"
+      title="Lista de Utilizadores"
     >
       <span class="users-launcher-glyph">👥</span>
       <span class="users-launcher-name">Lista</span>
-      <span class="users-launcher-caption">Em breve</span>
-    </a>
+      <span class="users-launcher-caption">Abrir</span>
+    </button>
 
     <!-- Roles icon -->
     <a

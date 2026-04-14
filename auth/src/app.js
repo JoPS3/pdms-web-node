@@ -12,12 +12,20 @@ const isDev = process.env.NODE_ENV === 'development';
 const basePath = isDev ? process.env.BASE_PATH_DEV : process.env.BASE_PATH_PROD;
 const gatewayBasePath = isDev ? process.env.GATEWAY_BASE_PATH_DEV : process.env.GATEWAY_BASE_PATH_PROD;
 const gatewayValidateUrl = isDev ? process.env.GATEWAY_VALIDATE_DEV : process.env.GATEWAY_VALIDATE_PROD;
+const mapasAuditLogUrl = isDev
+  ? (process.env.MAPAS_AUDIT_LOG_URL_DEV
+      || process.env.MAPAS_AUDIT_LOG_URL
+      || 'http://localhost:6001/pdms-new/mapas/internal/auditoria/log')
+  : (process.env.MAPAS_AUDIT_LOG_URL_PROD
+      || process.env.MAPAS_AUDIT_LOG_URL
+      || 'http://localhost:6001/pdms/mapas/internal/auditoria/log');
 const assetVersion = String(Date.now());
 
 // Armazena em app settings
 app.set('basePath', basePath);
 app.set('gatewayBasePath', gatewayBasePath);
 app.set('gatewayValidateUrl', gatewayValidateUrl);
+app.set('mapasAuditLogUrl', mapasAuditLogUrl);
 
 // View engine setup
 app.set('view engine', 'ejs');

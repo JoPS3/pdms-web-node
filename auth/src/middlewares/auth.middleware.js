@@ -99,6 +99,7 @@ async function requireGatewaySessionApi(req, res, next) {
 }
 
 module.exports = {
+  parseSessionToken,
   requireGatewayAuth,
   requireGatewaySessionApi
 };

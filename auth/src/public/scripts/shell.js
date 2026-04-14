@@ -21,7 +21,7 @@
       }
       
       // Registar windows disponíveis
-      ['session', 'session-info', 'users'].forEach(windowId => {
+      ['session', 'session-info', 'session-password', 'users', 'users-list'].forEach(windowId => {
         const element = document.getElementById(`window-${windowId}`);
         
         this.windows[windowId] = {
@@ -47,6 +47,7 @@
       
       this._attachGlobalEvents();
       this._attachOverlayEvents();
+      this._attachPasswordFormEvents();
       
       // Inicializar clock
       this._initClock();
@@ -132,10 +133,84 @@
       //   }
       // });
     },
+
+    _attachPasswordFormEvents() {
+      const form = document.querySelector('[data-password-form="1"]');
+      if (!form) {
+        return;
+      }
+
+      const feedback = form.querySelector('[data-password-feedback="1"]');
+      const currentPasswordInput = form.querySelector('[name="currentPassword"]');
+      const newPasswordInput = form.querySelector('[name="newPassword"]');
+      const confirmPasswordInput = form.querySelector('[name="confirmPassword"]');
+
+      const writeFeedback = (message, type) => {
+        if (!feedback) {
+          return;
+        }
+
+        feedback.textContent = message;
+        feedback.classList.remove('is-success', 'is-error');
+        if (type) {
+          feedback.classList.add(type === 'success' ? 'is-success' : 'is-error');
+        }
+      };
+
+      form.addEventListener('submit', async event => {
+        event.preventDefault();
+
+        const payload = {
+          currentPassword: String(currentPasswordInput?.value || ''),
+          newPassword: String(newPasswordInput?.value || ''),
+          confirmPassword: String(confirmPasswordInput?.value || '')
+        };
+
+        if (!payload.newPassword || payload.newPassword.length < 8) {
+          writeFeedback('A nova password deve ter pelo menos 8 caracteres.', 'error');
+          return;
+        }
+
+        if (payload.newPassword !== payload.confirmPassword) {
+          writeFeedback('A confirmacao da password nao coincide.', 'error');
+          return;
+        }
+
+        try {
+          writeFeedback('A atualizar password...', null);
+          const basePath = window.location.pathname.replace(/\/$/, '');
+          const response = await fetch(`${basePath}/internal/session/change-password`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify(payload)
+          });
+
+          const data = await response.json();
+          if (!response.ok) {
+            writeFeedback(data?.message || 'Nao foi possivel alterar a password.', 'error');
+            return;
+          }
+
+          form.reset();
+          writeFeedback(data?.message || 'Password alterada com sucesso.', 'success');
+        } catch (error) {
+          writeFeedback('Erro de comunicacao com o servidor.', 'error');
+        }
+      });
+    },
     
     openWindow(windowId, options = {}) {
       if (!this.windows[windowId]) {
         console.warn(`[desktop-shell] window "${windowId}" not found`);
+        return;
+      }
+
+      // Rebuild users list from server on every reopen for deterministic clean state.
+      if (windowId === 'users-list' && !options.skipRebuild) {
+        this._reloadUsersListClean();
         return;
       }
 
@@ -189,6 +264,26 @@
           document.body.classList.remove('desktop-window-open');
         }
       }
+    },
+
+    _reloadUsersListClean() {
+      const url = new URL(window.location.href);
+      const params = url.searchParams;
+      const keys = Array.from(params.keys());
+
+      keys.forEach((k) => {
+        if (/^tf[A-Z]/.test(k)) {
+          params.delete(k);
+        }
+      });
+
+      params.delete('page');
+      params.delete('sortBy');
+      params.delete('sortDir');
+      params.set('openWindow', 'users-list');
+
+      const nextUrl = url.pathname + (params.toString() ? `?${params.toString()}` : '') + url.hash;
+      window.location.assign(nextUrl);
     },
     
     _showWindowSection(windowId, sectionId) {

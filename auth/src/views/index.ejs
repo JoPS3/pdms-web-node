@@ -29,7 +29,7 @@
           <p>Esta aplicacao e dedicada a fluxos autenticados e endpoints internos.</p>
           <p><strong>ID de utilizador:</strong> <%= userId || 'n/d' %></p>
           <p>
-            <a class="mobile-back" href="<%= basePath %>/utilizadores">Abrir utilizadores</a>
+            <a class="mobile-back" href="<%= basePath %>/">Abrir utilizadores</a>
           </p>
         </div>
       </main>
@@ -150,6 +150,25 @@
             <%- include('partials/desktop/window-session-info', { session: session }) %>
           </div>
         </div>
+
+        <!-- Session password child window -->
+        <div class="desktop-window window-session-password" id="window-session-password" hidden>
+          <div class="desktop-window-titlebar">
+            <strong class="desktop-window-title">Mudar Password</strong>
+            <button
+              type="button"
+              class="desktop-window-close"
+              data-close-window="session-password"
+              aria-label="Fechar janela"
+              title="Fechar"
+            >
+              ×
+            </button>
+          </div>
+          <div class="desktop-window-content">
+            <%- include('partials/desktop/window-session-password') %>
+          </div>
+        </div>
         
         <!-- Users window with embedded content -->
         <div class="desktop-window window-users" id="window-users" hidden>
@@ -167,6 +186,51 @@
           </div>
           <div class="desktop-window-content">
             <%- include('partials/desktop/window-users', { session: session }) %>
+          </div>
+        </div>
+
+        <!-- Users list child window -->
+        <div class="desktop-window window-users-list window-table-content" id="window-users-list" hidden>
+          <div class="desktop-window-titlebar">
+            <strong class="desktop-window-title">Lista de Utilizadores</strong>
+            <button
+              type="button"
+              class="desktop-window-close"
+              data-close-window="users-list"
+              aria-label="Fechar janela"
+              title="Fechar"
+            >
+              ×
+            </button>
+          </div>
+          <nav class="window-menu" data-users-list-menu>
+            <div class="window-menu-item">
+              <button type="button" class="window-menu-trigger">Ficheiro</button>
+              <div class="window-menu-dropdown">
+                <a href="#" class="window-menu-option" data-menu-action="refresh">Atualizar listagem</a>
+                <a href="#" class="window-menu-option" data-menu-action="first-page">Ir para primeira pagina</a>
+              </div>
+            </div>
+
+            <div class="window-menu-item">
+              <button type="button" class="window-menu-trigger">Ordenar</button>
+              <div class="window-menu-dropdown">
+                <a href="#" class="window-menu-option" data-menu-action="sort" data-sort-by="userName" data-sort-dir="ASC">Utilizador (A-Z)</a>
+                <a href="#" class="window-menu-option" data-menu-action="sort" data-sort-by="userName" data-sort-dir="DESC">Utilizador (Z-A)</a>
+                <a href="#" class="window-menu-option" data-menu-action="sort" data-sort-by="role" data-sort-dir="ASC">Perfil (A-Z)</a>
+                <a href="#" class="window-menu-option" data-menu-action="sort" data-sort-by="role" data-sort-dir="DESC">Perfil (Z-A)</a>
+              </div>
+            </div>
+
+            <div class="window-menu-item">
+              <button type="button" class="window-menu-trigger">Filtros</button>
+              <div class="window-menu-dropdown">
+                <a href="#" class="window-menu-option" data-menu-action="clear-filters">Limpar todos os filtros</a>
+              </div>
+            </div>
+          </nav>
+          <div class="desktop-window-content">
+            <%- include('partials/desktop/window-users-list', { usersList: usersList || [] }) %>
           </div>
         </div>
       </div>
@@ -194,5 +258,51 @@
 
     <!-- Global shell script: manages windows, overlay, drag, state -->
     <script src="<%= basePath %>/scripts/shell.js?v=<%= assetVersion %>"></script>
+
+    <script>
+      (function restoreDesktopWindowFromQuery() {
+        function restoreWindow() {
+          if (!window.matchMedia('(min-width: 1024px)').matches) {
+            return;
+          }
+
+          var shell = window.desktopShell;
+          if (!shell || typeof shell.openWindow !== 'function') {
+            return;
+          }
+
+          var params = new URLSearchParams(window.location.search || '');
+          var target = params.get('openWindow');
+
+          function clearOpenWindowParam() {
+            params.delete('openWindow');
+            var query = params.toString();
+            var nextUrl = window.location.pathname + (query ? ('?' + query) : '') + window.location.hash;
+            window.history.replaceState({}, '', nextUrl);
+          }
+
+          if (target === 'users-list') {
+            shell.openWindow('users-list', {
+              parentWindow: 'users',
+              hideParent: true,
+              skipRebuild: true
+            });
+            clearOpenWindowParam();
+          } else if (target === 'users' || target === 'session' || target === 'session-info' || target === 'session-password') {
+            shell.openWindow(target);
+            clearOpenWindowParam();
+          }
+        }
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', restoreWindow);
+        } else {
+          restoreWindow();
+        }
+      })();
+    </script>
+
+    <!-- Table filter system for users list -->
+    <script src="<%= basePath %>/scripts/table-filters.js?v=<%= assetVersion %>"></script>
   </body>
 </html>

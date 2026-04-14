@@ -85,3 +85,53 @@ Para abrir janela filha:
 - Evitar complexidade prematura (minimize/maximize) antes da base comum estabilizar.
 - Se necessario multi-janela simultanea, evoluir z-index manager sem alterar contrato base.
 - Manter compatibilidade visual entre modulos para reduzir custo cognitivo do utilizador.
+
+## Tabelas em Janelas (Contrato Global)
+Quando uma listagem vive dentro de uma `desktop-window`, o modulo deve seguir este contrato para evitar desvios de UX entre `auth`, `mapas` e restantes modulos.
+
+### Contrato de Query Params
+- Filtros por coluna: `tf<Coluna>` (ex.: `tfRole`, `tfUserName`).
+- Paginacao: `page`, `pageSize`.
+- Ordenacao: `sortBy`, `sortDir` (`ASC`/`DESC`).
+- Reabertura da janela apos submit server-side: `openWindow=<window-id>`.
+- Sentinela de selecao vazia explicita: `__EMPTY__`.
+
+Regras:
+1. O submit de filtro/ordenacao nunca pode apontar para rota inexistente.
+2. `openWindow` e one-shot: apos reabrir a janela, remover o param da URL com `replaceState`.
+3. Nao usar `pushState` para representar estado interno de menu/filtro.
+
+### Comportamento de Menu de Filtros
+1. Botoes de cabecalho:
+  - estado visual ativo apenas com filtro aplicado (`is-filtered`) ou ordenacao ativa (`is-sorted`);
+  - abrir menu nao deve colorir como se filtro estivesse aplicado.
+2. Ordenacao no menu:
+  - aplica imediatamente e reseta `page` para `1`.
+3. Filtros no menu:
+  - alteracoes de checkboxes sao locais ate `Aplicar`;
+  - `Aplicar` persiste `tf*`, reseta `page` para `1`, e submete.
+4. Opcao `Todos`:
+  - sem pesquisa ativa: atua sobre todas as opcoes;
+  - com pesquisa ativa: atua apenas sobre opcoes visiveis;
+  - pesquisa + nenhum selecionado implica filtro explicito vazio (`__EMPTY__`).
+
+### Contrato Backend para Opcoes de Filtro
+Cada coluna deve devolver opcoes distintas com semantica "Excel-like":
+1. Aplicar filtros das outras colunas.
+2. Ignorar filtro da propria coluna durante a recolha das opcoes.
+3. Manter normalizacao consistente de booleanos e vazios.
+
+### Politica de Reabertura da Janela
+Para listagens sensiveis a estado antigo:
+1. Reabrir pode forcar rebuild server-side da janela (estrategia deterministica).
+2. Rebuild deve limpar estado volatil local (filtros/pagina/sort antigos), exceto quando a abertura vem de restauracao explicita da query atual.
+3. A restauracao por query deve permitir um bypass controlado do rebuild (ex.: `skipRebuild`).
+
+### Checklist de Regressao (Obrigatorio)
+1. Clique no icone abre janela correta.
+2. Fechar janela filha restaura pai.
+3. Submit de filtro/ordenacao nao devolve 404.
+4. `openWindow` nao fica preso na URL apos reabrir.
+5. Refresh manual do browser nao causa reabertura inesperada de janela.
+6. `Todos` com pesquisa respeita apenas itens visiveis.
+7. Corpo da tabela mantem contraste de leitura em todos os estados visuais.

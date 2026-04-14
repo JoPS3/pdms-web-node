@@ -7,10 +7,12 @@ const mockAuthMode = {
 
 const mockGetHomePage = jest.fn((req, res) => res.status(200).send('home-page'));
 const mockGetInternalSessionStatus = jest.fn((req, res) => res.status(200).json({ status: 'ok', route: 'session-status' }));
+const mockChangeInternalSessionPassword = jest.fn((req, res) => res.status(200).json({ status: 'ok', route: 'change-password' }));
 
 jest.mock('../src/controllers/auth.controller', () => ({
   getHomePage: (req, res, next) => mockGetHomePage(req, res, next),
-  getInternalSessionStatus: (req, res, next) => mockGetInternalSessionStatus(req, res, next)
+  getInternalSessionStatus: (req, res, next) => mockGetInternalSessionStatus(req, res, next),
+  changeInternalSessionPassword: (req, res, next) => mockChangeInternalSessionPassword(req, res, next)
 }));
 
 jest.mock('../src/middlewares/auth.middleware', () => ({
@@ -109,5 +111,31 @@ describe('auth app integration routes', () => {
     expect(response.status).toBe(200);
     expect(response.body.route).toBe('session-status');
     expect(mockGetInternalSessionStatus).toHaveBeenCalledTimes(1);
+  });
+
+  test('POST internal change-password returns 401 when api auth fails', async () => {
+    mockAuthMode.api = 'deny';
+
+    const response = await request(app)
+      .post(`${basePath}/internal/session/change-password`)
+      .send({});
+
+    expect(response.status).toBe(401);
+    expect(response.body.error).toBe('invalid_gateway_session');
+    expect(mockChangeInternalSessionPassword).not.toHaveBeenCalled();
+  });
+
+  test('POST internal change-password reaches controller when api auth passes', async () => {
+    const response = await request(app)
+      .post(`${basePath}/internal/session/change-password`)
+      .send({
+        currentPassword: 'old-secret',
+        newPassword: 'new-secret-123',
+        confirmPassword: 'new-secret-123'
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.route).toBe('change-password');
+    expect(mockChangeInternalSessionPassword).toHaveBeenCalledTimes(1);
   });
 });
