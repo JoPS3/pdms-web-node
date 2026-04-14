@@ -9,11 +9,18 @@ jest.mock('../src/services/user-password.service', () => ({
 }));
 
 jest.mock('../src/services/users-list.service', () => ({
-  listUsers: jest.fn()
+  listUsers: jest.fn(),
+  listActiveUserRoles: jest.fn(),
+  listUsersWithPagination: jest.fn(),
+  getUsersTableFilterOptions: jest.fn(),
+  listUsersForExport: jest.fn(),
+  getUserByIdForEdit: jest.fn(),
+  updateUserFromEditById: jest.fn()
 }));
 
 jest.mock('../src/services/mapas-audit.service', () => ({
-  createPasswordChangeAuditLog: jest.fn()
+  createPasswordChangeAuditLog: jest.fn(),
+  createUserUpdateAuditLog: jest.fn()
 }));
 
 jest.mock('../src/middlewares/auth.middleware', () => ({
@@ -23,7 +30,7 @@ jest.mock('../src/middlewares/auth.middleware', () => ({
 const authController = require('../src/controllers/auth.controller');
 const { hashPassword, verifyPassword } = require('../src/services/password.service');
 const { getUserPasswordById, updateUserPasswordById } = require('../src/services/user-password.service');
-const { listUsers } = require('../src/services/users-list.service');
+const { listUsersWithPagination, getUsersTableFilterOptions, getUserByIdForEdit, listActiveUserRoles } = require('../src/services/users-list.service');
 const { createPasswordChangeAuditLog } = require('../src/services/mapas-audit.service');
 
 function createResMock(basePath = '/pdms-new/auth') {
@@ -46,15 +53,23 @@ describe('auth.controller', () => {
 
   test('getHomePage renders index with user metadata, session data, and users list', async () => {
     const req = {
+      query: {},
       user: { id: 'u-1', userName: 'alice', email: 'alice@example.com', role: 'ADMINISTRADOR', roleId: 1 }
     };
     const res = createResMock();
-    listUsers.mockResolvedValue([{ id: 'u-2', userName: 'bob' }]);
+    listUsersWithPagination.mockResolvedValue({
+      rows: [{ id: 'u-2', userName: 'bob' }],
+      pagination: { currentPage: 1, pageSize: 50, totalRecords: 1, totalPages: 1, from: 1, to: 1 },
+      sortBy: 'userName',
+      sortDir: 'ASC'
+    });
+    getUsersTableFilterOptions.mockResolvedValue({ userName: ['bob'] });
+    listActiveUserRoles.mockResolvedValue([{ id: 'r-1', role: 'ADMINISTRADOR' }]);
 
     await authController.getHomePage(req, res);
 
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(listUsers).toHaveBeenCalledWith(100);
+    expect(listUsersWithPagination).toHaveBeenCalledWith(1, 50, {}, 'userName', 'ASC');
     expect(res.render).toHaveBeenCalledWith('index', expect.objectContaining({
       pageTitle: 'Auth',
       userName: 'alice',
@@ -68,6 +83,30 @@ describe('auth.controller', () => {
         role: 'ADMINISTRADOR',
         roleId: 1
       })
+    }));
+  });
+
+  test('getEditUserPage renders user-edit when user exists', async () => {
+    const req = {
+      params: { userId: 'u-100' },
+      user: { id: 'u-admin', userName: 'admin', role: 'ADMINISTRADOR' }
+    };
+    const res = createResMock();
+
+    getUserByIdForEdit.mockResolvedValue({
+      id: 'u-100',
+      userName: 'jorge',
+      fullName: 'Jorge Silva',
+      email: 'jorge@example.com',
+      role: 'OPERADOR',
+      isAuthorized: true
+    });
+
+    await authController.getEditUserPage(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.render).toHaveBeenCalledWith('user-edit', expect.objectContaining({
+      userToEdit: expect.objectContaining({ id: 'u-100' })
     }));
   });
 

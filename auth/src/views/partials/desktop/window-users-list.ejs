@@ -28,6 +28,7 @@
         <button type="button" class="btn btn-muted users-table-filter-summary-clear" data-table-filter-clear-all>Limpar filtros</button>
       </div>
     </div>
+    <p class="users-table-edit-hint">Dica: duplo clique numa linha para abrir a janela de edicao do utilizador.</p>
 
     <div class="table-wrap">
       <table class="users-list-table" data-table-filter-root>
@@ -45,7 +46,16 @@
             <tr><td colspan="5">Sem registos.</td></tr>
           <% } %>
           <% (usersList || []).forEach((user) => { %>
-            <tr class="data-row">
+            <tr
+              class="data-row"
+              data-user-id="<%= user.id %>"
+              data-user-username="<%= user.userName || '' %>"
+              data-user-fullname="<%= user.fullName || '' %>"
+              data-user-email="<%= user.email || '' %>"
+              data-user-role="<%= user.role || '' %>"
+              data-user-roleid="<%= user.roleId || '' %>"
+              data-user-authorized="<%= user.isAuthorized ? 'true' : 'false' %>"
+            >
               <td><%= user.userName || 'n/d' %></td>
               <td><%= user.fullName || 'n/d' %></td>
               <td><%= user.email || 'n/d' %></td>

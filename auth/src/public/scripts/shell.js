@@ -21,7 +21,7 @@
       }
       
       // Registar windows disponíveis
-      ['session', 'session-info', 'session-password', 'users', 'users-list'].forEach(windowId => {
+      ['session', 'session-info', 'session-password', 'users', 'users-list', 'user-edit'].forEach(windowId => {
         const element = document.getElementById(`window-${windowId}`);
         
         this.windows[windowId] = {

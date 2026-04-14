@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= pageTitle %> | PDMS Auth</title>
+    <link rel="stylesheet" href="<%= basePath %>/styles/style.css?v=<%= assetVersion %>" />
+  </head>
+  <body class="apps-page">
+    <main class="user-edit-page">
+      <div class="user-edit-card">
+        <header class="user-edit-header">
+          <h1>Editar Utilizador</h1>
+          <a class="user-edit-back" href="<%= basePath %>/?openWindow=users-list">Voltar a listagem</a>
+        </header>
+
+        <section class="user-edit-grid" aria-label="Dados do utilizador">
+          <div class="user-edit-field">
+            <span class="user-edit-label">ID</span>
+            <strong><%= userToEdit.id %></strong>
+          </div>
+          <div class="user-edit-field">
+            <span class="user-edit-label">Utilizador</span>
+            <strong><%= userToEdit.userName || 'n/d' %></strong>
+          </div>
+          <div class="user-edit-field">
+            <span class="user-edit-label">Nome</span>
+            <strong><%= userToEdit.fullName || 'n/d' %></strong>
+          </div>
+          <div class="user-edit-field">
+            <span class="user-edit-label">Email</span>
+            <strong><%= userToEdit.email || 'n/d' %></strong>
+          </div>
+          <div class="user-edit-field">
+            <span class="user-edit-label">Perfil</span>
+            <strong><%= userToEdit.role || 'n/d' %></strong>
+          </div>
+          <div class="user-edit-field">
+            <span class="user-edit-label">Autorizado</span>
+            <strong><%= userToEdit.isAuthorized ? 'Sim' : 'Nao' %></strong>
+          </div>
+          <div class="user-edit-field">
+            <span class="user-edit-label">Criado em</span>
+            <strong><%= userToEdit.createdAt || 'n/d' %></strong>
+          </div>
+          <div class="user-edit-field">
+            <span class="user-edit-label">Ultima alteracao</span>
+            <strong><%= userToEdit.changedAt || 'n/d' %></strong>
+          </div>
+          <div class="user-edit-field user-edit-field-full">
+            <span class="user-edit-label">Alterado por</span>
+            <strong><%= userToEdit.changedBy || 'n/d' %></strong>
+          </div>
+        </section>
+
+        <p class="user-edit-note">Nota: esta view abre por duplo clique na linha da tabela de utilizadores.</p>
+      </div>
+    </main>
+  </body>
+</html>

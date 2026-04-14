@@ -6,13 +6,19 @@ const mockAuthMode = {
 };
 
 const mockGetHomePage = jest.fn((req, res) => res.status(200).send('home-page'));
+const mockGetEditUserPage = jest.fn((req, res) => res.status(200).send('edit-user-page'));
 const mockGetInternalSessionStatus = jest.fn((req, res) => res.status(200).json({ status: 'ok', route: 'session-status' }));
 const mockChangeInternalSessionPassword = jest.fn((req, res) => res.status(200).json({ status: 'ok', route: 'change-password' }));
+const mockExportUsersList = jest.fn((req, res) => res.status(200).send('export-users-list'));
+const mockUpdateUserFromEdit = jest.fn((req, res) => res.status(200).json({ status: 'ok', route: 'update-user' }));
 
 jest.mock('../src/controllers/auth.controller', () => ({
   getHomePage: (req, res, next) => mockGetHomePage(req, res, next),
+  getEditUserPage: (req, res, next) => mockGetEditUserPage(req, res, next),
   getInternalSessionStatus: (req, res, next) => mockGetInternalSessionStatus(req, res, next),
-  changeInternalSessionPassword: (req, res, next) => mockChangeInternalSessionPassword(req, res, next)
+  changeInternalSessionPassword: (req, res, next) => mockChangeInternalSessionPassword(req, res, next),
+  exportUsersList: (req, res, next) => mockExportUsersList(req, res, next),
+  updateUserFromEdit: (req, res, next) => mockUpdateUserFromEdit(req, res, next)
 }));
 
 jest.mock('../src/middlewares/auth.middleware', () => ({
@@ -89,6 +95,14 @@ describe('auth app integration routes', () => {
     expect(response.status).toBe(200);
     expect(response.text).toContain('home-page');
     expect(mockGetHomePage).toHaveBeenCalledTimes(1);
+  });
+
+  test('GET edit user page delegates to auth controller', async () => {
+    const response = await request(app).get(`${basePath}/users/123/edit`);
+
+    expect(response.status).toBe(200);
+    expect(response.text).toContain('edit-user-page');
+    expect(mockGetEditUserPage).toHaveBeenCalledTimes(1);
   });
 
   test('POST internal route returns 401 when api auth fails', async () => {

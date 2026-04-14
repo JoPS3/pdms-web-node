@@ -235,6 +235,25 @@
             <%- include('partials/desktop/window-users-list', { usersList: usersList || [] }) %>
           </div>
         </div>
+
+        <!-- User edit child window (opens from users list row double-click) -->
+        <div class="desktop-window window-user-edit" id="window-user-edit" hidden>
+          <div class="desktop-window-titlebar">
+            <strong class="desktop-window-title">Editar Utilizador</strong>
+            <button
+              type="button"
+              class="desktop-window-close"
+              data-close-window="user-edit"
+              aria-label="Fechar janela"
+              title="Fechar"
+            >
+              ×
+            </button>
+          </div>
+          <div class="desktop-window-content">
+            <%- include('partials/desktop/window-user-edit') %>
+          </div>
+        </div>
       </div>
     </div>
 

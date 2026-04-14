@@ -58,6 +58,7 @@ app.use(basePath, requireGatewayAuth);
 // Rotas protegidas
 app.get(basePath + '/', authController.getHomePage);
 app.get(basePath + '/users/export', authController.exportUsersList);
+app.get(basePath + '/users/:userId/edit', authController.getEditUserPage);
 
 // 404 Handler
 app.use((req, res) => {

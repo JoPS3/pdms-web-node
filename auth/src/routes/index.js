@@ -15,5 +15,6 @@ router.get('/health', (_req, res) => {
 
 router.post('/internal/session/status', requireGatewaySessionApi, authController.getInternalSessionStatus);
 router.post('/internal/session/change-password', requireGatewaySessionApi, authController.changeInternalSessionPassword);
+router.post('/internal/users/:userId/update', requireGatewaySessionApi, authController.updateUserFromEdit);
 
 module.exports = router;
