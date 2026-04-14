@@ -1,0 +1,51 @@
+<div class="user-edit-window-wrap" data-user-edit-window="1">
+  <form class="user-edit-window-form" data-user-edit-form="1" novalidate>
+    <div class="user-edit-window-grid">
+      <div class="user-edit-window-field">
+        <label class="user-edit-window-label" for="editUserId">ID</label>
+        <input id="editUserId" name="id" type="text" data-user-edit-input="id" readonly />
+      </div>
+      <div class="user-edit-window-field">
+        <label class="user-edit-window-label" for="editUserName">Utilizador</label>
+        <input id="editUserName" name="userName" type="text" data-user-edit-input="userName" />
+      </div>
+      <div class="user-edit-window-field">
+        <label class="user-edit-window-label" for="editFullName">Nome</label>
+        <input id="editFullName" name="fullName" type="text" data-user-edit-input="fullName" />
+      </div>
+      <div class="user-edit-window-field">
+        <label class="user-edit-window-label" for="editEmail">Email</label>
+        <input id="editEmail" name="email" type="email" data-user-edit-input="email" />
+      </div>
+      <div class="user-edit-window-field">
+        <label class="user-edit-window-label" for="editRoleId">Perfil</label>
+        <select id="editRoleId" name="roleId" data-user-edit-input="roleId">
+          <% (userRoleOptions || []).forEach((roleOption) => { %>
+            <option value="<%= roleOption.id %>"><%= roleOption.role %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="user-edit-window-field">
+        <label class="user-edit-window-label" for="editAuthorized">Autorizado</label>
+        <select id="editAuthorized" name="isAuthorized" data-user-edit-input="isAuthorized">
+          <option value="true">Sim</option>
+          <option value="false">Nao</option>
+        </select>
+      </div>
+      <div class="user-edit-window-field user-edit-window-field-full user-edit-window-checkline">
+        <label>
+          <input id="editClearPassword" name="clearPassword" type="checkbox" data-user-edit-input="clearPassword" />
+          Limpar password atual (obriga o utilizador a definir nova password no proximo login)
+        </label>
+      </div>
+    </div>
+
+    <div class="user-edit-window-actions">
+      <button type="submit" class="btn btn-primary">Guardar</button>
+      <button type="button" class="btn btn-muted" data-user-edit-cancel="1">Cancelar</button>
+    </div>
+
+    <p class="user-edit-window-feedback" data-user-edit-feedback="1"></p>
+    <p class="user-edit-window-note">Janela de edicao aberta a partir da listagem (duplo clique na linha).</p>
+  </form>
+</div>

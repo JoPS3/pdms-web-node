@@ -465,6 +465,7 @@
 
     const state = readState(form, cfg);
     const options = parseOptions(root);
+    const basePath = String(form.getAttribute('action') || '').replace(/\/$/, '');
     updateToggleStates(root, cfg, state, form);
     initUsersListMenu(root, form, state, cfg);
 
@@ -504,6 +505,132 @@
         }
         pageInput.value = String(Math.max(1, targetPage));
         submitForm(form);
+      });
+    });
+
+    function initUserEditWindowActions() {
+      const editWindow = document.getElementById('window-user-edit');
+      if (!editWindow || editWindow.getAttribute('data-user-edit-init') === '1') return;
+
+      const editForm = editWindow.querySelector('[data-user-edit-form]');
+      const cancelBtn = editWindow.querySelector('[data-user-edit-cancel]');
+      const feedback = editWindow.querySelector('[data-user-edit-feedback]');
+
+      function closeEditWindow() {
+        const shell = window.desktopShell;
+        if (shell && typeof shell.closeWindow === 'function') {
+          shell.closeWindow('user-edit');
+        }
+      }
+
+      if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+          if (feedback) feedback.textContent = '';
+          closeEditWindow();
+        });
+      }
+
+      if (editForm) {
+        editForm.addEventListener('submit', async (event) => {
+          event.preventDefault();
+
+          const idField = editWindow.querySelector('[data-user-edit-input="id"]');
+          const userNameField = editWindow.querySelector('[data-user-edit-input="userName"]');
+          const fullNameField = editWindow.querySelector('[data-user-edit-input="fullName"]');
+          const emailField = editWindow.querySelector('[data-user-edit-input="email"]');
+          const roleIdField = editWindow.querySelector('[data-user-edit-input="roleId"]');
+          const isAuthorizedField = editWindow.querySelector('[data-user-edit-input="isAuthorized"]');
+          const clearPasswordField = editWindow.querySelector('[data-user-edit-input="clearPassword"]');
+
+          const userId = String(idField?.value || '').trim();
+          if (!userId) {
+            if (feedback) feedback.textContent = 'ID de utilizador invalido.';
+            return;
+          }
+
+          const payload = {
+            id: userId,
+            userName: String(userNameField?.value || '').trim(),
+            fullName: String(fullNameField?.value || '').trim(),
+            email: String(emailField?.value || '').trim(),
+            roleId: String(roleIdField?.value || '').trim(),
+            isAuthorized: String(isAuthorizedField?.value || 'false').trim() === 'true',
+            clearPassword: Boolean(clearPasswordField?.checked)
+          };
+
+          if (!payload.userName || !payload.fullName || !payload.email || !payload.roleId) {
+            if (feedback) feedback.textContent = 'Preencha os campos obrigatorios.';
+            return;
+          }
+
+          try {
+            if (feedback) feedback.textContent = 'A guardar...';
+            const response = await fetch(`${basePath}/internal/users/${encodeURIComponent(userId)}/update`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              credentials: 'same-origin',
+              body: JSON.stringify(payload)
+            });
+
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+              if (feedback) feedback.textContent = String(data?.message || 'Nao foi possivel guardar as alteracoes.');
+              return;
+            }
+
+            if (feedback) feedback.textContent = String(data?.message || 'Utilizador atualizado com sucesso.');
+            closeEditWindow();
+            submitForm(form);
+          } catch (_) {
+            if (feedback) feedback.textContent = 'Erro de comunicacao ao guardar alteracoes.';
+          }
+        });
+      }
+
+      editWindow.setAttribute('data-user-edit-init', '1');
+    }
+
+    function fillUserEditWindowFromRow(row) {
+      const editWindow = document.getElementById('window-user-edit');
+      if (!editWindow) return;
+
+      const payload = {
+        id: String(row.getAttribute('data-user-id') || '').trim() || 'n/d',
+        userName: String(row.getAttribute('data-user-username') || '').trim() || 'n/d',
+        fullName: String(row.getAttribute('data-user-fullname') || '').trim() || 'n/d',
+        email: String(row.getAttribute('data-user-email') || '').trim() || 'n/d',
+        roleId: String(row.getAttribute('data-user-roleid') || '').trim(),
+        isAuthorized: String(row.getAttribute('data-user-authorized') || '').trim() === 'true' ? 'true' : 'false',
+        clearPassword: 'false'
+      };
+
+      Object.entries(payload).forEach(([key, value]) => {
+        const field = editWindow.querySelector(`[data-user-edit-input="${key}"]`);
+        if (!field) return;
+        if (field.type === 'checkbox') {
+          field.checked = String(value || '').trim() === 'true';
+          return;
+        }
+        field.value = value;
+      });
+
+      const feedback = editWindow.querySelector('[data-user-edit-feedback]');
+      if (feedback) feedback.textContent = '';
+    }
+
+    root.querySelectorAll('tr[data-user-id]').forEach((row) => {
+      row.addEventListener('dblclick', () => {
+        initUserEditWindowActions();
+        fillUserEditWindowFromRow(row);
+        const shell = window.desktopShell;
+        if (shell && typeof shell.openWindow === 'function') {
+          shell.openWindow('user-edit', {
+            parentWindow: 'users-list',
+            hideParent: true
+          });
+        }
       });
     });
   }

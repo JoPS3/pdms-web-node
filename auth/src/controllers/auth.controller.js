@@ -1,15 +1,18 @@
 const { hashPassword, verifyPassword } = require('../services/password.service');
 const { parseSessionToken } = require('../middlewares/auth.middleware');
-const { createPasswordChangeAuditLog } = require('../services/mapas-audit.service');
+const { createPasswordChangeAuditLog, createUserUpdateAuditLog } = require('../services/mapas-audit.service');
 const {
   getUserPasswordById,
   updateUserPasswordById
 } = require('../services/user-password.service');
 const {
   listUsers,
+  listActiveUserRoles,
   listUsersWithPagination,
   getUsersTableFilterOptions,
-  listUsersForExport
+  listUsersForExport,
+  getUserByIdForEdit,
+  updateUserFromEditById
 } = require('../services/users-list.service');
 
 function parseTableFiltersFromQuery(query) {
@@ -106,10 +109,12 @@ async function getHomePage(req, res) {
 
   let usersData = { rows: [], pagination: {}, sortBy, sortDir };
   let tableFilterOptions = {};
+  let userRoleOptions = [];
 
   try {
     usersData = await listUsersWithPagination(page, pageSize, tableFilters, sortBy, sortDir);
     tableFilterOptions = await getUsersTableFilterOptions(tableFilters);
+    userRoleOptions = await listActiveUserRoles();
   } catch (error) {
     console.error('[auth] Erro ao obter lista de utilizadores:', error.message);
     // Fallback to empty list
@@ -134,6 +139,7 @@ async function getHomePage(req, res) {
       roleId: req.user?.roleId || null
     },
     usersList: usersData.rows,
+    userRoleOptions,
     pagination: usersData.pagination,
     tableFilters,
     tableFilterOptions,
@@ -169,6 +175,140 @@ async function exportUsersList(req, res) {
     res.status(500).json({
       error: 'export_failed',
       message: 'Nao foi possivel exportar a listagem filtrada.'
+    });
+  }
+}
+
+async function getEditUserPage(req, res) {
+  const userId = String(req.params.userId || '').trim();
+  if (!userId) {
+    return res.status(400).render('error', {
+      title: 'Erro',
+      error: 'Identificador de utilizador invalido.'
+    });
+  }
+
+  try {
+    const userToEdit = await getUserByIdForEdit(userId);
+    if (!userToEdit) {
+      return res.status(404).render('404', { title: 'Not Found' });
+    }
+
+    return res.status(200).render('user-edit', {
+      pageTitle: 'Editar Utilizador',
+      userName: req.user?.userName || 'Utilizador',
+      userRole: req.user?.role || '',
+      userId: req.user?.id || '',
+      userToEdit
+    });
+  } catch (error) {
+    console.error('[auth] Erro ao abrir view de edicao de utilizador:', error.message);
+    return res.status(500).render('error', {
+      title: 'Erro',
+      error: 'Nao foi possivel abrir a view de edicao do utilizador.'
+    });
+  }
+}
+
+async function updateUserFromEdit(req, res) {
+  const targetUserId = String(req.params.userId || '').trim();
+  const sessionToken = parseSessionToken(req);
+  const actor = req.user?.userName || req.user?.email || 'system@pedaco.pt';
+  const actorRole = req.user?.role || null;
+  const mapasAuditLogUrl = req.app?.get('mapasAuditLogUrl')
+    || process.env.MAPAS_AUDIT_LOG_URL
+    || (process.env.NODE_ENV === 'development'
+      ? 'http://localhost:6001/pdms-new/mapas/internal/auditoria/log'
+      : 'http://localhost:6001/pdms/mapas/internal/auditoria/log');
+
+  if (!targetUserId) {
+    return res.status(400).json({
+      error: 'invalid_user_id',
+      message: 'Identificador de utilizador invalido.'
+    });
+  }
+
+  try {
+    const before = await getUserByIdForEdit(targetUserId);
+    if (!before) {
+      return res.status(404).json({
+        error: 'user_not_found',
+        message: 'Utilizador nao encontrado.'
+      });
+    }
+
+    const updateResult = await updateUserFromEditById(targetUserId, req.body || {}, actor);
+    if (!updateResult.ok) {
+      if (updateResult.error === 'duplicate_user_name') {
+        return res.status(409).json({
+          error: 'duplicate_user_name',
+          message: 'Ja existe outro utilizador com esse nome de utilizador.'
+        });
+      }
+      if (updateResult.error === 'duplicate_email') {
+        return res.status(409).json({
+          error: 'duplicate_email',
+          message: 'Ja existe outro utilizador com esse email.'
+        });
+      }
+      if (updateResult.error === 'invalid_role') {
+        return res.status(400).json({
+          error: 'invalid_role',
+          message: 'Perfil selecionado e invalido.'
+        });
+      }
+      if (updateResult.error === 'missing_required_fields') {
+        return res.status(400).json({
+          error: 'missing_required_fields',
+          message: 'Existem campos obrigatorios em falta.'
+        });
+      }
+      return res.status(404).json({
+        error: 'user_not_found',
+        message: 'Utilizador nao encontrado.'
+      });
+    }
+
+    const after = await getUserByIdForEdit(targetUserId);
+    const changedFields = [];
+    if (after) {
+      if (before.userName !== after.userName) changedFields.push('user_name');
+      if (before.fullName !== after.fullName) changedFields.push('full_name');
+      if (before.email !== after.email) changedFields.push('email');
+      if (before.roleId !== after.roleId) changedFields.push('role_id');
+      if (before.isAuthorized !== after.isAuthorized) changedFields.push('is_authorized');
+      if (before.hasPassword !== after.hasPassword) changedFields.push('password');
+    }
+
+    try {
+      await createUserUpdateAuditLog({
+        auditLogUrl: mapasAuditLogUrl,
+        sessionToken,
+        targetUserId,
+        targetUserName: after?.userName || before.userName,
+        actor,
+        actorRole,
+        changedFields
+      });
+
+      return res.status(200).json({
+        status: 'ok',
+        auditStatus: 'ok',
+        message: 'Utilizador atualizado com sucesso.'
+      });
+    } catch (auditError) {
+      console.error('[auth] Utilizador atualizado mas auditoria falhou:', auditError.message);
+      return res.status(200).json({
+        status: 'ok',
+        auditStatus: 'failed',
+        message: 'Utilizador atualizado com sucesso, mas o registo de auditoria falhou.'
+      });
+    }
+  } catch (error) {
+    console.error('[auth] Erro ao atualizar utilizador:', error.message);
+    return res.status(500).json({
+      error: 'user_update_failed',
+      message: 'Erro interno ao atualizar utilizador.'
     });
   }
 }
@@ -306,5 +446,7 @@ module.exports = {
   getHomePage,
   getInternalSessionStatus,
   changeInternalSessionPassword,
-  exportUsersList
+  exportUsersList,
+  getEditUserPage,
+  updateUserFromEdit
 };

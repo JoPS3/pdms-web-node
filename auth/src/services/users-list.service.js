@@ -10,6 +10,7 @@ async function listUsers(limit = 100) {
         u.user_name AS userName,
         CONCAT_WS(' ', u.first_name, u.last_name) AS fullName,
         u.email,
+        ur.id AS roleId,
         ur.role,
         u.is_authorized AS isAuthorized,
         u.created_at AS createdAt
@@ -26,10 +27,167 @@ async function listUsers(limit = 100) {
     userName: row.userName || '',
     fullName: row.fullName || '',
     email: row.email || '',
+    roleId: row.roleId || null,
     role: row.role || '',
     isAuthorized: Boolean(row.isAuthorized),
     createdAt: row.createdAt || null
   }));
+}
+
+async function listActiveUserRoles() {
+  const rows = await query(
+    `
+      SELECT id, role
+      FROM users_role
+      WHERE is_deleted = 0
+      ORDER BY role ASC
+    `
+  );
+
+  return rows.map((row) => ({
+    id: row.id,
+    role: row.role || ''
+  }));
+}
+
+async function getUserByIdForEdit(userId) {
+  const rows = await query(
+    `
+      SELECT
+        u.id,
+        u.user_name AS userName,
+        u.first_name AS firstName,
+        u.last_name AS lastName,
+        CONCAT_WS(' ', u.first_name, u.last_name) AS fullName,
+        u.email,
+        ur.id AS roleId,
+        ur.role AS role,
+        u.is_authorized AS isAuthorized,
+        CASE WHEN u.password IS NULL OR u.password = '' THEN 0 ELSE 1 END AS hasPassword,
+        u.created_at AS createdAt,
+        u.changed_at AS changedAt,
+        u.changed_by AS changedBy
+      FROM users u
+      LEFT JOIN users_role ur ON ur.id = u.role_id
+      WHERE u.id = ?
+        AND u.is_deleted = 0
+      LIMIT 1
+    `,
+    [userId]
+  );
+
+  const row = rows[0];
+  if (!row) return null;
+
+  return {
+    id: row.id,
+    userName: row.userName || '',
+    firstName: row.firstName || '',
+    lastName: row.lastName || '',
+    fullName: row.fullName || '',
+    email: row.email || '',
+    roleId: row.roleId || null,
+    role: row.role || '',
+    isAuthorized: Boolean(row.isAuthorized),
+    hasPassword: Boolean(row.hasPassword),
+    createdAt: row.createdAt || null,
+    changedAt: row.changedAt || null,
+    changedBy: row.changedBy || ''
+  };
+}
+
+async function updateUserFromEditById(userId, payload = {}, changedBy = 'system@pedaco.pt') {
+  const safeUserId = String(userId || '').trim();
+  const safeUserName = String(payload.userName || '').trim();
+  const safeEmail = String(payload.email || '').trim().toLowerCase();
+  const safeRoleId = String(payload.roleId || '').trim();
+  const safeIsAuthorized = payload.isAuthorized === true || payload.isAuthorized === 'true' ? 1 : 0;
+  const safeClearPassword = payload.clearPassword === true || payload.clearPassword === 'true' ? 1 : 0;
+  const safeFullName = String(payload.fullName || '').trim();
+
+  if (!safeUserId || !safeUserName || !safeEmail || !safeRoleId || !safeFullName) {
+    return { ok: false, error: 'missing_required_fields' };
+  }
+
+  const roleRows = await query(
+    `
+      SELECT id
+      FROM users_role
+      WHERE id = ?
+        AND is_deleted = 0
+      LIMIT 1
+    `,
+    [safeRoleId]
+  );
+  if (!roleRows[0]) {
+    return { ok: false, error: 'invalid_role' };
+  }
+
+  const userNameConflictRows = await query(
+    `
+      SELECT id
+      FROM users
+      WHERE user_name = ?
+        AND id <> ?
+        AND is_deleted = 0
+      LIMIT 1
+    `,
+    [safeUserName, safeUserId]
+  );
+  if (userNameConflictRows[0]) {
+    return { ok: false, error: 'duplicate_user_name' };
+  }
+
+  const emailConflictRows = await query(
+    `
+      SELECT id
+      FROM users
+      WHERE email = ?
+        AND id <> ?
+        AND is_deleted = 0
+      LIMIT 1
+    `,
+    [safeEmail, safeUserId]
+  );
+  if (emailConflictRows[0]) {
+    return { ok: false, error: 'duplicate_email' };
+  }
+
+  const nameParts = safeFullName.split(/\s+/).filter(Boolean);
+  const firstName = nameParts[0] || safeFullName;
+  const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+
+  const result = await query(
+    `
+      UPDATE users
+      SET role_id = ?,
+          first_name = ?,
+          last_name = ?,
+          user_name = ?,
+          email = ?,
+          is_authorized = ?,
+          password = IF(?, NULL, password),
+          changed_by = ?
+      WHERE id = ?
+        AND is_deleted = 0
+    `,
+    [
+      safeRoleId,
+      firstName,
+      lastName || null,
+      safeUserName,
+      safeEmail,
+      safeIsAuthorized,
+      safeClearPassword,
+      changedBy,
+      safeUserId
+    ]
+  );
+
+  return {
+    ok: Boolean(result.affectedRows),
+    error: result.affectedRows ? null : 'not_found'
+  };
 }
 
 function buildUsersFilteredQueryContext(tableFilters = {}, sortBy = 'userName', sortDir = 'ASC') {
@@ -141,6 +299,7 @@ async function listUsersWithPagination(
       u.user_name AS userName,
       CONCAT_WS(' ', u.first_name, u.last_name) AS fullName,
       u.email,
+      ur.id AS roleId,
       ur.role,
       u.is_authorized AS isAuthorized,
       u.created_at AS createdAt
@@ -161,6 +320,7 @@ async function listUsersWithPagination(
       userName: row.userName || '',
       fullName: row.fullName || '',
       email: row.email || '',
+      roleId: row.roleId || null,
       role: row.role || '',
       isAuthorized: Boolean(row.isAuthorized),
       createdAt: row.createdAt || null
@@ -322,6 +482,7 @@ async function listUsersForExport(tableFilters = {}, sortBy = 'userName', sortDi
         u.user_name AS userName,
         CONCAT_WS(' ', u.first_name, u.last_name) AS fullName,
         u.email,
+        ur.id AS roleId,
         ur.role,
         u.is_authorized AS isAuthorized,
         u.created_at AS createdAt
@@ -339,6 +500,7 @@ async function listUsersForExport(tableFilters = {}, sortBy = 'userName', sortDi
       userName: row.userName || '',
       fullName: row.fullName || '',
       email: row.email || '',
+      roleId: row.roleId || null,
       role: row.role || '',
       isAuthorized: Boolean(row.isAuthorized),
       createdAt: row.createdAt || null
@@ -350,7 +512,10 @@ async function listUsersForExport(tableFilters = {}, sortBy = 'userName', sortDi
 
 module.exports = {
   listUsers,
+  listActiveUserRoles,
   listUsersWithPagination,
   getUsersTableFilterOptions,
-  listUsersForExport
+  listUsersForExport,
+  getUserByIdForEdit,
+  updateUserFromEditById
 };
