@@ -17,6 +17,22 @@ const AUDITORIA_FILTER_COLUMNS = {
   userId: 'LOWER(user_id)'
 };
 
+function buildPeriodoBounds(periodo) {
+  const value = String(periodo || '').trim();
+  if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(value)) {
+    return null;
+  }
+
+  const [yearRaw, monthRaw] = value.split('-').map((entry) => Number.parseInt(entry, 10));
+  const nextMonth = monthRaw === 12 ? 1 : monthRaw + 1;
+  const nextYear = monthRaw === 12 ? yearRaw + 1 : yearRaw;
+
+  const start = `${String(yearRaw).padStart(4, '0')}-${String(monthRaw).padStart(2, '0')}-01 00:00:00`;
+  const end = `${String(nextYear).padStart(4, '0')}-${String(nextMonth).padStart(2, '0')}-01 00:00:00`;
+
+  return { start, end };
+}
+
 function normalizeUuid(value) {
   const normalized = String(value || '').trim().toLowerCase();
   return UUID_RE.test(normalized) ? normalized : '';
@@ -107,7 +123,7 @@ async function listLogs(filters = {}) {
         nome_tabela AS tableName,
         LOWER(registo_id) AS recordId,
         payload_alteracoes AS payload,
-        created_at AS createdAt
+        DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') AS createdAt
       FROM auditoria_logs
       ${whereClause}
       ORDER BY created_at DESC, id DESC
@@ -119,6 +135,7 @@ async function listLogs(filters = {}) {
 
 async function listLogsPaged(filters = {}) {
   const tableFilters = filters.tableFilters || {};
+  const periodo = String(filters.periodo || '').trim();
   const sortBy = String(filters.sortBy || 'createdAt');
   const sortDir = String(filters.sortDir || 'DESC').toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
   const sortColumn = AUDITORIA_SORT_FIELDS[sortBy] || AUDITORIA_SORT_FIELDS.createdAt;
@@ -153,9 +170,20 @@ async function listLogsPaged(filters = {}) {
     }
   });
 
-  const buildWhereClause = (ignoredKey = null) => {
+  const buildWhereClause = (ignoredKey = null, includeTableFilters = true) => {
     const conditions = [];
     const params = [];
+
+    const periodoBounds = buildPeriodoBounds(periodo);
+    if (periodoBounds) {
+      conditions.push('created_at >= ? AND created_at < ?');
+      params.push(periodoBounds.start, periodoBounds.end);
+    }
+
+    if (!includeTableFilters) {
+      const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+      return { whereClause, params };
+    }
 
     Object.entries(AUDITORIA_FILTER_COLUMNS).forEach(([key, columnExpr]) => {
       if (ignoredKey === key || !Object.prototype.hasOwnProperty.call(normalizedTableFilters, key)) {
@@ -182,6 +210,7 @@ async function listLogsPaged(filters = {}) {
   };
 
   const { whereClause, params } = buildWhereClause();
+  const { whereClause: periodWhereClause, params: periodParams } = buildWhereClause(null, false);
 
   const pageSize = Number.isInteger(filters.pageSize) && filters.pageSize > 0
     ? Math.min(filters.pageSize, 200)
@@ -189,10 +218,14 @@ async function listLogsPaged(filters = {}) {
   const page = Number.isInteger(filters.page) && filters.page > 0 ? filters.page : 1;
   const offset = (page - 1) * pageSize;
 
-  const [countResult, rows] = await Promise.all([
+  const [countFilteredResult, countPeriodoResult, rows] = await Promise.all([
     query(
       `SELECT COUNT(*) AS total FROM auditoria_logs ${whereClause}`,
       [...params]
+    ),
+    query(
+      `SELECT COUNT(*) AS total FROM auditoria_logs ${periodWhereClause}`,
+      [...periodParams]
     ),
     query(
       `
@@ -203,7 +236,7 @@ async function listLogsPaged(filters = {}) {
           nome_tabela AS tableName,
           LOWER(registo_id) AS recordId,
           payload_alteracoes AS payload,
-          created_at AS createdAt
+          DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') AS createdAt
         FROM auditoria_logs
         ${whereClause}
         ORDER BY ${sortColumn} ${sortDir}, id DESC
@@ -213,18 +246,21 @@ async function listLogsPaged(filters = {}) {
     )
   ]);
 
-  const total = Number(countResult[0]?.total ?? 0);
+  const total = Number(countFilteredResult[0]?.total ?? 0);
+  const totalPeriodo = Number(countPeriodoResult[0]?.total ?? 0);
 
   return {
     rows,
     total,
+    totalPeriodo,
     page,
     pageSize,
     pages: Math.ceil(total / pageSize) || 1
   };
 }
 
-async function listTableFilterOptions(tableFilters = {}) {
+async function listTableFilterOptions(tableFilters = {}, periodo = '') {
+  const normalizedPeriodo = String(periodo || '').trim();
   const normalizeFilterValues = (value) => {
     if (!Array.isArray(value)) {
       return [];
@@ -258,6 +294,12 @@ async function listTableFilterOptions(tableFilters = {}) {
   const buildWhereClause = (ignoredKey = null) => {
     const conditions = [];
     const params = [];
+
+    const periodoBounds = buildPeriodoBounds(normalizedPeriodo);
+    if (periodoBounds) {
+      conditions.push('created_at >= ? AND created_at < ?');
+      params.push(periodoBounds.start, periodoBounds.end);
+    }
 
     Object.entries(AUDITORIA_FILTER_COLUMNS).forEach(([key, columnExpr]) => {
       if (ignoredKey === key || !Object.prototype.hasOwnProperty.call(normalizedTableFilters, key)) {

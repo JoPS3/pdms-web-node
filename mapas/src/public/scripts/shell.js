@@ -1,4 +1,12 @@
 (function () {
+  try {
+    if (window.self !== window.top) {
+      document.body.classList.add('in-desktop-iframe');
+    }
+  } catch (err) {
+    // Ignore frame access restrictions if any.
+  }
+
   const EMPTY = '__EMPTY__';
   const CONFIG = {
     diarioCaixa: {
@@ -34,11 +42,11 @@
         userId: 'userId'
       },
       extractor: {
-        createdAtDate: (r) => ((r.cells[1]?.textContent || '').trim().slice(0, 10)),
-        tableName: (r) => (r.cells[2]?.textContent || '').trim(),
-        recordId: (r) => (r.cells[3]?.textContent || '').trim().toLowerCase(),
-        action: (r) => (r.cells[4]?.textContent || '').trim(),
-        userId: (r) => (r.cells[5]?.textContent || '').trim().toLowerCase()
+        createdAtDate: (r) => ((r.cells[0]?.textContent || '').trim().slice(0, 10)),
+        tableName: (r) => (r.cells[1]?.textContent || '').trim(),
+        recordId: (r) => (r.cells[2]?.textContent || '').trim().toLowerCase(),
+        action: (r) => (r.cells[3]?.textContent || '').trim(),
+        userId: (r) => (r.cells[4]?.textContent || '').trim().toLowerCase()
       }
     }
   };
@@ -94,30 +102,26 @@
     });
   }
 
-  function applyLocalFilter(root, cfg, state) {
-    const rows = Array.from(root.querySelectorAll('tbody tr.data-row'));
-    rows.forEach((row) => {
-      let visible = true;
-      for (const k of cfg.columns) {
-        if (!state.has(k)) continue;
-        const selected = state.get(k);
-        const cellVal = String(cfg.extractor[k](row) || '').trim();
-        if (!selected.size) {
-          if (cellVal !== '') visible = false;
-        } else if (!selected.has(cellVal)) {
-          visible = false;
-        }
-        if (!visible) break;
-      }
-      row.hidden = !visible;
-    });
+  function updateToggleStates(root, cfg, state, form) {
+    const sortBy = String(form.elements.namedItem('sortBy')?.value || '').trim();
+    const sortDir = String(form.elements.namedItem('sortDir')?.value || '').trim().toUpperCase();
 
-    const summary = root.querySelector('[data-table-filter-summary-text]');
-    if (summary) {
-      const total = rows.length;
-      const shown = rows.filter((r) => !r.hidden).length;
-      summary.innerHTML = `A mostrar <strong>${shown}</strong> de <strong>${total}</strong> registos nesta pagina.`;
-    }
+    root.querySelectorAll('[data-table-filter-toggle]').forEach((button) => {
+      const key = button.getAttribute('data-table-filter-toggle');
+      const th = button.closest('th[data-table-filter-key]');
+      const filtered = state.has(key);
+      const sorted = (cfg.sortMap[key] || '') === sortBy && (sortDir === 'ASC' || sortDir === 'DESC');
+      const glyph = sorted ? (sortDir === 'ASC' ? 'A↑' : 'D↓') : (filtered ? '•' : '▽');
+
+      button.setAttribute('data-sort-glyph', glyph);
+      button.classList.toggle('is-filtered', filtered);
+      button.classList.toggle('is-sorted', sorted);
+
+      if (th) {
+        th.classList.toggle('is-filtered', filtered);
+        th.classList.toggle('is-sorted', sorted);
+      }
+    });
   }
 
   function submitForm(form) {
@@ -142,7 +146,9 @@
     const allChecked = !state.has(key);
     const list = unique.map((v) => {
       const checked = selected.has(v);
-      return `<label class="tf-option"><input type="checkbox" data-v="${v.replace(/"/g, '&quot;')}" ${checked ? 'checked' : ''}/> <span>${v}</span></label>`;
+      const safeValue = v.replace(/"/g, '&quot;');
+      const safeLabel = v.replace(/"/g, '&quot;').toLowerCase();
+      return `<label class="tf-option" data-option-row data-label="${safeLabel}"><input type="checkbox" data-v="${safeValue}" ${checked ? 'checked' : ''}/> <span>${v}</span></label>`;
     }).join('');
 
     menu.innerHTML = `
@@ -154,30 +160,98 @@
         <button type="button" data-sort="ASC">Ordenar A-Z</button>
         <button type="button" data-sort="DESC">Ordenar Z-A</button>
       </div>
-      <label class="tf-option tf-all"><input type="checkbox" data-all ${allChecked ? 'checked' : ''}/> <span>Todos</span></label>
-      <div class="tf-options">${list || '<div class="tf-empty">Sem opções</div>'}</div>
       <div class="tf-actions">
         <button type="button" data-apply>Aplicar</button>
+      </div>
+      <input type="text" class="tf-search" data-search placeholder="Filtrar valores..." />
+      <div class="tf-options">
+        <label class="tf-option tf-all"><input type="checkbox" data-all ${allChecked ? 'checked' : ''}/> <span data-all-label>Todos</span></label>
+        ${list || '<div class="tf-empty">Sem opções</div>'}
       </div>
     `;
 
     const all = menu.querySelector('[data-all]');
+    const allLabel = menu.querySelector('[data-all-label]');
+    const search = menu.querySelector('[data-search]');
     const cbs = Array.from(menu.querySelectorAll('input[data-v]'));
+    let forceExplicitSelection = false;
+
+    function refreshAllState() {
+      if (!all) return;
+      const checkedCount = cbs.filter((c) => c.checked).length;
+
+      if (checkedCount === 0) {
+        all.checked = !forceExplicitSelection;
+        all.indeterminate = false;
+        if (allLabel) allLabel.textContent = forceExplicitSelection ? 'Todos (0)' : 'Todos';
+        return;
+      }
+
+      if (checkedCount === cbs.length) {
+        all.checked = false;
+        all.indeterminate = false;
+        if (allLabel) allLabel.textContent = `Todos (${checkedCount})`;
+        return;
+      }
+
+      all.checked = false;
+      all.indeterminate = true;
+      if (allLabel) allLabel.textContent = `Todos (${checkedCount})`;
+    }
+
+    function normalizeForSearch(value) {
+      return String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+    }
+
+    function applySearchFilter() {
+      if (!search) return;
+      const q = normalizeForSearch(search.value);
+
+      if (q.length > 0) {
+        forceExplicitSelection = true;
+        if (all) {
+          all.checked = false;
+          all.indeterminate = false;
+        }
+      }
+
+      cbs.forEach((cb) => {
+        const row = cb.closest('[data-option-row]');
+        const labelRaw = row ? row.getAttribute('data-label') : '';
+        const label = normalizeForSearch(labelRaw);
+        if (!row) return;
+        row.style.display = q && !label.includes(q) ? 'none' : '';
+      });
+
+      refreshAllState();
+    }
 
     if (all) {
       all.addEventListener('change', () => {
         if (all.checked) {
+          forceExplicitSelection = false;
           state.delete(key);
           cbs.forEach((c) => { c.checked = false; });
+          refreshAllState();
         }
       });
     }
 
     cbs.forEach((cb) => {
       cb.addEventListener('change', () => {
-        if (all) all.checked = false;
+        refreshAllState();
       });
     });
+
+    if (search) {
+      search.addEventListener('input', applySearchFilter);
+    }
+
+    refreshAllState();
 
     menu.querySelectorAll('[data-sort]').forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -202,7 +276,7 @@
       }
 
       syncHiddenInputs(form, state, cfg);
-      applyLocalFilter(root, cfg, state);
+      updateToggleStates(root, cfg, state, form);
       closeMenu(true);
     });
 
@@ -225,6 +299,29 @@
     return menu;
   }
 
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function positionMenuWithinListing(root, button) {
+    const anchorRect = button.getBoundingClientRect();
+    const listing = root.querySelector('.table-wrap') || root;
+    const listingRect = listing.getBoundingClientRect();
+    const horizontalPadding = 8;
+
+    menu.style.position = 'fixed';
+    menu.style.maxWidth = `${Math.max(240, Math.floor(listingRect.width - horizontalPadding * 2))}px`;
+    menu.hidden = false;
+
+    const menuRect = menu.getBoundingClientRect();
+    const minLeft = listingRect.left + horizontalPadding;
+    const maxLeft = listingRect.right - horizontalPadding - menuRect.width;
+    const resolvedLeft = clamp(anchorRect.left, minLeft, Math.max(minLeft, maxLeft));
+
+    menu.style.left = `${Math.round(resolvedLeft)}px`;
+    menu.style.top = `${Math.min(window.innerHeight - 16 - 340, anchorRect.bottom + 6)}px`;
+  }
+
   function initScope(root) {
     const scopeName = getScope(root);
     const cfg = CONFIG[scopeName];
@@ -235,7 +332,7 @@
 
     const state = readState(form, cfg);
     const options = parseOptions(root);
-    applyLocalFilter(root, cfg, state);
+    updateToggleStates(root, cfg, state, form);
 
     root.querySelectorAll('[data-table-filter-toggle]').forEach((button) => {
       button.addEventListener('click', () => {
@@ -246,11 +343,7 @@
         openCtx = { root, form, cfg, key, state, options, button };
         renderMenu(openCtx);
 
-        const rect = button.getBoundingClientRect();
-        menu.style.position = 'fixed';
-        menu.style.left = `${Math.max(8, Math.min(window.innerWidth - 300, rect.left))}px`;
-        menu.style.top = `${Math.min(window.innerHeight - 16 - 340, rect.bottom + 6)}px`;
-        menu.hidden = false;
+        positionMenuWithinListing(root, button);
         button.setAttribute('aria-expanded', 'true');
       });
     });
@@ -258,9 +351,63 @@
     root.querySelector('[data-table-filter-clear-all]')?.addEventListener('click', () => {
       state.clear();
       syncHiddenInputs(form, state, cfg);
-      applyLocalFilter(root, cfg, state);
+      updateToggleStates(root, cfg, state, form);
       submitForm(form);
     });
+
+    const anoPicker = root.querySelector('[data-ano-picker]');
+    const anoInput = form.querySelector('[data-ano-input]');
+    if (anoPicker && anoInput) {
+      anoPicker.addEventListener('change', () => {
+        const val = parseInt(anoPicker.value, 10);
+        if (Number.isFinite(val) && val >= 2000 && val <= 2100) {
+          anoInput.value = val;
+          form.querySelector('[data-page-input]').value = '1';
+          submitForm(form);
+        }
+      });
+    }
+
+    const periodPicker = root.querySelector('[data-period-picker]');
+    const periodInput = form.querySelector('[data-period-input]');
+    if (periodPicker && periodInput) {
+      periodPicker.addEventListener('change', () => {
+        const val = String(periodPicker.value || '').trim();
+        if (/^\d{4}-(0[1-9]|1[0-2])$/.test(val)) {
+          periodInput.value = val;
+          form.querySelector('[data-page-input]').value = '1';
+          submitForm(form);
+        }
+      });
+    }
+
+    root.querySelectorAll('[data-page-nav]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const targetPage = parseInt(button.getAttribute('data-page-nav') || '', 10);
+        const pageInput = form.querySelector('[data-page-input]');
+        if (!Number.isFinite(targetPage) || !pageInput) {
+          return;
+        }
+        pageInput.value = String(Math.max(1, targetPage));
+        submitForm(form);
+      });
+    });
+
+    if (scopeName === 'auditoriaLogs') {
+      const payloadPanels = Array.from(root.querySelectorAll('details.payload-collapse'));
+      payloadPanels.forEach((panel) => {
+        panel.addEventListener('toggle', () => {
+          if (!panel.open) {
+            return;
+          }
+          payloadPanels.forEach((other) => {
+            if (other !== panel) {
+              other.open = false;
+            }
+          });
+        });
+      });
+    }
   }
 
   document.querySelectorAll('[data-mapas-table-filter-scope]').forEach(initScope);

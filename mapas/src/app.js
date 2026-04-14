@@ -12,6 +12,7 @@ const isDev = process.env.NODE_ENV === 'development';
 const basePath = isDev ? process.env.BASE_PATH_DEV : process.env.BASE_PATH_PROD;
 const gatewayBasePath = isDev ? process.env.GATEWAY_BASE_PATH_DEV : process.env.GATEWAY_BASE_PATH_PROD;
 const gatewayValidateUrl = isDev ? process.env.GATEWAY_VALIDATE_DEV : process.env.GATEWAY_VALIDATE_PROD;
+const assetVersion = String(Date.now());
 
 // Armazena em app settings
 app.set('basePath', basePath);
@@ -32,6 +33,7 @@ app.use(cookieParser());
 app.use((req, res, next) => {
   res.locals.basePath = basePath;
   res.locals.gatewayBasePath = gatewayBasePath;
+  res.locals.assetVersion = assetVersion;
   next();
 });
 

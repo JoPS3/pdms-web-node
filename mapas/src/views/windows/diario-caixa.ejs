@@ -1,0 +1,54 @@
+<div class="desktop-window-layer" id="diarioDesktopLayer" hidden>
+  <div class="desktop-window-backdrop"></div>
+  <section class="desktop-floating-window" role="dialog" aria-modal="true" aria-label="Diario de Caixa">
+    <header class="desktop-floating-window-titlebar">
+      <strong>Diario de Caixa</strong>
+      <button type="button" class="desktop-floating-window-close" data-close-window="diario" aria-label="Fechar">×</button>
+    </header>
+    <nav class="window-menu" id="windowMenu" data-window-menu="diario">
+      <div class="window-menu-item">
+        <button type="button" class="window-menu-trigger">Ficheiro</button>
+        <div class="window-menu-dropdown">
+          <a href="#" class="window-menu-option" data-action="export-csv">Exportar para CSV</a>
+          <a href="#" class="window-menu-option" data-action="export-excel">Exportar para Excel</a>
+          <div class="window-menu-divider"></div>
+          <a href="#" class="window-menu-option" data-action="print">Imprimir</a>
+        </div>
+      </div>
+
+      <div class="window-menu-item">
+        <button type="button" class="window-menu-trigger">Ver</button>
+        <div class="window-menu-dropdown">
+          <label class="window-menu-checkbox">
+            <input type="checkbox" checked /> Mostrar filtros
+          </label>
+          <label class="window-menu-checkbox">
+            <input type="checkbox" checked /> Mostrar resumo
+          </label>
+          <label class="window-menu-checkbox">
+            <input type="checkbox" checked /> Linhas alternadas
+          </label>
+        </div>
+      </div>
+
+      <div class="window-menu-item">
+        <button type="button" class="window-menu-trigger">Ações</button>
+        <div class="window-menu-dropdown">
+          <a href="#" class="window-menu-option" data-action="refresh">Atualizar (⌘R)</a>
+          <a href="#" class="window-menu-option" data-action="reset-filters">Limpar todos os filtros</a>
+          <div class="window-menu-divider"></div>
+          <a href="#" class="window-menu-option" data-action="select-all">Selecionar tudo</a>
+          <a href="#" class="window-menu-option" data-action="select-none">Desselecionar tudo</a>
+        </div>
+      </div>
+    </nav>
+    <iframe id="diarioDesktopFrame" class="desktop-floating-window-frame" title="Diario de Caixa"></iframe>
+    <button
+      type="button"
+      class="desktop-floating-window-resize"
+      data-window-resize-handle
+      aria-label="Redimensionar janela"
+      title="Arrastar para redimensionar"
+    ></button>
+  </section>
+</div>

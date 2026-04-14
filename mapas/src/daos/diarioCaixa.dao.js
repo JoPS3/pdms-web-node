@@ -89,38 +89,21 @@ function normalizeRowForOutput(row) {
 }
 
 const latestMovimentosSubquery = `
-  SELECT *
-  FROM (
-    SELECT
-      id,
-      data,
-      codigo_entidade,
-      doc_entidade,
-      doc_interno,
-      codigo_tipo,
-      centro_custos,
-      mapa,
-      valor,
-      credito_debito,
-      conta,
-      created_at,
-      changed_at,
-      ROW_NUMBER() OVER (
-        PARTITION BY
-          data,
-          codigo_entidade,
-          doc_entidade,
-          doc_interno,
-          codigo_tipo,
-          COALESCE(centro_custos, ''),
-          mapa,
-          credito_debito,
-          conta
-        ORDER BY COALESCE(changed_at, created_at) DESC, id DESC
-      ) AS rn
-    FROM diario_caixa
-  ) ranked_diario_caixa
-  WHERE rn = 1
+  SELECT
+    id,
+    data,
+    codigo_entidade,
+    doc_entidade,
+    doc_interno,
+    codigo_tipo,
+    centro_custos,
+    mapa,
+    valor,
+    credito_debito,
+    conta,
+    created_at,
+    changed_at
+  FROM diario_caixa
 `;
 
 async function listLatest(limit = 100) {
@@ -128,7 +111,7 @@ async function listLatest(limit = 100) {
     `
       SELECT
         id,
-        data,
+        DATE_FORMAT(data, '%Y-%m-%d') AS data,
         codigo_entidade,
         doc_entidade,
         doc_interno,
@@ -174,10 +157,15 @@ function normalizeTableFilters(rawFilters = {}) {
   return normalized;
 }
 
-function buildTableFiltersWhereClause(tableFilters = {}, ignoredKey = null) {
+function buildTableFiltersWhereClause(tableFilters = {}, ignoredKey = null, ano = null) {
   const normalizedFilters = normalizeTableFilters(tableFilters);
   const whereParts = [];
   const params = [];
+
+  if (ano !== null && Number.isFinite(ano)) {
+    whereParts.push('YEAR(diario_caixa.data) = ?');
+    params.push(ano);
+  }
 
   Object.entries(DIARIO_FILTER_COLUMNS).forEach(([key, columnExpr]) => {
     if (key === ignoredKey || !Object.prototype.hasOwnProperty.call(normalizedFilters, key)) {
@@ -207,7 +195,8 @@ function buildTableFiltersWhereClause(tableFilters = {}, ignoredKey = null) {
 
 async function count(options = {}) {
   const tableFilters = options.tableFilters || {};
-  const { whereClause, params } = buildTableFiltersWhereClause(tableFilters);
+  const ano = options.ano || null;
+  const { whereClause, params } = buildTableFiltersWhereClause(tableFilters, null, ano);
   const result = await query(
     `SELECT COUNT(*) as total FROM (${latestMovimentosSubquery}) diario_caixa ${whereClause}`,
     params
@@ -221,12 +210,13 @@ async function listWithPagination(page = 1, pageSize = 50, options = {}) {
   const sortDir = String(options.sortDir || 'ASC').toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
   const sortColumn = DIARIO_SORT_FIELDS[sortBy] || DIARIO_SORT_FIELDS.data;
   const tableFilters = options.tableFilters || {};
-  const { whereClause, params } = buildTableFiltersWhereClause(tableFilters);
+  const ano = options.ano || null;
+  const { whereClause, params } = buildTableFiltersWhereClause(tableFilters, null, ano);
   const rows = await query(
     `
       SELECT
         id,
-        data,
+        DATE_FORMAT(data, '%Y-%m-%d') AS data,
         codigo_entidade,
         doc_entidade,
         doc_interno,
@@ -248,10 +238,10 @@ async function listWithPagination(page = 1, pageSize = 50, options = {}) {
   return rows.map(normalizeRowForOutput);
 }
 
-async function listTableFilterOptions(tableFilters = {}) {
+async function listTableFilterOptions(tableFilters = {}, ano = null) {
   const optionEntries = await Promise.all(
     Object.entries(DIARIO_FILTER_COLUMNS).map(async ([key, columnExpr]) => {
-      const { whereClause, params } = buildTableFiltersWhereClause(tableFilters, key);
+      const { whereClause, params } = buildTableFiltersWhereClause(tableFilters, key, ano);
       const rows = await query(
         `
           SELECT DISTINCT ${columnExpr} AS value

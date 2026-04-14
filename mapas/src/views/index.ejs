@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><%= pageTitle %> | Mapas</title>
-    <link rel="stylesheet" href="<%= basePath %>/styles/style.css" />
+    <link rel="stylesheet" href="<%= basePath %>/styles/style.css?v=<%= assetVersion %>" />
   </head>
   <body class="apps-page">
     <div class="mobile-shell">
@@ -74,6 +74,7 @@
               class="desktop-icon <%= module.url === '#' ? 'is-disabled' : '' %>"
               href="<%= module.url %>"
               <% if (module.url && module.url.includes('/diario-caixa')) { %>data-open-diario-window="1"<% } %>
+              <% if (module.url && module.url.includes('/auditoria-logs')) { %>data-open-auditoria-window="1"<% } %>
               title="<%= module.name %>"
               aria-label="Abrir <%= module.name %>"
             >
@@ -84,23 +85,8 @@
         </section>
       </main>
 
-      <div class="desktop-window-layer" id="diarioDesktopLayer" hidden>
-        <div class="desktop-window-backdrop"></div>
-        <section class="desktop-floating-window" role="dialog" aria-modal="true" aria-label="Diario de Caixa">
-          <header class="desktop-floating-window-titlebar">
-            <strong>Diario de Caixa</strong>
-            <button type="button" class="desktop-floating-window-close" data-close-diario-window aria-label="Fechar">×</button>
-          </header>
-          <iframe id="diarioDesktopFrame" class="desktop-floating-window-frame" title="Diario de Caixa"></iframe>
-          <button
-            type="button"
-            class="desktop-floating-window-resize"
-            data-window-resize-handle
-            aria-label="Redimensionar janela"
-            title="Arrastar para redimensionar"
-          ></button>
-        </section>
-      </div>
+      <%- include('windows/diario-caixa') %>
+      <%- include('windows/auditoria-logs') %>
 
       <nav class="desktop-dock" aria-label="Dock de modulos">
         <div class="dock-inner">
@@ -109,6 +95,7 @@
               class="dock-item <%= module.url === '#' ? 'is-disabled' : '' %>"
               href="<%= module.url %>"
               <% if (module.url && module.url.includes('/diario-caixa')) { %>data-open-diario-window="1"<% } %>
+              <% if (module.url && module.url.includes('/auditoria-logs')) { %>data-open-auditoria-window="1"<% } %>
               title="<%= module.name %>"
               aria-label="Abrir <%= module.name %>"
             >
@@ -120,314 +107,6 @@
       </nav>
     </div>
 
-    <script>
-      (function attachDesktopClock() {
-        var clock = document.getElementById('desktopClock');
-        if (!clock) {
-          return;
-        }
-
-        function renderTime() {
-          var now = new Date();
-          clock.textContent = now.toLocaleTimeString('pt-PT', {
-            hour: '2-digit',
-            minute: '2-digit'
-          });
-        }
-
-        renderTime();
-        setInterval(renderTime, 1000);
-      })();
-
-      (function diarioWindowDesktopOnly() {
-        var layer = document.getElementById('diarioDesktopLayer');
-        var frame = document.getElementById('diarioDesktopFrame');
-        var floatingWindow = layer ? layer.querySelector('.desktop-floating-window') : null;
-        var titlebar = layer ? layer.querySelector('.desktop-floating-window-titlebar') : null;
-        var resizeHandle = layer ? layer.querySelector('[data-window-resize-handle]') : null;
-        if (!layer || !frame) {
-          return;
-        }
-
-        var WINDOW_MARGIN = 12;
-        var MIN_READABLE_WIDTH = 920;
-        var MIN_READABLE_HEIGHT = 520;
-
-        var drag = {
-          active: false,
-          pointerId: null,
-          startX: 0,
-          startY: 0,
-          originLeft: 0,
-          originTop: 0,
-          nextLeft: 0,
-          nextTop: 0,
-          rafPending: false
-        };
-
-        var resize = {
-          active: false,
-          pointerId: null,
-          startX: 0,
-          startY: 0,
-          startWidth: 0,
-          startHeight: 0,
-          startLeft: 0,
-          startTop: 0,
-          nextWidth: 0,
-          nextHeight: 0,
-          rafPending: false
-        };
-
-        function resetWindowPosition() {
-          if (!floatingWindow) {
-            return;
-          }
-          floatingWindow.style.width = '';
-          floatingWindow.style.height = '';
-          floatingWindow.style.left = '50%';
-          floatingWindow.style.top = '72px';
-          floatingWindow.style.transform = 'translateX(-50%)';
-        }
-
-        function clamp(value, min, max) {
-          return Math.max(min, Math.min(max, value));
-        }
-
-        function materializeWindowPosition() {
-          if (!floatingWindow) {
-            return;
-          }
-          if (floatingWindow.style.transform === 'none') {
-            return;
-          }
-
-          var rect = floatingWindow.getBoundingClientRect();
-          floatingWindow.style.left = rect.left + 'px';
-          floatingWindow.style.top = rect.top + 'px';
-          floatingWindow.style.transform = 'none';
-        }
-
-        function getMinReadableSize() {
-          return {
-            width: Math.min(MIN_READABLE_WIDTH, Math.max(700, window.innerWidth - WINDOW_MARGIN * 2)),
-            height: Math.min(MIN_READABLE_HEIGHT, Math.max(420, window.innerHeight - WINDOW_MARGIN * 2))
-          };
-        }
-
-        function applyDragPosition() {
-          if (!drag.active || !floatingWindow) {
-            drag.rafPending = false;
-            return;
-          }
-
-          floatingWindow.style.left = drag.nextLeft + 'px';
-          floatingWindow.style.top = drag.nextTop + 'px';
-          floatingWindow.style.transform = 'none';
-          drag.rafPending = false;
-        }
-
-        function queueDragRender() {
-          if (drag.rafPending) {
-            return;
-          }
-          drag.rafPending = true;
-          window.requestAnimationFrame(applyDragPosition);
-        }
-
-        function onPointerMove(event) {
-          if (!drag.active || !floatingWindow) {
-            return;
-          }
-          if (drag.pointerId !== event.pointerId) {
-            return;
-          }
-
-          var deltaX = event.clientX - drag.startX;
-          var deltaY = event.clientY - drag.startY;
-
-          var maxLeft = window.innerWidth - floatingWindow.offsetWidth - 12;
-          var maxTop = window.innerHeight - floatingWindow.offsetHeight - 12;
-
-          drag.nextLeft = clamp(drag.originLeft + deltaX, 12, Math.max(12, maxLeft));
-          drag.nextTop = clamp(drag.originTop + deltaY, 12, Math.max(12, maxTop));
-          queueDragRender();
-        }
-
-        function stopDrag() {
-          if (!drag.active) {
-            return;
-          }
-
-          if (titlebar && drag.pointerId !== null && titlebar.hasPointerCapture(drag.pointerId)) {
-            titlebar.releasePointerCapture(drag.pointerId);
-          }
-
-          drag.active = false;
-          drag.pointerId = null;
-          drag.rafPending = false;
-          document.body.classList.remove('desktop-window-dragging');
-        }
-
-        function applyResizeDimensions() {
-          if (!resize.active || !floatingWindow) {
-            resize.rafPending = false;
-            return;
-          }
-
-          floatingWindow.style.width = resize.nextWidth + 'px';
-          floatingWindow.style.height = resize.nextHeight + 'px';
-          resize.rafPending = false;
-        }
-
-        function queueResizeRender() {
-          if (resize.rafPending) {
-            return;
-          }
-          resize.rafPending = true;
-          window.requestAnimationFrame(applyResizeDimensions);
-        }
-
-        function onResizePointerMove(event) {
-          if (!resize.active || !floatingWindow) {
-            return;
-          }
-          if (resize.pointerId !== event.pointerId) {
-            return;
-          }
-
-          var minSize = getMinReadableSize();
-          var maxWidth = window.innerWidth - resize.startLeft - WINDOW_MARGIN;
-          var maxHeight = window.innerHeight - resize.startTop - WINDOW_MARGIN;
-
-          var minWidth = Math.min(minSize.width, Math.max(320, maxWidth));
-          var minHeight = Math.min(minSize.height, Math.max(280, maxHeight));
-
-          var deltaX = event.clientX - resize.startX;
-          var deltaY = event.clientY - resize.startY;
-
-          resize.nextWidth = clamp(resize.startWidth + deltaX, minWidth, Math.max(minWidth, maxWidth));
-          resize.nextHeight = clamp(resize.startHeight + deltaY, minHeight, Math.max(minHeight, maxHeight));
-
-          queueResizeRender();
-        }
-
-        function stopResize() {
-          if (!resize.active) {
-            return;
-          }
-
-          if (resizeHandle && resize.pointerId !== null && resizeHandle.hasPointerCapture(resize.pointerId)) {
-            resizeHandle.releasePointerCapture(resize.pointerId);
-          }
-
-          resize.active = false;
-          resize.pointerId = null;
-          resize.rafPending = false;
-          document.body.classList.remove('desktop-window-resizing');
-        }
-
-        function isDesktop() {
-          return window.matchMedia('(min-width: 1024px)').matches;
-        }
-
-        function openWindow(url) {
-          resetWindowPosition();
-          frame.src = url;
-          layer.hidden = false;
-          document.body.classList.add('desktop-window-open');
-        }
-
-        function closeWindow() {
-          stopDrag();
-          stopResize();
-          layer.hidden = true;
-          frame.src = 'about:blank';
-          document.body.classList.remove('desktop-window-open');
-        }
-
-        document.querySelectorAll('[data-open-diario-window="1"]').forEach(function (link) {
-          link.addEventListener('click', function (event) {
-            if (!isDesktop()) {
-              return;
-            }
-            event.preventDefault();
-            openWindow(link.getAttribute('href'));
-          });
-        });
-
-        document.querySelectorAll('[data-close-diario-window]').forEach(function (el) {
-          el.addEventListener('click', closeWindow);
-        });
-
-        if (titlebar && floatingWindow) {
-          titlebar.addEventListener('pointerdown', function (event) {
-            if (resize.active) {
-              return;
-            }
-            if (event.button !== 0) {
-              return;
-            }
-            if (event.target && event.target.closest('.desktop-floating-window-close')) {
-              return;
-            }
-
-            drag.active = true;
-            drag.pointerId = event.pointerId;
-            drag.startX = event.clientX;
-            drag.startY = event.clientY;
-
-            var rect = floatingWindow.getBoundingClientRect();
-            drag.originLeft = rect.left;
-            drag.originTop = rect.top;
-            drag.nextLeft = rect.left;
-            drag.nextTop = rect.top;
-
-            document.body.classList.add('desktop-window-dragging');
-            titlebar.setPointerCapture(event.pointerId);
-            event.preventDefault();
-          });
-
-          titlebar.addEventListener('pointermove', onPointerMove);
-          titlebar.addEventListener('pointerup', stopDrag);
-          titlebar.addEventListener('pointercancel', stopDrag);
-          titlebar.addEventListener('lostpointercapture', stopDrag);
-          window.addEventListener('blur', stopDrag);
-        }
-
-        if (resizeHandle && floatingWindow) {
-          resizeHandle.addEventListener('pointerdown', function (event) {
-            if (drag.active || event.button !== 0) {
-              return;
-            }
-
-            materializeWindowPosition();
-
-            var rect = floatingWindow.getBoundingClientRect();
-            resize.active = true;
-            resize.pointerId = event.pointerId;
-            resize.startX = event.clientX;
-            resize.startY = event.clientY;
-            resize.startWidth = rect.width;
-            resize.startHeight = rect.height;
-            resize.startLeft = rect.left;
-            resize.startTop = rect.top;
-            resize.nextWidth = rect.width;
-            resize.nextHeight = rect.height;
-
-            document.body.classList.add('desktop-window-resizing');
-            resizeHandle.setPointerCapture(event.pointerId);
-            event.preventDefault();
-            event.stopPropagation();
-          });
-
-          resizeHandle.addEventListener('pointermove', onResizePointerMove);
-          resizeHandle.addEventListener('pointerup', stopResize);
-          resizeHandle.addEventListener('pointercancel', stopResize);
-          resizeHandle.addEventListener('lostpointercapture', stopResize);
-          window.addEventListener('blur', stopResize);
-        }
-      })();
-    </script>
+    <script src="<%= basePath %>/scripts/desktop-shell.js?v=<%= assetVersion %>"></script>
   </body>
 </html>

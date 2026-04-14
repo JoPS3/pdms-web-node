@@ -77,6 +77,39 @@ Na pagina inicial desktop do modulo (`GET <basePath>/`):
 - O fecho da janela e feito apenas no botao `x` da propria janela.
 - Existe botao de logout no canto superior direito, ao lado do botao de voltar.
 
+## Modelo de filtros de tabela (local)
+
+As listagens `diario-caixa` e `auditoria-logs` seguem o mesmo contrato de filtros por coluna.
+
+- Parametros de filtro por coluna: `tf*` (ex.: `tfData`, `tfTableName`)
+- Token de selecao vazia explicita: `__EMPTY__`
+- Ordenacao persistida: `sortBy` e `sortDir`
+- Paginacao persistida: `page` e `pageSize`
+
+### Diario de Caixa
+
+- Filtro base por ano: `ano` (default = ano corrente)
+- Query principal ja inicia filtrada por `YEAR(data) = ano`
+- Resumo mostra intervalo da pagina e total do conjunto filtrado
+
+### Auditoria Logs
+
+- Filtro base por periodo: `periodo` no formato `YYYY-MM` (default = mes corrente)
+- Query principal ja inicia filtrada por intervalo de `created_at` do periodo
+- Resumo mostra: `Total de logs em ANO-MES: x de y`
+	- `x`: total apos filtros de coluna
+	- `y`: total do periodo base (sem filtros de coluna)
+- Coluna UUID removida da grelha
+- Payload colapsavel por linha (acordeao, uma linha aberta de cada vez)
+
+## Modelo global (cross-modulo)
+
+Referencia no repositorio:
+
+- `docs/TABLE_FILTER_GLOBAL_MODEL.md`
+
+Este documento descreve o padrao transversal para reaplicacao em outros modulos.
+
 ### Logout
 
 - O logout do modulo usa o endpoint central do gateway.

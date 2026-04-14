@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><%= pageTitle %></title>
-  <link rel="stylesheet" href="<%= basePath %>/styles/style.css" />
+  <link rel="stylesheet" href="<%= basePath %>/styles/style.css?v=<%= assetVersion %>" />
 </head>
 <body>
   <main class="mobile-main">
@@ -16,19 +16,13 @@
 
     <section class="desktop-only-feature window-canvas" data-mapas-table-filter-scope="diarioCaixa">
       <article class="desktop-window desktop-window--overlay">
-        <header class="window-titlebar">
-          <div class="window-title">
-            <h2>Diario de Caixa</h2>
-            <p>Utilizador: <strong><%= user?.userName || 'N/A' %></strong></p>
-          </div>
-        </header>
-
         <div class="window-content">
     <form method="get" action="<%= basePath %>/diario-caixa" data-grid-form>
       <input type="hidden" name="page" value="<%= pagination.currentPage %>" data-page-input />
       <input type="hidden" name="pageSize" value="<%= pagination.pageSize %>" />
       <input type="hidden" name="sortBy" value="<%= sortBy %>" />
       <input type="hidden" name="sortDir" value="<%= sortDir %>" />
+      <input type="hidden" name="ano" value="<%= ano %>" data-ano-input />
 
       <% Object.entries(tableFilters || {}).forEach(([key, values]) => { %>
         <% if (Array.isArray(values) && values.length > 0) { %>
@@ -48,11 +42,15 @@
         <div class="pagination-info" data-table-filter-summary-text>
           A mostrar <strong><%= pagination.from %>-<%= pagination.to %></strong> de <strong><%= pagination.totalRecords %></strong> movimentos.
         </div>
-        <button type="button" class="btn btn-muted users-table-filter-summary-clear" data-table-filter-clear-all>Limpar filtros</button>
+        <div class="year-filter-group">
+          <label class="year-filter-label" for="diario-ano-input">Ano</label>
+          <input type="number" id="diario-ano-input" class="year-filter-input" value="<%= ano %>" min="2000" max="2100" data-ano-picker />
+          <button type="button" class="btn btn-muted users-table-filter-summary-clear" data-table-filter-clear-all>Limpar filtros</button>
+        </div>
       </div>
 
       <div class="table-wrap">
-        <table data-table-filter-root>
+        <table class="diario-table" data-table-filter-root>
           <thead>
             <tr>
               <th data-table-filter-key="data"><div class="table-filter-head"><span>Data</span><button type="button" class="table-filter-toggle" data-table-filter-toggle="data"></button></div></th>
@@ -73,14 +71,14 @@
             <% } %>
             <% (rows || []).forEach((row) => { %>
               <tr class="data-row">
-                <td><%= row.data ? new Date(row.data).toISOString().slice(0, 10) : '' %></td>
+                <td class="diario-col-data"><%= row.data || '' %></td>
                 <td><%= row.codigo_entidade %></td>
                 <td><%= row.doc_entidade %></td>
                 <td><%= row.doc_interno %></td>
                 <td><%= row.codigo_tipo %></td>
                 <td><%= row.centro_custos || '' %></td>
                 <td><%= row.mapa %></td>
-                <td><%= Number(row.valor || 0).toFixed(2) %></td>
+                <td class="diario-col-valor"><%= Number(row.valor || 0).toFixed(2) %></td>
                 <td><%= row.credito_debito %></td>
                 <td><%= row.conta %></td>
               </tr>
@@ -88,11 +86,27 @@
           </tbody>
         </table>
       </div>
+
+      <div class="table-pagination" aria-label="Paginacao">
+        <button
+          type="button"
+          class="btn btn-muted"
+          data-page-nav="<%= Math.max(1, pagination.currentPage - 1) %>"
+          <%= pagination.currentPage <= 1 ? 'disabled' : '' %>
+        >Anterior</button>
+        <span class="table-pagination-info">Pagina <strong><%= pagination.currentPage %></strong> de <strong><%= pagination.totalPages %></strong></span>
+        <button
+          type="button"
+          class="btn btn-muted"
+          data-page-nav="<%= Math.min(pagination.totalPages, pagination.currentPage + 1) %>"
+          <%= pagination.currentPage >= pagination.totalPages ? 'disabled' : '' %>
+        >Seguinte</button>
+      </div>
     </form>
         </div>
       </article>
     </section>
   </main>
-  <script src="<%= basePath %>/scripts/shell.js"></script>
+  <script src="<%= basePath %>/scripts/shell.js?v=<%= assetVersion %>"></script>
 </body>
 </html>

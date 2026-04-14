@@ -23,6 +23,23 @@ function normalizeText(value) {
   return String(value ?? '').trim();
 }
 
+function resolvePeriodoMesAno(rawValue) {
+  const now = new Date();
+  const defaultPeriodo = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const value = normalizeText(rawValue);
+  return /^\d{4}-(0[1-9]|1[0-2])$/.test(value) ? value : defaultPeriodo;
+}
+
+function getLastQueryValue(value) {
+  if (Array.isArray(value)) {
+    if (value.length === 0) {
+      return '';
+    }
+    return value[value.length - 1];
+  }
+  return value;
+}
+
 function normalizeDecimal(value) {
   const parsed = Number.parseFloat(String(value ?? '').replace(',', '.'));
   if (!Number.isFinite(parsed)) {
@@ -154,21 +171,25 @@ async function getDiarioCaixaPage(req, res, next) {
     }
 
     const query = req.query || {};
-    const requestedPage = Math.max(1, Number.parseInt(query.page, 10) || 1);
-    const pageSize = Math.min(200, Math.max(25, Number.parseInt(query.pageSize, 10) || 50));
-    const sortBy = normalizeText(query.sortBy) || 'data';
-    const sortDir = normalizeText(query.sortDir).toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+    const requestedPage = Math.max(1, Number.parseInt(getLastQueryValue(query.page), 10) || 1);
+    const pageSize = Math.min(200, Math.max(25, Number.parseInt(getLastQueryValue(query.pageSize), 10) || 50));
+    const sortBy = normalizeText(getLastQueryValue(query.sortBy)) || 'data';
+    const sortDir = normalizeText(getLastQueryValue(query.sortDir)).toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
     const tableFilters = parseDiarioTableFilters(query);
+    const currentYear = new Date().getFullYear();
+    const anoRaw = Number.parseInt(getLastQueryValue(query.ano), 10);
+    const ano = (Number.isFinite(anoRaw) && anoRaw >= 2000 && anoRaw <= 2100) ? anoRaw : currentYear;
 
-    const totalRecords = await diarioCaixaDao.count({ tableFilters });
+    const totalRecords = await diarioCaixaDao.count({ tableFilters, ano });
     const totalPages = Math.max(1, Math.ceil(totalRecords / pageSize));
     const page = Math.min(requestedPage, totalPages);
     const rows = await diarioCaixaDao.listWithPagination(page, pageSize, {
       sortBy,
       sortDir,
-      tableFilters
+      tableFilters,
+      ano
     });
-    const tableFilterOptions = await diarioCaixaDao.listTableFilterOptions(tableFilters);
+    const tableFilterOptions = await diarioCaixaDao.listTableFilterOptions(tableFilters, ano);
 
     if (totalRecords > 0 && requestedPage > totalPages) {
       const redirectQs = new URLSearchParams();
@@ -176,6 +197,7 @@ async function getDiarioCaixaPage(req, res, next) {
       redirectQs.set('pageSize', String(pageSize));
       redirectQs.set('sortBy', sortBy);
       redirectQs.set('sortDir', sortDir);
+      redirectQs.set('ano', String(ano));
       appendTableFiltersToQueryString(redirectQs, tableFilters);
       return res.redirect(302, `${res.locals.basePath}/diario-caixa?${redirectQs.toString()}`);
     }
@@ -190,6 +212,7 @@ async function getDiarioCaixaPage(req, res, next) {
       tableFilterOptions,
       sortBy,
       sortDir,
+      ano,
       pagination: {
         currentPage: page,
         pageSize,
@@ -213,20 +236,22 @@ async function getAuditoriaLogsPage(req, res, next) {
 
     const q = req.query || {};
 
-    const page = Math.max(1, Number.parseInt(q.page, 10) || 1);
-    const pageSize = Math.min(200, Math.max(10, Number.parseInt(q.pageSize, 10) || 50));
-    const sortBy = normalizeText(q.sortBy) || 'createdAt';
-    const sortDir = normalizeText(q.sortDir).toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+    const page = Math.max(1, Number.parseInt(getLastQueryValue(q.page), 10) || 1);
+    const pageSize = Math.min(200, Math.max(10, Number.parseInt(getLastQueryValue(q.pageSize), 10) || 50));
+    const sortBy = normalizeText(getLastQueryValue(q.sortBy)) || 'createdAt';
+    const sortDir = normalizeText(getLastQueryValue(q.sortDir)).toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
     const tableFilters = parseAuditoriaTableFilters(q);
+    const periodo = resolvePeriodoMesAno(getLastQueryValue(q.periodo));
 
     const result = await auditoriaLogsDao.listLogsPaged({
       page,
       pageSize,
       sortBy,
       sortDir,
-      tableFilters
+      tableFilters,
+      periodo
     });
-    const tableFilterOptions = await auditoriaLogsDao.listTableFilterOptions(tableFilters);
+    const tableFilterOptions = await auditoriaLogsDao.listTableFilterOptions(tableFilters, periodo);
 
     if (result.total > 0 && page > result.pages) {
       const redirectQs = new URLSearchParams();
@@ -234,6 +259,7 @@ async function getAuditoriaLogsPage(req, res, next) {
       redirectQs.set('pageSize', String(pageSize));
       redirectQs.set('sortBy', sortBy);
       redirectQs.set('sortDir', sortDir);
+      redirectQs.set('periodo', periodo);
       appendTableFiltersToQueryString(redirectQs, tableFilters);
       return res.redirect(302, `${res.locals.basePath}/auditoria-logs?${redirectQs.toString()}`);
     }
@@ -245,6 +271,7 @@ async function getAuditoriaLogsPage(req, res, next) {
       tableFilterOptions,
       sortBy,
       sortDir,
+      periodo,
       user: req.user
     });
   } catch (error) {
