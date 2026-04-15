@@ -74,7 +74,7 @@ class AuthService {
         user.id,
         ipAddress,
         userAgent,
-        24 // 24 horas
+        20 // 20 minutos
       );
 
       return {
@@ -92,15 +92,15 @@ class AuthService {
   }
 
   /**
-   * Valida uma sessão ativa
+   * Valida uma sessão ativa e renova se está próxima de expirar (Sliding Window)
    * @param {string} sessionToken - Token da sessão
-   * @returns {Promise<Object>} { valid: true, ... } ou { valid: false }
+   * @returns {Promise<Object>} { valid: true, renewed, ... } ou { valid: false }
    */
   async validateSession(sessionToken) {
     try {
-      return await SessionDAO.validate(sessionToken);
+      return await SessionDAO.validateAndRenew(sessionToken);
     } catch (error) {
-      throw new Error(`Erro ao validar sessão: ${error.message}`);
+      throw new Error(`Erro ao validar e renovar sessão: ${error.message}`);
     }
   }
 
@@ -192,7 +192,7 @@ class AuthService {
         user.id,
         ipAddress,
         userAgent,
-        24 // 24 horas
+        20 // 20 minutos
       );
 
       return {
@@ -254,7 +254,7 @@ class AuthService {
         user.id,
         ipAddress,
         userAgent,
-        24 // 24 horas
+        20 // 20 minutos
       );
 
       return {

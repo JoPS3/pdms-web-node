@@ -7,13 +7,13 @@ class SessionDAO {
    * @param {string} userId - UUID do utilizador
    * @param {string} ipAddress - IP da requisição
    * @param {string} userAgent - User-Agent da requisição
-   * @param {number} expiresInHours - Horas até expiração (padrão: 24h)
+   * @param {number} expiresInMinutes - Minutos até expiração (padrão: 20 min)
    * @returns {Promise<string>} session_token
    */
-  async create(userId, ipAddress, userAgent, expiresInHours = 24) {
+  async create(userId, ipAddress, userAgent, expiresInMinutes = 20) {
     const sessionToken = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + expiresInHours);
+    expiresAt.setMinutes(expiresAt.getMinutes() + expiresInMinutes);
 
     const sql = `
       INSERT INTO sessions (id, user_id, session_token, ip_address, user_agent, expires_at, created_by)
@@ -132,6 +132,72 @@ class SessionDAO {
     } catch (error) {
       // Silent fail - não interrompe o fluxo
       console.error(`Aviso: não foi possível atualizar last_activity: ${error.message}`);
+    }
+  }
+
+  /**
+   * Valida uma sessão e a renova se está perto de expirar (Sliding Window)
+   * @param {string} sessionToken - Token da sessão
+   * @param {number} renewalThresholdMinutes - Minutos antes de expiração para renovar (padrão: 5 min)
+   * @returns {Promise<Object>} { valid, userId, roleId, role, userName, email, renewed }
+   */
+  async validateAndRenew(sessionToken, renewalThresholdMinutes = 5) {
+    const validation = await this.validate(sessionToken);
+    
+    if (!validation.valid) {
+      return validation;
+    }
+
+    // Buscar a sessão para verificar tempo de expiração
+    const sql = `
+      SELECT id, expires_at
+      FROM sessions
+      WHERE session_token = :sessionToken AND is_deleted = 0
+    `;
+
+    try {
+      const [rows] = await pool.execute(sql, { sessionToken });
+      
+      if (rows.length === 0) {
+        return { valid: false, reason: 'not_found' };
+      }
+
+      const session = rows[0];
+      const NOW = new Date();
+      const expiresAt = new Date(session.expires_at);
+      const minutesLeft = (expiresAt - NOW) / 1000 / 60;
+
+      // Se faltam menos de X minutos, renovar
+      if (minutesLeft < renewalThresholdMinutes) {
+        const newExpiresAt = new Date();
+        newExpiresAt.setMinutes(newExpiresAt.getMinutes() + 20); // Renovar com 20 minutos
+
+        const updateSql = `
+          UPDATE sessions
+          SET expires_at = :expiresAt, changed_at = NOW(), changed_by = :changedBy
+          WHERE id = :sessionId AND is_deleted = 0
+        `;
+
+        await pool.execute(updateSql, {
+          expiresAt: newExpiresAt,
+          sessionId: session.id,
+          changedBy: 'gateway-auth-renewal'
+        });
+
+        return {
+          ...validation,
+          renewed: true,
+          expiresAt: newExpiresAt
+        };
+      }
+
+      return {
+        ...validation,
+        renewed: false,
+        expiresAt: expiresAt
+      };
+    } catch (error) {
+      throw new Error(`Erro ao validar e renovar sessão: ${error.message}`);
     }
   }
 

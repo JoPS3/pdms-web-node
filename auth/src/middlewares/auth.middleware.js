@@ -100,6 +100,7 @@ async function requireGatewaySessionApi(req, res, next) {
 
 module.exports = {
   parseSessionToken,
+  validateGatewaySession,
   requireGatewayAuth,
   requireGatewaySessionApi
 };

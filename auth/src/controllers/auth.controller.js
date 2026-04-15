@@ -313,6 +313,32 @@ async function updateUserFromEdit(req, res) {
   }
 }
 
+function getSessionStatus(req, res) {
+  if (!req.user) {
+    return res.status(401).json({
+      status: 'unauthorized',
+      session: {
+        valid: false,
+        message: 'Token ausente ou inválido'
+      },
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  return res.status(200).json({
+    status: 'ok',
+    session: {
+      valid: true,
+      userId: req.user?.id || null,
+      userName: req.user?.userName || null,
+      email: req.user?.email || null,
+      role: req.user?.role || null,
+      roleId: req.user?.roleId || null
+    },
+    timestamp: new Date().toISOString()
+  });
+}
+
 function getInternalSessionStatus(req, res) {
   return res.status(200).json({
     status: 'ok',
@@ -444,6 +470,7 @@ async function changeInternalSessionPassword(req, res) {
 
 module.exports = {
   getHomePage,
+  getSessionStatus,
   getInternalSessionStatus,
   changeInternalSessionPassword,
   exportUsersList,

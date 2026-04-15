@@ -7,6 +7,7 @@ const mockAuthMode = {
 
 const mockGetHomePage = jest.fn((req, res) => res.status(200).send('home-page'));
 const mockGetEditUserPage = jest.fn((req, res) => res.status(200).send('edit-user-page'));
+const mockGetSessionStatus = jest.fn((req, res) => res.status(200).json({ status: 'ok', route: 'get-session-status' }));
 const mockGetInternalSessionStatus = jest.fn((req, res) => res.status(200).json({ status: 'ok', route: 'session-status' }));
 const mockChangeInternalSessionPassword = jest.fn((req, res) => res.status(200).json({ status: 'ok', route: 'change-password' }));
 const mockExportUsersList = jest.fn((req, res) => res.status(200).send('export-users-list'));
@@ -15,6 +16,7 @@ const mockUpdateUserFromEdit = jest.fn((req, res) => res.status(200).json({ stat
 jest.mock('../src/controllers/auth.controller', () => ({
   getHomePage: (req, res, next) => mockGetHomePage(req, res, next),
   getEditUserPage: (req, res, next) => mockGetEditUserPage(req, res, next),
+  getSessionStatus: (req, res, next) => mockGetSessionStatus(req, res, next),
   getInternalSessionStatus: (req, res, next) => mockGetInternalSessionStatus(req, res, next),
   changeInternalSessionPassword: (req, res, next) => mockChangeInternalSessionPassword(req, res, next),
   exportUsersList: (req, res, next) => mockExportUsersList(req, res, next),
