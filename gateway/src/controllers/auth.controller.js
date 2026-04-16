@@ -171,7 +171,7 @@ async function setPassword(req, res) {
     res.cookie('session_token', result.sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax',
       maxAge: 24 * 60 * 60 * 1000
     });
 
@@ -260,7 +260,7 @@ async function verifyPassword(req, res) {
     res.cookie('session_token', result.sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax',
       maxAge: 24 * 60 * 60 * 1000
     });
 

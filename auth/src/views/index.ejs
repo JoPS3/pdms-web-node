@@ -6,7 +6,7 @@
     <title><%= pageTitle %> | PDMS Auth</title>
     <link rel="stylesheet" href="<%= basePath %>/styles/style.css?v=<%= assetVersion %>" />
   </head>
-  <body class="main-page desktop-page">
+  <body class="main-page desktop-page" data-gateway-base-path="<%= gatewayBasePath %>">
     <div class="mobile-shell">
       <header class="mobile-header">
         <div class="mobile-header-content">
@@ -233,6 +233,25 @@
           </div>
           <div class="desktop-window-content">
             <%- include('partials/desktop/window-onedrive') %>
+          </div>
+        </div>
+
+        <!-- OneDrive Setup window -->
+        <div class="desktop-window window-onedrive-setup" id="window-onedrive-setup" hidden>
+          <div class="desktop-window-titlebar">
+            <strong class="desktop-window-title">OneDrive — Configurar OAuth</strong>
+            <button
+              type="button"
+              class="desktop-window-close"
+              data-close-window="onedrive-setup"
+              aria-label="Fechar janela"
+              title="Fechar"
+            >
+              ×
+            </button>
+          </div>
+          <div class="desktop-window-content">
+            <%- include('partials/desktop/window-onedrive-setup') %>
           </div>
         </div>
 

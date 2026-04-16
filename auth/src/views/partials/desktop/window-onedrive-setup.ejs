@@ -1,0 +1,28 @@
+<form class="onedrive-setup-form" data-onedrive-setup-form="1">
+  <label class="password-label" for="odClientId">Client ID</label>
+  <input id="odClientId" name="clientId" type="text" autocomplete="off" required />
+
+  <label class="password-label" for="odClientSecret">Client Secret</label>
+  <input id="odClientSecret" name="clientSecret" type="password" autocomplete="off" placeholder="Introduza o secret" />
+  <p class="password-hint" data-od-secret-hint hidden>Secret ja configurado — deixe vazio para manter o atual.</p>
+
+  <label class="password-label" for="odTenantId">Tenant ID</label>
+  <input id="odTenantId" name="tenantId" type="text" value="common" autocomplete="off" />
+
+  <label class="password-label" for="odScopes">Scopes</label>
+  <input id="odScopes" name="scopes" type="text" value="offline_access User.Read Files.ReadWrite.All" autocomplete="off" />
+
+  <label class="password-label" for="odGatewayBase">Gateway Public Base URL</label>
+  <input id="odGatewayBase" name="gatewayPublicBaseUrl" type="url" placeholder="https://exemplo.com" autocomplete="off" />
+
+  <label class="password-label" for="odRedirectUri">Redirect URI (opcional)</label>
+  <input id="odRedirectUri" name="redirectUri" type="url" placeholder="calculado automaticamente a partir da base URL" autocomplete="off" />
+
+  <p class="password-hint">Se o Redirect URI estiver vazio, e calculado a partir da Gateway Public Base URL.</p>
+
+  <div class="onedrive-setup-feedback" data-onedrive-setup-feedback hidden></div>
+
+  <div class="password-actions">
+    <button type="submit" class="password-submit">Guardar</button>
+  </div>
+</form>

@@ -460,6 +460,99 @@ thead th {
   color: var(--muted);
 }
 
+.onedrive-status-panel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 4px 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #f5efe4;
+  border: 1px solid #e0cdb0;
+  font-size: 0.82rem;
+  color: #6a5b45;
+}
+
+.onedrive-status-panel.is-success {
+  background: #edf7f0;
+  border-color: #b2dbc0;
+  color: #25643a;
+}
+
+.onedrive-status-panel.is-error {
+  background: #fdf0f0;
+  border-color: #e8b4b4;
+  color: #8a2e2e;
+}
+
+.onedrive-status-text {
+  flex: 1;
+}
+
+.onedrive-status-dismiss {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  color: inherit;
+  opacity: 0.6;
+  padding: 0 2px;
+}
+
+.onedrive-status-dismiss:hover {
+  opacity: 1;
+}
+
+.onedrive-confirm-modal {
+  margin: 14px 4px 0;
+  padding: 14px;
+  border: 1px solid #e6d5ba;
+  border-radius: 10px;
+  background: #fffaf1;
+}
+
+.onedrive-confirm-message {
+  margin: 0 0 12px;
+  font-size: 0.88rem;
+  color: #3a2f1d;
+}
+
+.onedrive-confirm-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.onedrive-confirm-btn-danger {
+  background: #8a2e2e !important;
+}
+
+.onedrive-confirm-btn-danger:hover {
+  background: #6e2323 !important;
+}
+
+.onedrive-setup-feedback {
+  padding: 7px 10px;
+  border-radius: 7px;
+  font-size: 0.82rem;
+  background: #f5efe4;
+  color: #6a5b45;
+  border: 1px solid #e0cdb0;
+}
+
+.onedrive-setup-feedback.is-success {
+  background: #edf7f0;
+  border-color: #b2dbc0;
+  color: #25643a;
+}
+
+.onedrive-setup-feedback.is-error {
+  background: #fdf0f0;
+  border-color: #e8b4b4;
+  color: #8a2e2e;
+}
+
 .onedrive-feedback {
   margin: 10px 4px 0;
   font-size: 0.82rem;
