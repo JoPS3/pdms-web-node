@@ -21,7 +21,7 @@
       }
       
       // Registar windows disponíveis
-      ['session', 'session-info', 'session-password', 'users', 'users-list', 'user-edit'].forEach(windowId => {
+      ['session', 'session-info', 'session-password', 'users', 'onedrive', 'users-list', 'user-edit'].forEach(windowId => {
         const element = document.getElementById(`window-${windowId}`);
         
         this.windows[windowId] = {
@@ -48,6 +48,7 @@
       this._attachGlobalEvents();
       this._attachOverlayEvents();
       this._attachPasswordFormEvents();
+      this._attachOneDriveEvents();
       
       // Inicializar clock
       this._initClock();
@@ -200,6 +201,197 @@
           writeFeedback('Erro de comunicacao com o servidor.', 'error');
         }
       });
+    },
+
+    _attachOneDriveEvents() {
+      const feedback = document.querySelector('[data-onedrive-feedback="1"]');
+      const actions = document.querySelectorAll('[data-onedrive-action]');
+      const setupForm = document.querySelector('[data-onedrive-setup-form="1"]');
+      let oneDriveSetupHasSecret = false;
+      if (!actions.length) {
+        return;
+      }
+
+      const writeFeedback = (message, type) => {
+        if (!feedback) {
+          return;
+        }
+
+        feedback.textContent = message;
+        feedback.classList.remove('is-success', 'is-error');
+        if (type) {
+          feedback.classList.add(type === 'success' ? 'is-success' : 'is-error');
+        }
+      };
+
+      const basePath = window.location.pathname.replace(/\/$/, '');
+
+      const loadSetup = async () => {
+        if (!setupForm) {
+          return;
+        }
+
+        try {
+          const response = await fetch(`${basePath}/internal/onedrive/setup`, {
+            method: 'GET',
+            credentials: 'same-origin'
+          });
+          const data = await response.json();
+          if (!response.ok || !data?.setup) {
+            return;
+          }
+
+          const fields = setupForm.elements;
+          if (fields.clientId) fields.clientId.value = data.setup.clientId || '';
+          if (fields.tenantId) fields.tenantId.value = data.setup.tenantId || 'common';
+          if (fields.scopes) fields.scopes.value = data.setup.scopes || 'offline_access User.Read Files.ReadWrite.All';
+          if (fields.gatewayPublicBaseUrl) fields.gatewayPublicBaseUrl.value = data.setup.gatewayPublicBaseUrl || '';
+          if (fields.redirectUri) fields.redirectUri.value = data.setup.redirectUri || '';
+
+          if (data.setup.hasClientSecret && fields.clientSecret) {
+            oneDriveSetupHasSecret = true;
+            fields.clientSecret.placeholder = 'Secret ja configurado';
+          }
+        } catch (_error) {
+          // no-op
+        }
+      };
+
+      const runAction = async (action) => {
+        if (action === 'status') {
+          const response = await fetch(`${basePath}/internal/onedrive/status`, {
+            method: 'GET',
+            credentials: 'same-origin'
+          });
+
+          const data = await response.json();
+          if (!response.ok) {
+            writeFeedback(data?.message || 'Falha ao consultar estado OneDrive.', 'error');
+            return;
+          }
+
+          const linked = !!data?.onedrive?.connected;
+          if (!linked) {
+            writeFeedback('OneDrive sem ligacao ativa.', 'error');
+            return;
+          }
+
+          const expiresLabel = data?.onedrive?.expiresAt
+            ? new Date(data.onedrive.expiresAt).toLocaleString('pt-PT')
+            : 'n/d';
+          writeFeedback(`Ligado. Expira: ${expiresLabel}`, 'success');
+          return;
+        }
+
+        if (action === 'connect') {
+          const response = await fetch(`${basePath}/internal/onedrive/connect`, {
+            method: 'POST',
+            credentials: 'same-origin'
+          });
+
+          const data = await response.json();
+          if (!response.ok) {
+            writeFeedback(data?.message || 'Falha ao iniciar autenticacao OneDrive.', 'error');
+            return;
+          }
+
+          if (!data?.authorizeUrl) {
+            writeFeedback('Gateway nao devolveu URL de autorizacao.', 'error');
+            return;
+          }
+
+          writeFeedback('A redirecionar para autenticacao Microsoft...', 'success');
+          window.location.assign(data.authorizeUrl);
+          return;
+        }
+
+        if (action === 'disconnect') {
+          const response = await fetch(`${basePath}/internal/onedrive/disconnect`, {
+            method: 'POST',
+            credentials: 'same-origin'
+          });
+
+          const data = await response.json();
+          if (!response.ok) {
+            writeFeedback(data?.message || 'Falha ao desligar OneDrive.', 'error');
+            return;
+          }
+
+          writeFeedback('Ligacao OneDrive revogada com sucesso.', 'success');
+          return;
+        }
+
+        writeFeedback('Acao indisponivel de momento.', 'error');
+      };
+
+      actions.forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const action = String(btn.dataset.onedriveAction || '');
+          writeFeedback('A processar...', null);
+
+          try {
+            await runAction(action);
+          } catch (_error) {
+            writeFeedback('Erro de comunicacao com o servidor.', 'error');
+          }
+        });
+      });
+
+      if (setupForm) {
+        loadSetup();
+
+        setupForm.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          const fields = setupForm.elements;
+
+          const payload = {
+            clientId: String(fields.clientId?.value || '').trim(),
+            clientSecret: String(fields.clientSecret?.value || '').trim(),
+            tenantId: String(fields.tenantId?.value || 'common').trim(),
+            scopes: String(fields.scopes?.value || '').trim(),
+            gatewayPublicBaseUrl: String(fields.gatewayPublicBaseUrl?.value || '').trim(),
+            redirectUri: String(fields.redirectUri?.value || '').trim()
+          };
+
+          if (!payload.clientId) {
+            writeFeedback('Client ID e obrigatorio.', 'error');
+            return;
+          }
+
+          if (!payload.clientSecret && !oneDriveSetupHasSecret) {
+            writeFeedback('Client Secret e obrigatorio para guardar setup.', 'error');
+            return;
+          }
+
+          writeFeedback('A guardar setup OneDrive...', null);
+
+          try {
+            const response = await fetch(`${basePath}/internal/onedrive/setup`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'same-origin',
+              body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+              writeFeedback(data?.message || 'Falha ao guardar setup OneDrive.', 'error');
+              return;
+            }
+
+            if (fields.clientSecret) {
+              if (payload.clientSecret) {
+                oneDriveSetupHasSecret = true;
+              }
+              fields.clientSecret.value = '';
+              fields.clientSecret.placeholder = 'Secret guardado';
+            }
+            writeFeedback('Setup OneDrive guardado com sucesso.', 'success');
+          } catch (_error) {
+            writeFeedback('Erro de comunicacao ao guardar setup.', 'error');
+          }
+        });
+      }
     },
     
     openWindow(windowId, options = {}) {

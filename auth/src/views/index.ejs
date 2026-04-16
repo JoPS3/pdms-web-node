@@ -69,7 +69,10 @@
             title="Sessão"
             aria-label="Abrir sessão"
           >
-            <span class="desktop-icon-glyph">📋</span>
+            <span class="desktop-icon-glyph desktop-icon-folder">
+              <span class="desktop-icon-folder-main" aria-hidden="true">📁</span>
+              <span class="desktop-icon-folder-badge" aria-hidden="true">🔐</span>
+            </span>
             <span class="desktop-icon-name">Sessão</span>
           </button>
           <button
@@ -79,8 +82,24 @@
             title="Utilizadores"
             aria-label="Abrir utilizadores"
           >
-            <span class="desktop-icon-glyph">👥</span>
+            <span class="desktop-icon-glyph desktop-icon-folder">
+              <span class="desktop-icon-folder-main" aria-hidden="true">📁</span>
+              <span class="desktop-icon-folder-badge" aria-hidden="true">👥</span>
+            </span>
             <span class="desktop-icon-name">Utilizadores</span>
+          </button>
+          <button
+            type="button"
+            class="desktop-icon"
+            data-open-window="onedrive"
+            title="OneDrive"
+            aria-label="Abrir ligação OneDrive"
+          >
+            <span class="desktop-icon-glyph desktop-icon-folder">
+              <span class="desktop-icon-folder-main" aria-hidden="true">📁</span>
+              <span class="desktop-icon-folder-badge" aria-hidden="true">☁️</span>
+            </span>
+            <span class="desktop-icon-name">OneDrive</span>
           </button>
         </section>
       </main>
@@ -104,6 +123,15 @@
             aria-label="Abrir utilizadores"
           >
             <span class="dock-item-glyph">👥</span>
+          </button>
+          <button
+            type="button"
+            class="dock-item"
+            data-open-window="onedrive"
+            title="OneDrive"
+            aria-label="Abrir ligação OneDrive"
+          >
+            <span class="dock-item-glyph">☁️</span>
           </button>
           <a class="dock-back" href="<%= gatewayBasePath %>/apps" aria-label="Voltar ao launcher">◀</a>
         </div>
@@ -186,6 +214,25 @@
           </div>
           <div class="desktop-window-content">
             <%- include('partials/desktop/window-users', { session: session }) %>
+          </div>
+        </div>
+
+        <!-- OneDrive window -->
+        <div class="desktop-window window-onedrive" id="window-onedrive" hidden>
+          <div class="desktop-window-titlebar">
+            <strong class="desktop-window-title">OneDrive</strong>
+            <button
+              type="button"
+              class="desktop-window-close"
+              data-close-window="onedrive"
+              aria-label="Fechar janela"
+              title="Fechar"
+            >
+              ×
+            </button>
+          </div>
+          <div class="desktop-window-content">
+            <%- include('partials/desktop/window-onedrive') %>
           </div>
         </div>
 

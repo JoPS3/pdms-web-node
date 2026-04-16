@@ -9,7 +9,12 @@ const mockGetHomePage = jest.fn((req, res) => res.status(200).send('home-page'))
 const mockGetEditUserPage = jest.fn((req, res) => res.status(200).send('edit-user-page'));
 const mockGetSessionStatus = jest.fn((req, res) => res.status(200).json({ status: 'ok', route: 'get-session-status' }));
 const mockGetInternalSessionStatus = jest.fn((req, res) => res.status(200).json({ status: 'ok', route: 'session-status' }));
+const mockGetInternalOneDriveSetup = jest.fn((req, res) => res.status(200).json({ status: 'ok', route: 'onedrive-setup' }));
+const mockSaveInternalOneDriveSetup = jest.fn((req, res) => res.status(200).json({ status: 'ok', route: 'onedrive-setup-save' }));
 const mockChangeInternalSessionPassword = jest.fn((req, res) => res.status(200).json({ status: 'ok', route: 'change-password' }));
+const mockGetInternalOneDriveStatus = jest.fn((req, res) => res.status(200).json({ status: 'ok', route: 'onedrive-status' }));
+const mockStartInternalOneDriveConnect = jest.fn((req, res) => res.status(200).json({ status: 'ok', route: 'onedrive-connect' }));
+const mockDisconnectInternalOneDrive = jest.fn((req, res) => res.status(200).json({ status: 'ok', route: 'onedrive-disconnect' }));
 const mockExportUsersList = jest.fn((req, res) => res.status(200).send('export-users-list'));
 const mockUpdateUserFromEdit = jest.fn((req, res) => res.status(200).json({ status: 'ok', route: 'update-user' }));
 
@@ -18,6 +23,11 @@ jest.mock('../src/controllers/auth.controller', () => ({
   getEditUserPage: (req, res, next) => mockGetEditUserPage(req, res, next),
   getSessionStatus: (req, res, next) => mockGetSessionStatus(req, res, next),
   getInternalSessionStatus: (req, res, next) => mockGetInternalSessionStatus(req, res, next),
+  getInternalOneDriveSetup: (req, res, next) => mockGetInternalOneDriveSetup(req, res, next),
+  saveInternalOneDriveSetup: (req, res, next) => mockSaveInternalOneDriveSetup(req, res, next),
+  getInternalOneDriveStatus: (req, res, next) => mockGetInternalOneDriveStatus(req, res, next),
+  startInternalOneDriveConnect: (req, res, next) => mockStartInternalOneDriveConnect(req, res, next),
+  disconnectInternalOneDrive: (req, res, next) => mockDisconnectInternalOneDrive(req, res, next),
   changeInternalSessionPassword: (req, res, next) => mockChangeInternalSessionPassword(req, res, next),
   exportUsersList: (req, res, next) => mockExportUsersList(req, res, next),
   updateUserFromEdit: (req, res, next) => mockUpdateUserFromEdit(req, res, next)

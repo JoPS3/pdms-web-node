@@ -49,6 +49,11 @@ router.get('/api/session/status', requireGatewaySessionApi, authController.getSe
 
 router.post('/internal/session/status', requireGatewaySessionApi, authController.getInternalSessionStatus);
 router.post('/internal/session/change-password', requireGatewaySessionApi, authController.changeInternalSessionPassword);
+router.get('/internal/onedrive/setup', requireGatewaySessionApi, authController.getInternalOneDriveSetup);
+router.post('/internal/onedrive/setup', requireGatewaySessionApi, authController.saveInternalOneDriveSetup);
+router.get('/internal/onedrive/status', requireGatewaySessionApi, authController.getInternalOneDriveStatus);
+router.post('/internal/onedrive/connect', requireGatewaySessionApi, authController.startInternalOneDriveConnect);
+router.post('/internal/onedrive/disconnect', requireGatewaySessionApi, authController.disconnectInternalOneDrive);
 router.post('/internal/users/:userId/update', requireGatewaySessionApi, authController.updateUserFromEdit);
 
 module.exports = router;

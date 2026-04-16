@@ -12,6 +12,10 @@ const isDev = process.env.NODE_ENV === 'development';
 const basePath = isDev ? process.env.BASE_PATH_DEV : process.env.BASE_PATH_PROD;
 const gatewayBasePath = isDev ? process.env.GATEWAY_BASE_PATH_DEV : process.env.GATEWAY_BASE_PATH_PROD;
 const gatewayValidateUrl = isDev ? process.env.GATEWAY_VALIDATE_DEV : process.env.GATEWAY_VALIDATE_PROD;
+const gatewayOneDriveSetupUrl = isDev ? process.env.GATEWAY_ONEDRIVE_SETUP_DEV : process.env.GATEWAY_ONEDRIVE_SETUP_PROD;
+const gatewayOneDriveStatusUrl = isDev ? process.env.GATEWAY_ONEDRIVE_STATUS_DEV : process.env.GATEWAY_ONEDRIVE_STATUS_PROD;
+const gatewayOneDriveConnectUrl = isDev ? process.env.GATEWAY_ONEDRIVE_CONNECT_DEV : process.env.GATEWAY_ONEDRIVE_CONNECT_PROD;
+const gatewayOneDriveDisconnectUrl = isDev ? process.env.GATEWAY_ONEDRIVE_DISCONNECT_DEV : process.env.GATEWAY_ONEDRIVE_DISCONNECT_PROD;
 const mapasAuditLogUrl = isDev
   ? (process.env.MAPAS_AUDIT_LOG_URL_DEV
       || process.env.MAPAS_AUDIT_LOG_URL
@@ -25,6 +29,10 @@ const assetVersion = String(Date.now());
 app.set('basePath', basePath);
 app.set('gatewayBasePath', gatewayBasePath);
 app.set('gatewayValidateUrl', gatewayValidateUrl);
+app.set('gatewayOneDriveSetupUrl', gatewayOneDriveSetupUrl);
+app.set('gatewayOneDriveStatusUrl', gatewayOneDriveStatusUrl);
+app.set('gatewayOneDriveConnectUrl', gatewayOneDriveConnectUrl);
+app.set('gatewayOneDriveDisconnectUrl', gatewayOneDriveDisconnectUrl);
 app.set('mapasAuditLogUrl', mapasAuditLogUrl);
 
 // View engine setup

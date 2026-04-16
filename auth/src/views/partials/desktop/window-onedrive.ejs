@@ -1,0 +1,66 @@
+<section class="users-launcher-grid" aria-label="Acoes OneDrive">
+  <button
+    type="button"
+    class="users-launcher-icon"
+    data-onedrive-action="connect"
+    title="Autenticar e ligar ao OneDrive"
+    aria-label="Autenticar e ligar ao OneDrive"
+  >
+    <span class="users-launcher-glyph">🔐</span>
+    <span class="users-launcher-name">Autenticar</span>
+    <span class="users-launcher-caption">Ligar conta OneDrive</span>
+  </button>
+
+  <button
+    type="button"
+    class="users-launcher-icon"
+    data-onedrive-action="status"
+    title="Ver estado da ligacao OneDrive"
+    aria-label="Ver estado da ligacao OneDrive"
+  >
+    <span class="users-launcher-glyph">📡</span>
+    <span class="users-launcher-name">Estado da Ligacao</span>
+    <span class="users-launcher-caption">Sessao e permissões</span>
+  </button>
+
+  <button
+    type="button"
+    class="users-launcher-icon"
+    data-onedrive-action="disconnect"
+    title="Desligar conta OneDrive"
+    aria-label="Desligar conta OneDrive"
+  >
+    <span class="users-launcher-glyph">🔌</span>
+    <span class="users-launcher-name">Desligar</span>
+    <span class="users-launcher-caption">Revogar ligacao ativa</span>
+  </button>
+</section>
+
+<p class="onedrive-feedback" data-onedrive-feedback="1">Selecione uma acao para gerir a ligacao ao OneDrive.</p>
+
+<form class="onedrive-setup-form" data-onedrive-setup-form="1">
+  <h3>Setup OAuth OneDrive</h3>
+
+  <label class="password-label" for="odClientId">Client ID</label>
+  <input id="odClientId" name="clientId" type="text" autocomplete="off" required />
+
+  <label class="password-label" for="odClientSecret">Client Secret</label>
+  <input id="odClientSecret" name="clientSecret" type="password" autocomplete="off" />
+
+  <label class="password-label" for="odTenantId">Tenant ID</label>
+  <input id="odTenantId" name="tenantId" type="text" value="common" autocomplete="off" />
+
+  <label class="password-label" for="odScopes">Scopes</label>
+  <input id="odScopes" name="scopes" type="text" value="offline_access User.Read Files.ReadWrite.All" autocomplete="off" />
+
+  <label class="password-label" for="odGatewayBase">Gateway Public Base URL</label>
+  <input id="odGatewayBase" name="gatewayPublicBaseUrl" type="url" placeholder="http://localhost:6000" autocomplete="off" />
+
+  <label class="password-label" for="odRedirectUri">Redirect URI (opcional)</label>
+  <input id="odRedirectUri" name="redirectUri" type="url" placeholder="http://localhost:6000/pdms-new/internal/onedrive/callback" autocomplete="off" />
+
+  <div class="password-actions">
+    <button type="submit" class="password-submit">Guardar Setup</button>
+  </div>
+  <p class="password-hint">Pode preencher redirect URI ou gateway base URL. Se o secret ja estiver guardado, pode deixar vazio.</p>
+</form>

@@ -460,6 +460,45 @@ thead th {
   color: var(--muted);
 }
 
+.onedrive-feedback {
+  margin: 10px 4px 0;
+  font-size: 0.82rem;
+  color: #6a5b45;
+}
+
+.onedrive-feedback.is-success {
+  color: #25643a;
+}
+
+.onedrive-feedback.is-error {
+  color: #8a2e2e;
+}
+
+.onedrive-setup-form {
+  margin: 14px 4px 0;
+  padding: 12px;
+  border: 1px solid #e6d5ba;
+  border-radius: 10px;
+  background: #fffaf1;
+  display: grid;
+  gap: 8px;
+}
+
+.onedrive-setup-form h3 {
+  margin: 0 0 4px;
+  font-size: 0.92rem;
+  color: #3a2f1d;
+}
+
+.onedrive-setup-form input {
+  width: 100%;
+  border: 1px solid #ccbda2;
+  border-radius: 8px;
+  padding: 7px 9px;
+  font-size: 0.85rem;
+  background: #fffdf8;
+}
+
 .password-form-wrap {
   height: 100%;
   padding: 16px 14px;
@@ -982,6 +1021,32 @@ thead th {
     background: rgba(255, 255, 255, 0.14);
     border: 1px solid rgba(255, 255, 255, 0.24);
     font-size: 2rem;
+  }
+
+  .desktop-icon-folder {
+    position: relative;
+  }
+
+  .desktop-icon-folder-main {
+    line-height: 1;
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.28));
+  }
+
+  .desktop-icon-folder-badge {
+    position: absolute;
+    right: 7px;
+    bottom: 7px;
+    min-width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    padding: 0 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    background: rgba(10, 22, 36, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.42);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
   }
 
   .desktop-icon-name {
