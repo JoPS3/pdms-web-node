@@ -2,11 +2,12 @@
 # pdms.sh — gestão de módulos PDMS via PM2
 #
 # Uso:
-#   ./pdms.sh start       — inicia todos os módulos
-#   ./pdms.sh restart     — reinicia e aplica variáveis de ambiente actuais
-#   ./pdms.sh stop        — para todos os módulos
-#   ./pdms.sh status      — estado de todos os processos PM2
-#   ./pdms.sh logs <nome> — logs de um módulo (ex: pdms-gateway)
+#   ./pdms.sh start           — inicia todos os módulos
+#   ./pdms.sh restart         — reinicia e aplica variáveis de ambiente actuais
+#   ./pdms.sh clean-restart   — delete + start (limpa estado PM2 antigo)
+#   ./pdms.sh stop            — para todos os módulos
+#   ./pdms.sh status          — estado de todos os processos PM2
+#   ./pdms.sh logs <nome>     — logs de um módulo (ex: pdms-gateway)
 #
 # Módulos geridos: pdms-gateway (6000), pdms-auth (6001), pdms-mapas (6002)
 
@@ -49,6 +50,28 @@ case "$cmd" in
     pm2 status
     ;;
 
+  clean-restart)
+    echo "A fazer clean-restart dos módulos PDMS (delete + start)..."
+    for entry in "${MODULES[@]}"; do
+      dir="${entry%%:*}"
+      name="${entry##*:}"
+      echo ""
+      echo "  → $name (delete)"
+      pm2 delete "$name" 2>/dev/null || true
+    done
+    echo ""
+    echo "A iniciar módulos PDMS (fresh)..."
+    for entry in "${MODULES[@]}"; do
+      dir="${entry%%:*}"
+      name="${entry##*:}"
+      echo ""
+      echo "  → $name"
+      pm2 start "$SCRIPT_DIR/$dir/ecosystem.config.cjs" --only "$name"
+    done
+    echo ""
+    pm2 status
+    ;;
+
   stop)
     echo "A parar módulos PDMS..."
     for entry in "${MODULES[@]}"; do
@@ -78,11 +101,12 @@ case "$cmd" in
     echo ""
     echo "Uso: ./pdms.sh <comando> [argumento]"
     echo ""
-    echo "  start       Inicia todos os módulos"
-    echo "  restart     Reinicia todos os módulos e actualiza variáveis de ambiente"
-    echo "  stop        Para todos os módulos"
-    echo "  status      Mostra o estado PM2 de todos os processos"
-    echo "  logs <name> Mostra logs de um módulo (ex: pdms-gateway)"
+    echo "  start          Inicia todos os módulos"
+    echo "  restart        Reinicia todos os módulos e actualiza variáveis de ambiente"
+    echo "  clean-restart  Delete + start (limpa estado PM2 antigo, força fresh start)"
+    echo "  stop           Para todos os módulos"
+    echo "  status         Mostra o estado PM2 de todos os processos"
+    echo "  logs <name>    Mostra logs de um módulo (ex: pdms-gateway)"
     echo ""
     echo "Módulos geridos:"
     for entry in "${MODULES[@]}"; do

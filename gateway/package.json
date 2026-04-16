@@ -6,6 +6,9 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
+    "start:pm2": "npm run styles:build && node src/server.js",
+    "styles:build": "sass src/public/styles/scss/app.scss src/public/styles/app.css --no-source-map",
+    "styles:watch": "sass --watch src/public/styles/scss/app.scss:src/public/styles/app.css",
     "test": "jest --runInBand --passWithNoTests",
     "test:watch": "jest --watch",
     "pm2:start": "pm2 start ecosystem.config.cjs --only pdms-gateway",
@@ -35,6 +38,7 @@
   },
   "devDependencies": {
     "jest": "^29.7.0",
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "sass": "^1.93.2"
   }
 }

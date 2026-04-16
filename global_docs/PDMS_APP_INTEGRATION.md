@@ -9,6 +9,36 @@ Documento global para padronizar a integracao entre o `pdms-gateway` e as apps d
 - Sub-app valida sessao no gateway via HTTP (`GET /validate-session`).
 - Nao e necessario proxy interno no gateway para abrir sub-apps.
 
+## Convencao de URLs (obrigatoria)
+
+### 1) Comunicacao interna entre apps (server-to-server)
+
+Usar sempre URL interna por porta, incluindo base path de desenvolvimento:
+
+`http://localhost:<porta>/<dev_basepath>/<endpoint>`
+
+Exemplos:
+- `http://localhost:6000/pdms-new/validate-session`
+- `http://localhost:6000/pdms-new/internal/onedrive/status`
+- `http://localhost:6002/pdms-new/mapas/internal/auditoria/log`
+
+### 2) Comunicacao externa (browser)
+
+Usar sempre dominio publico com base path de producao:
+
+`https://<dominio>/<prod_basepath>/<endpoint>`
+
+Exemplos:
+- `https://exemplo.pt/pdms/login`
+- `https://exemplo.pt/pdms/auth`
+- `https://exemplo.pt/pdms/mapas`
+
+### 3) Regra de configuracao de base path
+
+- `BASE_PATH_DEV` e `BASE_PATH_PROD` devem ser lidos do `.env` de cada modulo.
+- Nao fazer override de `BASE_PATH_*` no `ecosystem.config.cjs`.
+- PM2 deve apenas definir `NODE_ENV`, `PORT` e variaveis de integracao necessarias.
+
 ## Contrato de autenticacao
 
 ### Requisicao
@@ -58,8 +88,9 @@ Documento global para padronizar a integracao entre o `pdms-gateway` e as apps d
 
 1. O launcher (`/apps`) deve expor URL real de cada app.
 2. URLs devem ser configuraveis por ambiente.
-3. Em dev, preferir `/pdms-new/<app>`.
-4. Em prod, preferir `/pdms/<app>`.
+3. Em browser, evitar hardcode de `localhost` em links e redirects.
+4. Em dev, preferir `/pdms-new/<app>`.
+5. Em prod, preferir `/pdms/<app>`.
 
 ## Base paths padrao
 

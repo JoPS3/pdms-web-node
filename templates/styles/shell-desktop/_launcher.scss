@@ -1,0 +1,107 @@
+@media (min-width: 1024px) {
+  .desktop-icons {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    align-content: start;
+    gap: 20px 18px;
+    max-width: 720px;
+  }
+
+  .desktop-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: #f2f7ff;
+    border-radius: 12px;
+    padding: 10px 8px;
+    transition: background 120ms ease;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+  }
+
+  .desktop-icon:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .desktop-icon.is-disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .desktop-icon-glyph {
+    width: 68px;
+    height: 68px;
+    border-radius: 18px;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    font-size: 2rem;
+    box-shadow: 0 8px 14px rgba(0, 0, 0, 0.22);
+  }
+
+  .desktop-icon-name {
+    font-size: 0.8rem;
+    text-align: center;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.38);
+  }
+
+  .desktop-dock {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    display: flex;
+    justify-content: center;
+    padding: 0 16px 18px;
+  }
+
+  .dock-inner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 18px;
+    background: rgba(17, 29, 42, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.38);
+  }
+
+  .dock-item,
+  .dock-logout button,
+  .dock-back {
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border-radius: 14px;
+    text-decoration: none;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.12);
+    color: #f5fbff;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .dock-item:hover,
+  .dock-logout button:hover,
+  .dock-back:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 0 2px var(--desktop-glow);
+  }
+
+  .dock-item.is-disabled {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
+  .dock-item-glyph {
+    font-size: 1.45rem;
+  }
+}

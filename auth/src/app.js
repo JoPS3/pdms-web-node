@@ -11,6 +11,7 @@ const app = express();
 const isDev = process.env.NODE_ENV === 'development';
 const basePath = isDev ? process.env.BASE_PATH_DEV : process.env.BASE_PATH_PROD;
 const gatewayBasePath = isDev ? process.env.GATEWAY_BASE_PATH_DEV : process.env.GATEWAY_BASE_PATH_PROD;
+const gatewayPort = Number(isDev ? process.env.GATEWAY_PORT_DEV : process.env.GATEWAY_PORT_PROD) || 6000;
 const gatewayValidateUrl = isDev ? process.env.GATEWAY_VALIDATE_DEV : process.env.GATEWAY_VALIDATE_PROD;
 const gatewayOneDriveSetupUrl = isDev ? process.env.GATEWAY_ONEDRIVE_SETUP_DEV : process.env.GATEWAY_ONEDRIVE_SETUP_PROD;
 const gatewayOneDriveStatusUrl = isDev ? process.env.GATEWAY_ONEDRIVE_STATUS_DEV : process.env.GATEWAY_ONEDRIVE_STATUS_PROD;
@@ -25,9 +26,16 @@ const mapasAuditLogUrl = isDev
     || 'http://localhost:6002/pdms/mapas/internal/auditoria/log');
 const assetVersion = String(Date.now());
 
+function firstHeaderValue(headerValue) {
+  return String(headerValue || '')
+    .split(',')[0]
+    .trim();
+}
+
 // Armazena em app settings
 app.set('basePath', basePath);
 app.set('gatewayBasePath', gatewayBasePath);
+app.set('gatewayPort', gatewayPort);
 app.set('gatewayValidateUrl', gatewayValidateUrl);
 app.set('gatewayOneDriveSetupUrl', gatewayOneDriveSetupUrl);
 app.set('gatewayOneDriveStatusUrl', gatewayOneDriveStatusUrl);
@@ -47,8 +55,18 @@ app.use(cookieParser());
 
 // Injeta basePath em res.locals para todas as views
 app.use((req, res, next) => {
+  const gatewayBasePathRaw = String(gatewayBasePath || '').trim();
+  const forwardedHost = firstHeaderValue(req.get('x-forwarded-host'));
+  const forwardedProto = firstHeaderValue(req.get('x-forwarded-proto'));
+  const isProxied = Boolean(forwardedHost || forwardedProto);
+  const gatewayBasePathPublic = /^https?:\/\//i.test(gatewayBasePathRaw)
+    ? gatewayBasePathRaw.replace(/\/+$/, '')
+    : (isProxied
+      ? String(gatewayBasePathRaw || '').replace(/\/+$/, '')
+      : `${req.protocol}://${req.hostname}:${gatewayPort}${String(gatewayBasePathRaw || '').replace(/\/+$/, '')}`);
+
   res.locals.basePath = basePath;
-  res.locals.gatewayBasePath = gatewayBasePath;
+  res.locals.gatewayBasePath = gatewayBasePathPublic;
   res.locals.assetVersion = assetVersion;
   next();
 });

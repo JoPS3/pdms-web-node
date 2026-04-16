@@ -1,13 +1,37 @@
-<html lang="en">
+<!DOCTYPE html>
+<html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="styles/shell.css">
+    <title>Área de Trabalho</title>
+    <link rel="stylesheet" href="styles/root.css">
+    <link rel="stylesheet" href="styles/desktop.css">
 </head>
-<body class="landing-page">
+<body class="main-page">
     <div class="desktop-shell" aria-label="Desktop de aplicações">
         <main class="desktop-workspace">
+            <header class="desktop-titlebar">
+                <div class="titlebar-left">
+                    <span class="traffic-light red" aria-hidden="true"></span>
+                    <span class="traffic-light yellow" aria-hidden="true"></span>
+                    <span class="traffic-light green" aria-hidden="true"></span>
+                    <strong class="desktop-brand">PDMS - Modulo Mapas</strong>
+                </div>
+                <div class="titlebar-center">
+                    <span class="desktop-clock" id="desktopClock">--:--</span>
+                </div>
+
+                <div class="titlebar-right">
+                    <span class="desktop-user">
+                        <strong>Joao</strong>
+                        <span class="desktop-user-role">ADMINISTRADOR</span>
+                    </span>
+                    <a class="titlebar-back" href="#" title="Voltar ao launcher">◀</a>
+                    <form method="post" action="#" class="titlebar-logout">
+                        <button type="submit" title="Terminar sessao" aria-label="Terminar sessao">⏻</button>
+                    </form>
+                </div>
+            </header>
             <h1>Área de trabalho</h1>
         </main>
     </div>

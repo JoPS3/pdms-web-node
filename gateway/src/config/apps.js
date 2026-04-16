@@ -1,5 +1,42 @@
-function getApps() {
-  const basePathDev = process.env.BASE_PATH_DEV || '';
+function getApps(runtime = {}) {
+  const basePathDev = String(process.env.BASE_PATH_DEV || '').replace(/\/+$/, '');
+  const withBasePath = (path) => `${basePathDev}${path}`;
+  const host = String(runtime.host || '').trim();
+  const protocol = String(runtime.protocol || 'http').trim() || 'http';
+  const isProxied = Boolean(runtime.isProxied);
+  const authPort = Number(process.env.AUTH_PORT || process.env.AUTH_PORT_DEV || 6001);
+  const mapasPort = Number(process.env.MAPAS_PORT || process.env.MAPAS_PORT_DEV || 6002);
+
+  const withHostPort = (path, port) => {
+    if (!host || !port) {
+      return path;
+    }
+    return `${protocol}://${host}:${port}${path}`;
+  };
+
+  const byEnvOrDefault = (envKey, fallbackPath) => {
+    const raw = String(process.env[envKey] || '').trim();
+    return raw || withBasePath(fallbackPath);
+  };
+
+  const authUrl = byEnvOrDefault('APP_AUTH_URL_DEV', '/auth');
+  const mapasUrl = byEnvOrDefault('APP_MAPAS_URL_DEV', '/mapas');
+
+  const resolveServiceUrl = (url, port) => {
+    if (/^https?:\/\//i.test(url)) {
+      return url;
+    }
+
+    // Behind nginx/reverse proxy, keep path-only URLs on the same public origin.
+    if (isProxied) {
+      return url;
+    }
+
+    return withHostPort(url, port);
+  };
+
+  const resolvedAuthUrl = resolveServiceUrl(authUrl, authPort);
+  const resolvedMapasUrl = resolveServiceUrl(mapasUrl, mapasPort);
 
   return [
     {
@@ -7,35 +44,35 @@ function getApps() {
       name: 'Mapas',
       description: 'Gestão de diário de caixa e auditoria',
       icon: '📊',
-      url: `${basePathDev}/mapas`
+      url: resolvedMapasUrl
     },
     {
       id: 'vendas',
       name: 'Vendas',
       description: 'Controlo de vendas e faturação',
       icon: '💰',
-      url: '/vendas'
+      url: byEnvOrDefault('APP_VENDAS_URL_DEV', '/vendas')
     },
     {
       id: 'compras',
       name: 'Compras',
       description: 'Gestão de compras e fornecedores',
       icon: '📦',
-      url: '/compras'
+      url: byEnvOrDefault('APP_COMPRAS_URL_DEV', '/compras')
     },
     {
       id: 'rh',
       name: 'RH',
       description: 'Gestão de recursos humanos',
       icon: '👥',
-      url: '/rh'
+      url: byEnvOrDefault('APP_RH_URL_DEV', '/rh')
     },
     {
       id: 'autenticacao',
       name: 'Autenticação',
       description: 'Gestão de acesso e permissões',
       icon: '🔐',
-      url: `${basePathDev}/auth`
+      url: resolvedAuthUrl
     }
   ];
 }

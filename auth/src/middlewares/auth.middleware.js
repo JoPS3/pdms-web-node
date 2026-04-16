@@ -1,5 +1,11 @@
 const axios = require('axios');
 
+function firstHeaderValue(headerValue) {
+  return String(headerValue || '')
+    .split(',')[0]
+    .trim();
+}
+
 function parseSessionToken(req) {
   const cookieToken = String(req.cookies?.session_token || '').trim();
   if (cookieToken) {
@@ -54,7 +60,16 @@ async function validateGatewaySession(req) {
  * Adiciona req.user se válido, redireciona para gateway login se inválido
  */
 async function requireGatewayAuth(req, res, next) {
-  const gatewayBasePath = req.app.get('gatewayBasePath');
+  const gatewayBasePathRaw = String(req.app.get('gatewayBasePath') || '').trim();
+  const gatewayPort = Number(req.app.get('gatewayPort')) || 6000;
+  const forwardedHost = firstHeaderValue(req.get('x-forwarded-host'));
+  const forwardedProto = firstHeaderValue(req.get('x-forwarded-proto'));
+  const isProxied = Boolean(forwardedHost || forwardedProto);
+  const gatewayBasePath = /^https?:\/\//i.test(gatewayBasePathRaw)
+    ? gatewayBasePathRaw.replace(/\/+$/, '')
+    : (isProxied
+      ? gatewayBasePathRaw.replace(/\/+$/, '')
+      : `${req.protocol}://${req.hostname}:${gatewayPort}${gatewayBasePathRaw.replace(/\/+$/, '')}`);
 
   try {
     const validation = await validateGatewaySession(req);

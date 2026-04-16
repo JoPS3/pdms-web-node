@@ -75,7 +75,34 @@ Ficheiro: `src/config/runtime.js`
 | `SESSION_SECRET`    | Segredo para assinar sessões Express       | (valor secreto)     |
 | `DB_HOST/PORT/USER/PASSWORD/NAME` | Ligação à base de dados    | —                   |
 
-O `basePath` activo é determinado por `BASE_PATH_DEV` (dev) ou vazio se não definido. Em produção o path é configurado via variável de ambiente injectada pelo PM2.
+O `basePath` activo é determinado por `BASE_PATH_DEV` (dev) ou `BASE_PATH_PROD` (prod), sempre lidos do ficheiro `.env` do modulo.
+
+Regra operacional:
+- Nao fazer override de `BASE_PATH_DEV/BASE_PATH_PROD` no `ecosystem.config.cjs`.
+- PM2 deve iniciar o processo e preservar os valores carregados do `.env`.
+
+## Convenção de Endpoints
+
+### Interno (entre serviços)
+
+Formato esperado:
+
+`http://localhost:<porta>/<dev_basepath>/<endpoint>`
+
+Exemplos:
+- `http://localhost:6000/pdms-new/validate-session`
+- `http://localhost:6000/pdms-new/internal/onedrive/connect`
+
+### Externo (browser/cliente)
+
+Formato esperado:
+
+`https://<dominio>/<prod_basepath>/<endpoint>`
+
+Exemplos:
+- `https://exemplo.pt/pdms/login`
+- `https://exemplo.pt/pdms/apps`
+- `https://exemplo.pt/pdms/auth`
 
 ---
 

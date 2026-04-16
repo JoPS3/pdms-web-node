@@ -7,7 +7,7 @@
   --desktop-glow: rgba(198, 228, 255, 0.35);
 }
 
-.apps-page {
+.main-page {
   min-height: 100vh;
 }
 
@@ -101,7 +101,7 @@
 }
 
 @media (min-width: 1024px) {
-  .apps-page {
+  .main-page {
     width: 100vw;
     height: 100vh;
     margin: 0;
