@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= pageTitle %> | <%= appTitle %></title>
+    <link rel="stylesheet" href="<%= basePath %>/styles/style.css?v=<%= assetVersion %>" />
+  </head>
+  <body class="main-page" data-gateway-base-path="<%= gatewayBasePath %>">
+    <!-- Mobile Shell -->
+    <%- include('partials/mobile-shell', { 
+      appTitle, 
+      userName, 
+      userRole, 
+      gatewayBasePath,
+      body: mobileMobileBody || '',
+      showMobileFooter: true 
+    }) %>
+
+    <!-- Desktop Shell -->
+    <div class="desktop-shell" aria-label="Desktop de <%= appTitle %>">
+      <%- include('partials/desktop-titlebar', { 
+        appTitle, 
+        userName, 
+        userRole, 
+        gatewayBasePath 
+      }) %>
+
+      <main class="desktop-workspace">
+        <%- include('partials/desktop-icons', { 
+          desktopIcons,
+          appTitle
+        }) %>
+      </main>
+
+      <%- include('partials/desktop-dock', { 
+        dockItems,
+        gatewayBasePath
+      }) %>
+
+      <!-- Windows container (injected by app-specific content) -->
+      <%- windowsContainer || '' %>
+    </div>
+
+    <script>
+      window.APP_CONFIG = {
+        basePath: '<%= basePath %>',
+        gatewayBasePath: '<%= gatewayBasePath %>'
+      };
+    </script>
+    <%- scriptContent || '' %>
+  </body>
+</html>

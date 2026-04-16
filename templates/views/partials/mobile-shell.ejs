@@ -1,0 +1,26 @@
+<div class="mobile-shell">
+  <header class="mobile-header">
+    <div class="mobile-header-content">
+      <div>
+        <h1><%= appTitle %></h1>
+      </div>
+      <div class="mobile-user">
+        Bem-vindo, <strong><%= userName %></strong><br />
+        <% if (userRole) { %>
+          <span><%= userRole %></span>
+        <% } %>
+      </div>
+      <a class="mobile-back" href="<%= gatewayBasePath %>/apps">Launcher</a>
+    </div>
+  </header>
+
+  <main class="mobile-main">
+    <%- body %>
+  </main>
+
+  <% if (showMobileFooter) { %>
+    <footer class="mobile-footer">
+      <p style="margin: 0;">&copy; 2026 PDMS</p>
+    </footer>
+  <% } %>
+</div>

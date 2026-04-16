@@ -410,5 +410,20 @@
     }
   }
 
-  document.querySelectorAll('[data-mapas-table-filter-scope]').forEach(initScope);
+  function initMapasTableFilters(root) {
+    if (root && root.nodeType === 1) {
+      if (root.hasAttribute('data-mapas-table-filter-scope')) {
+        initScope(root);
+        return;
+      }
+
+      root.querySelectorAll('[data-mapas-table-filter-scope]').forEach(initScope);
+      return;
+    }
+
+    document.querySelectorAll('[data-mapas-table-filter-scope]').forEach(initScope);
+  }
+
+  window.initMapasTableFilters = initMapasTableFilters;
+  initMapasTableFilters(document);
 })();

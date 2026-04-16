@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= pageTitle %> | PDMS Vendas</title>
+    <link rel="stylesheet" href="<%= basePath %>/styles/style.css?v=<%= assetVersion %>" />
+  </head>
+  <body class="main-page" data-gateway-base-path="<%= gatewayBasePath %>">
+    <div class="mobile-shell">
+      <header class="mobile-header">
+        <div class="mobile-header-content">
+          <div>
+            <h1>PDMS Vendas</h1>
+          </div>
+          <div class="mobile-user">
+            Bem-vindo, <strong><%= userName %></strong><br />
+            <% if (userRole) { %>
+              <span><%= userRole %></span>
+            <% } %>
+          </div>
+          <a class="mobile-back" href="<%= gatewayBasePath %>/apps">Launcher</a>
+        </div>
+      </header>
+
+      <main class="mobile-main">
+        <h2>Modulos Disponiveis</h2>
+        <div class="mobile-apps-grid">
+          <div class="mobile-app-card">
+            <h3>📊 Vendas</h3>
+            <p>Gestão de vendas e comissões</p>
+            <span>Em breve</span>
+          </div>
+        </div>
+      </main>
+
+      <footer class="mobile-footer">
+        <p style="margin: 0;">&copy; 2026 PDMS - Vendas</p>
+      </footer>
+    </div>
+
+    <div class="desktop-shell" aria-label="Desktop de Vendas">
+      <header class="desktop-titlebar">
+        <div class="titlebar-left">
+          <span class="traffic-light red" aria-hidden="true"></span>
+          <span class="traffic-light yellow" aria-hidden="true"></span>
+          <span class="traffic-light green" aria-hidden="true"></span>
+          <strong class="desktop-brand">PDMS - Modulo Vendas</strong>
+        </div>
+
+        <div class="titlebar-center">
+          <span class="desktop-clock" id="desktopClock">--:--</span>
+        </div>
+
+        <div class="titlebar-right">
+          <span class="desktop-user">
+            <strong><%= userName %></strong>
+            <% if (userRole) { %><span class="desktop-user-role"><%= userRole %></span><% } %>
+          </span>
+          <a class="titlebar-back" href="<%= gatewayBasePath %>/apps" title="Voltar ao launcher">◀</a>
+          <form method="post" action="<%= gatewayBasePath %>/logout" class="titlebar-logout">
+            <button type="submit" title="Terminar sessao" aria-label="Terminar sessao">⏻</button>
+          </form>
+        </div>
+      </header>
+
+      <main class="desktop-workspace">
+        <section class="desktop-icons" aria-label="Atalhos de vendas">
+          <button
+            type="button"
+            class="desktop-icon is-disabled"
+            title="Vendas"
+            aria-label="Modulo de vendas"
+          >
+            <span class="desktop-icon-glyph desktop-icon-folder">
+              <span class="desktop-icon-folder-main" aria-hidden="true">📁</span>
+              <span class="desktop-icon-folder-badge" aria-hidden="true">📊</span>
+            </span>
+            <span class="desktop-icon-name">Vendas</span>
+          </button>
+        </section>
+      </main>
+
+      <nav class="desktop-dock" aria-label="Dock de modulos">
+        <div class="dock-inner">
+          <a class="dock-back" href="<%= gatewayBasePath %>/apps" aria-label="Voltar ao launcher">◀</a>
+        </div>
+      </nav>
+
+      <div class="desktop-windows-container"></div>
+    </div>
+
+    <script>
+      (function attachDesktopClock() {
+        var clock = document.getElementById('desktopClock');
+        if (!clock) return;
+        function renderTime() {
+          var now = new Date();
+          clock.textContent = now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+        }
+        renderTime();
+        setInterval(renderTime, 1000);
+      })();
+    </script>
+  </body>
+</html>

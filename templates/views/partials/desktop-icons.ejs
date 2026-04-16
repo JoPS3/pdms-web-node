@@ -1,0 +1,19 @@
+<section class="desktop-icons" aria-label="Atalhos de modulos">
+  <% if (desktopIcons && desktopIcons.length > 0) { %>
+    <% desktopIcons.forEach((icon) => { %>
+      <button
+        type="button"
+        class="desktop-icon"
+        data-open-window="<%= icon.dataOpenWindow %>"
+        title="<%= icon.title %>"
+        aria-label="<%= icon.ariaLabel %>"
+      >
+        <span class="desktop-icon-glyph desktop-icon-folder">
+          <span class="desktop-icon-folder-main" aria-hidden="true"><%= icon.glyphMain %></span>
+          <span class="desktop-icon-folder-badge" aria-hidden="true"><%= icon.glyphBadge %></span>
+        </span>
+        <span class="desktop-icon-name"><%= icon.name %></span>
+      </button>
+    <% }) %>
+  <% } %>
+</section>

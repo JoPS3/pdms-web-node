@@ -1,0 +1,151 @@
+@media (min-width: 1024px) {
+  .desktop-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(7, 12, 18, 0.42);
+    backdrop-filter: blur(2px);
+  }
+
+  .desktop-overlay[hidden] {
+    display: none;
+  }
+
+  .desktop-windows-container {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    pointer-events: none;
+  }
+
+  .desktop-windows-container > * {
+    pointer-events: auto;
+  }
+
+  .desktop-window {
+    position: fixed;
+    top: 72px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(980px, calc(100vw - 140px));
+    height: min(680px, calc(100vh - 190px));
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 24px 50px rgba(0, 0, 0, 0.34);
+    display: grid;
+    grid-template-rows: 44px 1fr;
+    will-change: left, top;
+    min-width: 720px;
+    min-height: 460px;
+    z-index: 1010;
+  }
+
+  .desktop-window[hidden] {
+    display: none;
+  }
+
+  .desktop-window-titlebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    color: #f3f8ff;
+    background: linear-gradient(180deg, #2f4d6d 0%, #26425f 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+  }
+
+  .desktop-window-titlebar:active {
+    cursor: grabbing;
+  }
+
+  .desktop-window-title {
+    font-weight: 700;
+    font-size: 1rem;
+    line-height: normal;
+  }
+
+  .desktop-window-close {
+    width: 28px;
+    height: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    color: #fff;
+    background: transparent;
+    cursor: pointer;
+    line-height: 1;
+    transition: background 120ms ease, border-color 120ms ease;
+  }
+
+  .desktop-window-close:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+
+  .desktop-window-content {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+  }
+
+  .window-confirm-modal {
+    margin: 14px 4px 0;
+    padding: 14px;
+    border: 1px solid #e6d5ba;
+    border-radius: 10px;
+    background: #fffaf1;
+  }
+
+  .window-confirm-message {
+    margin: 0 0 12px;
+    font-size: 0.88rem;
+    color: #3a2f1d;
+  }
+
+  .window-confirm-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .window-confirm-btn-danger {
+    background: #8a2e2e !important;
+  }
+
+  .window-confirm-btn-danger:hover {
+    background: #6e2323 !important;
+  }
+
+  body.desktop-window-open .desktop-dock,
+  body.desktop-window-open .desktop-icons {
+    pointer-events: none;
+  }
+
+  body.desktop-window-dragging,
+  body.desktop-window-dragging * {
+    user-select: none;
+    cursor: grabbing !important;
+  }
+
+  body.desktop-window-resizing,
+  body.desktop-window-resizing * {
+    user-select: none;
+    cursor: nwse-resize !important;
+  }
+
+  body.desktop-window-dragging .desktop-window-backdrop,
+  body.desktop-window-resizing .desktop-window-backdrop {
+    backdrop-filter: none;
+    background: rgba(7, 12, 18, 0.32);
+  }
+
+  body.desktop-window-dragging .desktop-floating-window,
+  body.desktop-window-resizing .desktop-floating-window {
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
+  }
+}

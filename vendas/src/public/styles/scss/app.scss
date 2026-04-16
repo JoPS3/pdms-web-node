@@ -1,0 +1,11 @@
+@use "../../../../../templates/styles/tokens";
+@use "../../../../../templates/styles/globals";
+@use "../../../../../templates/styles/shell-desktop/shell" as desktop-shell;
+@use "../../../../../templates/styles/shell-desktop/titlebar" as desktop-titlebar;
+@use "../../../../../templates/styles/shell-desktop/launcher" as desktop-launcher;
+@use "../../../../../templates/styles/shell-desktop/windows" as desktop-windows;
+@use "../../../../../templates/styles/shell-desktop/window-menu" as desktop-window-menu;
+@use "../../../../../templates/styles/components/table-filters" as shared-table-filters;
+@use "../../../../../templates/styles/shell-mobile/shell" as mobile-shell;
+@use "../../../../../templates/styles/shell-mobile/launcher" as mobile-launcher;
+// @use 'vendas-module' as vendas-module;

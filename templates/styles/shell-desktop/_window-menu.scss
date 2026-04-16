@@ -1,0 +1,88 @@
+@media (min-width: 1024px) {
+  .window-menu {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid #e0d9c9;
+    background: #f9f8f6;
+    padding: 0;
+    margin: 0;
+  }
+
+  .window-menu-item {
+    position: relative;
+  }
+
+  .window-menu-trigger {
+    display: block;
+    padding: 8px 14px;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    border-right: 1px solid #ebe4d7;
+  }
+
+  .window-menu-trigger:hover {
+    background: rgba(193, 84, 27, 0.08);
+  }
+
+  .window-menu-trigger:active,
+  .window-menu-item.is-open .window-menu-trigger {
+    background: rgba(193, 84, 27, 0.15);
+  }
+
+  .window-menu-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 200px;
+    background: #fff;
+    border: 1px solid #d0c8b8;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    z-index: 1001;
+    overflow: hidden;
+  }
+
+  .window-menu-item.is-open .window-menu-dropdown {
+    display: block;
+  }
+
+  .window-menu-option,
+  .window-menu-checkbox {
+    display: flex;
+    align-items: center;
+    padding: 9px 14px;
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 0.9rem;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .window-menu-option:hover {
+    background: #f3ede3;
+  }
+
+  .window-menu-checkbox {
+    gap: 8px;
+    border: 0;
+    background: transparent;
+    padding-left: 14px;
+  }
+
+  .window-menu-checkbox input[type="checkbox"] {
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .window-menu-divider {
+    height: 1px;
+    background: #ebe4d7;
+    margin: 4px 0;
+  }
+}

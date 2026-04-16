@@ -1,0 +1,20 @@
+<nav class="desktop-dock" aria-label="Dock de modulos">
+  <div class="dock-inner">
+    <% if (dockItems && dockItems.length > 0) { %>
+      <% dockItems.forEach((item) => { %>
+        <% if (item.type === 'button') { %>
+          <button
+            type="button"
+            class="dock-item"
+            data-open-window="<%= item.dataOpenWindow %>"
+            title="<%= item.title %>"
+            aria-label="<%= item.ariaLabel %>"
+          >
+            <span class="dock-item-glyph"><%= item.glyph %></span>
+          </button>
+        <% } %>
+      <% }) %>
+    <% } %>
+    <a class="dock-back" href="<%= gatewayBasePath %>/apps" aria-label="Voltar ao launcher">◀</a>
+  </div>
+</nav>

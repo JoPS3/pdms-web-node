@@ -4,8 +4,10 @@
   "description": "Mapas module - clean Node+Express architecture",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
+    "styles:build": "sass src/public/styles/scss/app.scss src/public/styles/style.css --no-source-map",
+    "styles:watch": "sass --watch src/public/styles/scss/app.scss:src/public/styles/style.css --no-source-map",
+    "start": "npm run styles:build && node src/server.js",
+    "dev": "npm run styles:build && nodemon src/server.js",
     "test": "jest --runInBand --testPathIgnorePatterns=old_modulo --passWithNoTests",
     "pm2:start": "pm2 start src/server.js --name pdms-mapas",
     "pm2:start:watch": "pm2 start src/server.js --name pdms-mapas --watch --ignore-watch=\"node_modules .git logs\"",
@@ -32,6 +34,7 @@
   "devDependencies": {
     "jest": "^30.3.0",
     "nodemon": "^3.0.1",
+    "sass": "^1.99.0",
     "supertest": "^7.2.2"
   }
 }

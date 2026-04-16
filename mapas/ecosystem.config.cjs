@@ -7,7 +7,7 @@ module.exports = {
       interpreter: 'none',
       cwd: '/home/joao/Projects/node/pdms-web-node/mapas',
       watch: true,
-      ignore_watch: ['node_modules', '.git', 'logs', 'tmp'],
+      ignore_watch: ['node_modules', '.git', 'logs', 'tmp', 'src/public/styles/style.css'],
       watch_delay: 500,
       env: {
         NODE_ENV: 'development',

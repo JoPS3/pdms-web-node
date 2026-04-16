@@ -1,0 +1,36 @@
+<header class="desktop-titlebar">
+  <div class="titlebar-left">
+    <span class="traffic-light red" aria-hidden="true"></span>
+    <span class="traffic-light yellow" aria-hidden="true"></span>
+    <span class="traffic-light green" aria-hidden="true"></span>
+    <strong class="desktop-brand"><%= appTitle %></strong>
+  </div>
+
+  <div class="titlebar-center">
+    <span class="desktop-clock" id="desktopClock">--:--</span>
+  </div>
+
+  <div class="titlebar-right">
+    <span class="desktop-user">
+      <strong><%= userName %></strong>
+      <% if (userRole) { %><span class="desktop-user-role"><%= userRole %></span><% } %>
+    </span>
+    <a class="titlebar-back" href="<%= gatewayBasePath %>/apps" title="Voltar ao launcher">◀</a>
+    <form method="post" action="<%= gatewayBasePath %>/logout" class="titlebar-logout">
+      <button type="submit" title="Terminar sessao" aria-label="Terminar sessao">⏻</button>
+    </form>
+  </div>
+</header>
+
+<script>
+  (function attachDesktopClock() {
+    var clock = document.getElementById('desktopClock');
+    if (!clock) return;
+    function renderTime() {
+      var now = new Date();
+      clock.textContent = now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+    }
+    renderTime();
+    setInterval(renderTime, 1000);
+  })();
+</script>

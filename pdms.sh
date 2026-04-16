@@ -9,7 +9,9 @@
 #   ./pdms.sh status          — estado de todos os processos PM2
 #   ./pdms.sh logs <nome>     — logs de um módulo (ex: pdms-gateway)
 #
-# Módulos geridos: pdms-gateway (6000), pdms-auth (6001), pdms-mapas (6002)
+# Módulos geridos:
+#   pdms-gateway (6000), pdms-auth (6001), pdms-mapas (6002)
+#   pdms-vendas (6003), pdms-compras (6004), pdms-rh (6005)
 
 set -e
 
@@ -17,6 +19,9 @@ MODULES=(
   "gateway:pdms-gateway"
   "auth:pdms-auth"
   "mapas:pdms-mapas"
+  "vendas:pdms-vendas"
+  "compras:pdms-compras"
+  "rh:pdms-rh"
 )
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

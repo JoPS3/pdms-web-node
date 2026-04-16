@@ -29,8 +29,8 @@
     return window.matchMedia('(min-width: 1024px)').matches;
   }
 
-  function exportTableAsCSV(iframeDoc, filePrefix) {
-    var table = iframeDoc.querySelector('[data-table-filter-root]');
+  function exportTableAsCSV(rootNode, filePrefix) {
+    var table = rootNode.querySelector('[data-table-filter-root]');
     if (!table) {
       return;
     }
@@ -60,8 +60,8 @@
     link.click();
   }
 
-  function selectAllRows(iframeDoc, selected) {
-    var rows = iframeDoc.querySelectorAll('.data-row');
+  function selectAllRows(rootNode, selected) {
+    var rows = rootNode.querySelectorAll('.data-row');
     rows.forEach(function (row) {
       row.style.backgroundColor = selected ? 'rgba(193, 84, 27, 0.1)' : '';
     });
@@ -74,6 +74,7 @@
     var floatingWindow = layer ? layer.querySelector('.desktop-floating-window') : null;
     var titlebar = layer ? layer.querySelector('.desktop-floating-window-titlebar') : null;
     var resizeHandle = layer ? layer.querySelector('[data-window-resize-handle]') : null;
+    var currentUrl = '';
 
     if (!layer || !frame || !floatingWindow || !titlebar || !resizeHandle) {
       return;
@@ -187,14 +188,6 @@
       floatingWindow.style.width = resize.nextWidth + 'px';
       floatingWindow.style.height = resize.nextHeight + 'px';
 
-      try {
-        if (frame.contentWindow) {
-          frame.contentWindow.dispatchEvent(new Event('resize'));
-        }
-      } catch (err) {
-        // Ignore transient iframe access errors while frame is reloading.
-      }
-
       resize.rafPending = false;
     }
 
@@ -247,9 +240,58 @@
       document.body.classList.remove('desktop-window-resizing');
     }
 
+    function renderLoading() {
+      frame.innerHTML = '<div class="window-inline-state">A carregar...</div>';
+    }
+
+    function renderError(message) {
+      frame.innerHTML = '<div class="window-inline-state is-error">' + String(message || 'Falha ao carregar conteudo.') + '</div>';
+    }
+
+    function getInlineScopeRoot() {
+      return frame.querySelector('[data-mapas-table-filter-scope]') || frame;
+    }
+
+    function loadInlineContent(url) {
+      currentUrl = String(url || '').trim();
+      if (!currentUrl) {
+        renderError('URL invalido.');
+        return;
+      }
+
+      renderLoading();
+
+      fetch(currentUrl, { credentials: 'same-origin' })
+        .then(function (response) {
+          if (!response.ok) {
+            throw new Error('HTTP ' + response.status);
+          }
+          return response.text();
+        })
+        .then(function (html) {
+          var parser = new DOMParser();
+          var doc = parser.parseFromString(html, 'text/html');
+          var scope = doc.querySelector('[data-mapas-table-filter-scope]');
+          if (!scope) {
+            throw new Error('Conteudo inline nao encontrado');
+          }
+
+          frame.innerHTML = '';
+          frame.appendChild(scope);
+
+          if (typeof window.initMapasTableFilters === 'function') {
+            window.initMapasTableFilters(scope);
+          }
+        })
+        .catch(function (err) {
+          console.error('Inline window load error:', err);
+          renderError('Nao foi possivel carregar a listagem.');
+        });
+    }
+
     function openWindow(url) {
       resetWindowPosition();
-      frame.src = url;
+      loadInlineContent(url);
       layer.hidden = false;
       document.body.classList.add('desktop-window-open');
     }
@@ -258,7 +300,8 @@
       stopDrag();
       stopResize();
       layer.hidden = true;
-      frame.src = 'about:blank';
+      frame.innerHTML = '';
+      currentUrl = '';
       document.body.classList.remove('desktop-window-open');
     }
 
@@ -345,7 +388,6 @@
     window.addEventListener('pointercancel', stopResize, true);
     window.addEventListener('blur', stopResize);
 
-    frame.addEventListener('load', clearInteractionLocks);
     document.addEventListener('visibilitychange', function () {
       if (!document.hidden) {
         clearInteractionLocks();
@@ -387,35 +429,35 @@
         });
 
         try {
-          var iframeDoc = frame.contentDocument || frame.contentWindow.document;
-          if (!iframeDoc) {
+          var rootNode = getInlineScopeRoot();
+          if (!rootNode) {
             return;
           }
 
           switch (action) {
             case 'export-csv':
-              exportTableAsCSV(iframeDoc, config.filePrefix);
+              exportTableAsCSV(rootNode, config.filePrefix);
               break;
             case 'export-excel':
               alert('Exportar Excel ainda não implementado');
               break;
             case 'print':
-              frame.contentWindow.print();
+              window.print();
               break;
             case 'refresh':
-              frame.contentWindow.location.reload();
+              loadInlineContent(currentUrl);
               break;
             case 'reset-filters':
-              var clearButton = iframeDoc.querySelector('[data-table-filter-clear-all]');
+              var clearButton = rootNode.querySelector('[data-table-filter-clear-all]');
               if (clearButton) {
                 clearButton.click();
               }
               break;
             case 'select-all':
-              selectAllRows(iframeDoc, true);
+              selectAllRows(rootNode, true);
               break;
             case 'select-none':
-              selectAllRows(iframeDoc, false);
+              selectAllRows(rootNode, false);
               break;
             default:
               break;
