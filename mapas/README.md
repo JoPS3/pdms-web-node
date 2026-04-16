@@ -30,7 +30,7 @@ Aplicacao Node.js + Express para o modulo `mapas`, integrada com autenticacao ce
 Arquivo local: `.env`
 
 - `NODE_ENV=development`
-- `PORT=6001`
+- `PORT=6002`
 - `BASE_PATH_DEV=/pdms-new/mapas`
 - `BASE_PATH_PROD=/pdms/mapas`
 - `GATEWAY_BASE_PATH_DEV=/pdms-new`

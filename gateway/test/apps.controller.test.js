@@ -1,6 +1,3 @@
-const test = require('node:test');
-const assert = require('node:assert/strict');
-
 const { listApps } = require('../src/controllers/apps.controller');
 const { createResponseMock } = require('./helpers/http-mocks');
 
@@ -18,13 +15,13 @@ test('apps controller renders apps index with user and role info', () => {
 
   listApps(req, res);
 
-  assert.equal(res.view, 'apps/index');
-  assert.equal(res.viewData.pageTitle, 'Aplicações');
-  assert.equal(res.viewData.userName, 'admin');
-  assert.equal(res.viewData.userEmail, 'admin@pedaco.local');
-  assert.equal(res.viewData.userRole, 'admin');
-  assert.equal(Array.isArray(res.viewData.apps), true);
-  assert.equal(res.viewData.apps.length, 5);
+  expect(res.view).toBe('apps/index');
+  expect(res.viewData.pageTitle).toBe('Aplicações');
+  expect(res.viewData.userName).toBe('admin');
+  expect(res.viewData.userEmail).toBe('admin@pedaco.local');
+  expect(res.viewData.userRole).toBe('admin');
+  expect(Array.isArray(res.viewData.apps)).toBe(true);
+  expect(res.viewData.apps.length).toBe(5);
 });
 
 test('apps controller uses fallback user values', () => {
@@ -37,9 +34,9 @@ test('apps controller uses fallback user values', () => {
 
   listApps(req, res);
 
-  assert.equal(res.viewData.userName, 'Utilizador');
-  assert.equal(res.viewData.userEmail, '');
-  assert.equal(res.viewData.userRole, '');
+  expect(res.viewData.userName).toBe('Utilizador');
+  expect(res.viewData.userEmail).toBe('');
+  expect(res.viewData.userRole).toBe('');
 });
 
 test('apps controller includes autenticacao desktop entry', () => {
@@ -54,7 +51,7 @@ test('apps controller includes autenticacao desktop entry', () => {
 
   const authApp = res.viewData.apps.find((app) => app.id === 'autenticacao');
 
-  assert.equal(Boolean(authApp), true);
-  assert.equal(authApp.name, 'Autenticação');
-  assert.equal(authApp.icon, '🔐');
+  expect(authApp).toBeTruthy();
+  expect(authApp.name).toBe('Autenticação');
+  expect(authApp.icon).toBe('🔐');
 });

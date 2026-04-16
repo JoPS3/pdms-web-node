@@ -19,10 +19,10 @@ const gatewayOneDriveDisconnectUrl = isDev ? process.env.GATEWAY_ONEDRIVE_DISCON
 const mapasAuditLogUrl = isDev
   ? (process.env.MAPAS_AUDIT_LOG_URL_DEV
       || process.env.MAPAS_AUDIT_LOG_URL
-      || 'http://localhost:6001/pdms-new/mapas/internal/auditoria/log')
+    || 'http://localhost:6002/pdms-new/mapas/internal/auditoria/log')
   : (process.env.MAPAS_AUDIT_LOG_URL_PROD
       || process.env.MAPAS_AUDIT_LOG_URL
-      || 'http://localhost:6001/pdms/mapas/internal/auditoria/log');
+    || 'http://localhost:6002/pdms/mapas/internal/auditoria/log');
 const assetVersion = String(Date.now());
 
 // Armazena em app settings

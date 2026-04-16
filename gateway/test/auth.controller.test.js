@@ -1,6 +1,3 @@
-const test = require('node:test');
-const assert = require('node:assert/strict');
-
 const authController = require('../src/controllers/auth.controller');
 const { basePath } = require('../src/config/runtime');
 const { createResponseMock } = require('./helpers/http-mocks');
@@ -14,7 +11,7 @@ test('redirectRoot sends authenticated users to apps', () => {
 
   authController.redirectRoot(req, res);
 
-  assert.equal(res.redirectUrl, appsUrl);
+  expect(res.redirectUrl).toBe(appsUrl);
 });
 
 test('redirectRoot sends anonymous users to login', () => {
@@ -23,7 +20,7 @@ test('redirectRoot sends anonymous users to login', () => {
 
   authController.redirectRoot(req, res);
 
-  assert.equal(res.redirectUrl, loginUrl);
+  expect(res.redirectUrl).toBe(loginUrl);
 });
 
 test('renderLogin redirects when already authenticated', () => {
@@ -32,7 +29,7 @@ test('renderLogin redirects when already authenticated', () => {
 
   authController.renderLogin(req, res);
 
-  assert.equal(res.redirectUrl, appsUrl);
+  expect(res.redirectUrl).toBe(appsUrl);
 });
 
 test('renderLogin renders login view for anonymous users', () => {
@@ -41,9 +38,9 @@ test('renderLogin renders login view for anonymous users', () => {
 
   authController.renderLogin(req, res);
 
-  assert.equal(res.view, 'auth/login');
-  assert.equal(res.viewData.pageTitle, 'Login');
-  assert.equal(res.viewData.errorMessage, null);
+  expect(res.view).toBe('auth/login');
+  expect(res.viewData.pageTitle).toBe('Login');
+  expect(res.viewData.errorMessage).toBeNull();
 });
 
 test('render401 returns 401 and proper reason', () => {
@@ -52,7 +49,7 @@ test('render401 returns 401 and proper reason', () => {
 
   authController.render401(req, res, 'not_authenticated');
 
-  assert.equal(res.statusCode, 401);
-  assert.equal(res.view, 'errors/401');
-  assert.equal(res.viewData.reason, 'not_authenticated');
+  expect(res.statusCode).toBe(401);
+  expect(res.view).toBe('errors/401');
+  expect(res.viewData.reason).toBe('not_authenticated');
 });

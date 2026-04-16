@@ -219,8 +219,8 @@ async function updateUserFromEdit(req, res) {
   const mapasAuditLogUrl = req.app?.get('mapasAuditLogUrl')
     || process.env.MAPAS_AUDIT_LOG_URL
     || (process.env.NODE_ENV === 'development'
-      ? 'http://localhost:6001/pdms-new/mapas/internal/auditoria/log'
-      : 'http://localhost:6001/pdms/mapas/internal/auditoria/log');
+      ? 'http://localhost:6002/pdms-new/mapas/internal/auditoria/log'
+      : 'http://localhost:6002/pdms/mapas/internal/auditoria/log');
 
   if (!targetUserId) {
     return res.status(400).json({
@@ -510,8 +510,8 @@ async function changeInternalSessionPassword(req, res) {
   const mapasAuditLogUrl = req.app?.get('mapasAuditLogUrl')
     || process.env.MAPAS_AUDIT_LOG_URL
     || (process.env.NODE_ENV === 'development'
-      ? 'http://localhost:6001/pdms-new/mapas/internal/auditoria/log'
-      : 'http://localhost:6001/pdms/mapas/internal/auditoria/log');
+      ? 'http://localhost:6002/pdms-new/mapas/internal/auditoria/log'
+      : 'http://localhost:6002/pdms/mapas/internal/auditoria/log');
   const currentPassword = String(req.body?.currentPassword || '');
   const newPassword = String(req.body?.newPassword || '');
   const confirmPassword = String(req.body?.confirmPassword || '');

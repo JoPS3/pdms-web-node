@@ -36,7 +36,7 @@ const { createPasswordChangeAuditLog } = require('../src/services/mapas-audit.se
 function createResMock(basePath = '/pdms-new/auth') {
   const res = {
     locals: { basePath },
-    app: { get: jest.fn((key) => (key === 'mapasAuditLogUrl' ? 'http://localhost:6001/pdms-new/mapas/internal/auditoria/log' : undefined)) },
+    app: { get: jest.fn((key) => (key === 'mapasAuditLogUrl' ? 'http://localhost:6002/pdms-new/mapas/internal/auditoria/log' : undefined)) },
     status: jest.fn(),
     render: jest.fn(),
     json: jest.fn()

@@ -31,7 +31,7 @@ Aplicacao Node.js + Express para o modulo `auth`, integrada com autenticacao cen
 Arquivo local: `.env`
 
 - `NODE_ENV=development`
-- `PORT=6002`
+- `PORT=6001`
 - `BASE_PATH_DEV=/pdms-new/auth`
 - `BASE_PATH_PROD=/pdms/auth`
 - `GATEWAY_BASE_PATH_DEV=/pdms-new`
