@@ -43,7 +43,10 @@ async function validateGatewaySession(req) {
 
   const gatewayValidateUrl = req.app.get('gatewayValidateUrl');
   const response = await axios.get(gatewayValidateUrl, {
-    headers: { Cookie: `session_token=${sessionToken}` },
+    headers: {
+      Authorization: `Bearer ${sessionToken}`,
+      Cookie: `session_token=${sessionToken}`
+    },
     timeout: 5000,
     validateStatus: () => true
   });

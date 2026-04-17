@@ -1,6 +1,25 @@
 const { basePath } = require('../config/runtime');
 const AuthService = require('../services/AuthService');
 
+function parseSessionToken(req) {
+  const cookieToken = String(req.cookies?.session_token || '').trim();
+  if (cookieToken) {
+    return cookieToken;
+  }
+
+  const authorization = String(req.headers.authorization || '').trim();
+  if (!authorization) {
+    return '';
+  }
+
+  const [scheme, token] = authorization.split(' ');
+  if (String(scheme || '').toLowerCase() === 'bearer' && String(token || '').trim()) {
+    return String(token).trim();
+  }
+
+  return '';
+}
+
 /**
  * Redireciona root baseado em autenticação
  * Se autenticado → /apps
@@ -282,7 +301,7 @@ async function verifyPassword(req, res) {
  * GET /validate-session
  */
 async function validateSession(req, res) {
-  const sessionToken = req.cookies.session_token;
+  const sessionToken = parseSessionToken(req);
 
   if (!sessionToken) {
     return res.status(401).json({ valid: false, reason: 'no_token' });
