@@ -1,52 +1,46 @@
 # PDMS - Integracao Entre Gateway e Sub-apps
 
-Documento global para padronizar a integracao entre o `pdms-gateway` e as apps de dominio (`mapas`, `vendas`, `compras`, `rh`).
+Documento global para padronizar a integracao entre o `pdms-gateway` e as apps de dominio (`usuarios`, `mapas`, `vendas`, `compras`, `rh`).
 
 ## Principio de arquitetura
 
 - Gateway centraliza autenticacao e sessao.
-- Cada sub-app e independente e pode correr noutro servidor.
-- Sub-app valida sessao no gateway via HTTP (`GET /validate-session`).
-- Nao e necessario proxy interno no gateway para abrir sub-apps.
+- A navegacao externa de apps e canonicamente via gateway: `/apps/<app>`.
+- Sub-apps recebem contexto autenticado por `Authorization: Bearer <token>` e headers `X-Gateway-User-*`.
+- Sub-apps podem validar token via HTTP no gateway em fallback (`GET /validate-session`).
 
 ## Convencao de URLs (obrigatoria)
 
-### 1) Comunicacao interna entre apps (server-to-server)
+### 1) Comunicacao browser
 
-Usar sempre URL interna por porta, incluindo base path de desenvolvimento:
+- URL canonica no gateway:
+  - Dev: `/pdms-new/apps/<app>`
+  - Prod: `/pdms/apps/<app>`
 
-`http://localhost:<porta>/<dev_basepath>/<endpoint>`
+### 2) Comunicacao interna entre servicos
 
-Exemplos:
-- `http://localhost:6000/pdms-new/validate-session`
-- `http://localhost:6000/pdms-new/internal/onedrive/status`
-- `http://localhost:6002/pdms-new/mapas/internal/auditoria/log`
+- Usar URL interna por porta, incluindo base path:
+  - `http://localhost:6000/pdms-new/validate-session`
+  - `http://localhost:6000/pdms-new/internal/onedrive/status`
+  - `http://localhost:6002/pdms-new/mapas/internal/auditoria/log`
 
-### 2) Comunicacao externa (browser)
+### 3) Regra de base path
 
-Usar sempre dominio publico com base path de producao:
-
-`https://<dominio>/<prod_basepath>/<endpoint>`
-
-Exemplos:
-- `https://exemplo.pt/pdms/login`
-- `https://exemplo.pt/pdms/auth`
-- `https://exemplo.pt/pdms/mapas`
-
-### 3) Regra de configuracao de base path
-
-- `BASE_PATH_DEV` e `BASE_PATH_PROD` devem ser lidos do `.env` de cada modulo.
+- `BASE_PATH_DEV` e `BASE_PATH_PROD` devem vir do `.env`.
 - Nao fazer override de `BASE_PATH_*` no `ecosystem.config.cjs`.
-- PM2 deve apenas definir `NODE_ENV`, `PORT` e variaveis de integracao necessarias.
 
 ## Contrato de autenticacao
+
+`Authorization: Bearer <accessToken>` e obrigatorio para comunicacao entre servicos.
+
+`connect.sid` e apenas transporte de compatibilidade para navegacao MPA browser -> gateway.
 
 ### Requisicao
 
 `GET <gatewayBasePath>/validate-session`
 
-- Cookie enviado: `session_token=<valor>`
-- Alternativa service-to-service: `Authorization: Bearer <session_token>`
+- Obrigatorio (service-to-service): `Authorization: Bearer <session_token>`
+- Compatibilidade browser: sessao Express existente
 
 ### Resposta valida (200)
 
@@ -72,49 +66,33 @@ Exemplos:
 
 ## Regras para sub-apps
 
-1. Todas as rotas de negocio devem ser protegidas por middleware de auth.
-2. O middleware deve:
-- Ler cookie `session_token`.
-- Opcionalmente ler `Authorization: Bearer <session_token>` para chamadas entre apps.
-- Chamar `GET /validate-session` no gateway.
-- Em sucesso, popular `req.user`.
-- Em falha, redirecionar para `<gatewayBasePath>/login`.
-3. Rotas internas de integracao (`/internal/*`) devem usar o mesmo mecanismo de validacao de sessao no gateway.
-4. Rotas publicas permitidas: `health` e estaticos basicos.
-5. Todas as views devem usar `basePath` (sem paths absolutos hardcoded).
-6. Se a sub-app tiver launcher proprio, deve disponibilizar acao de logout para o gateway via `POST <gatewayBasePath>/logout`.
+1. Proteger todas as rotas de negocio com middleware de auth.
+2. Ler Bearer token primeiro.
+3. Consumir headers `X-Gateway-User-*` no fast path.
+4. Em fallback, chamar `GET /validate-session` no gateway.
+5. Em falha de auth, redirecionar para `<gatewayBasePath>/login`.
+6. Rotas `/internal/*` devolvem JSON 401/502 quando aplicavel.
+7. Views usam sempre `basePath` e `gatewayBasePath` (sem host hardcoded).
 
 ## Regras para launcher no gateway
 
-1. O launcher (`/apps`) deve expor URL real de cada app.
-2. URLs devem ser configuraveis por ambiente.
-3. Em browser, evitar hardcode de `localhost` em links e redirects.
-4. Em dev, preferir `/pdms-new/<app>`.
-5. Em prod, preferir `/pdms/<app>`.
-
-## Base paths padrao
-
-- Gateway dev: `/pdms-new`
-- Gateway prod: `/pdms`
-- Mapas dev: `/pdms-new/mapas`
-- Mapas prod: `/pdms/mapas`
+1. O launcher em `/apps` expoe links canonicos `/apps/<app>`.
+2. O proxy do gateway reescreve path e `Location` para manter rota canonica.
+3. Nao usar links diretos para `localhost:<porta>` no browser.
 
 ## PM2 (convencao de nomes)
 
 - `pdms-gateway`
+- `pdms-usuarios`
 - `pdms-mapas`
-- `pdms-vendas` (quando existir)
-- `pdms-compras` (quando existir)
-- `pdms-rh` (quando existir)
+- `pdms-vendas`
+- `pdms-compras`
+- `pdms-rh`
 
 ## Checklist de integracao de nova sub-app
 
 1. Definir `BASE_PATH_DEV` e `BASE_PATH_PROD`.
-2. Implementar middleware de validacao no gateway.
-3. Proteger rotas privadas.
-4. Validar fluxo:
-- login gateway -> abrir app
-- voltar ao launcher
-- logout na sub-app (POST gateway logout)
-- logout -> acesso direto redireciona para login
-5. Atualizar launcher do gateway com URL real da app.
+2. Registar app no proxy do gateway com rota canonica `/apps/<app>`.
+3. Implementar middleware auth Bearer-first na sub-app.
+4. Expor rotas tecnicas (`health`, `internal/*`) conforme contrato.
+5. Validar fluxo fim-a-fim: login -> launcher -> app -> logout.

@@ -15,7 +15,8 @@ function parseSessionToken(req) {
 }
 
 async function requireServiceSession(req, res, next) {
-  const sessionToken = parseSessionToken(req);
+  // Aceita Bearer (service-to-service) OU token da sessão Express (browser)
+  const sessionToken = parseSessionToken(req) || String(req.session?.sessionToken || '').trim();
   if (!sessionToken) {
     return res.status(401).json({ valid: false, reason: 'no_token' });
   }

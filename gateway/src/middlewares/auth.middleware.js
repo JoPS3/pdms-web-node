@@ -17,35 +17,26 @@ function parseBearerToken(req) {
 
 /**
  * Middleware de autenticação obrigatória
- * Verifica se utilizador está autenticado (session + token válido)
- * Se não estiver, redireciona para /login
+ * Aceita sessão Express OU Bearer token (Phase 2: stateless)
+ * Se não estiver autenticado, redireciona para /login
  */
 async function requireAuth(req, res, next) {
-  // Se não tem session do utilizador, redireciona
-  if (!req.session.user) {
-    return res.redirect(`${basePath}/login`);
-  }
-
-  // Preferir token guardado na sessão do servidor.
-  const sessionToken = String(req.session.sessionToken || '').trim() || parseBearerToken(req);
+  const bearerToken = parseBearerToken(req);
+  const sessionToken = String(req.session?.sessionToken || '').trim() || bearerToken;
 
   if (!sessionToken) {
-    // Limpa session se não tem token
-    req.session.destroy(() => {});
     return res.redirect(`${basePath}/login`);
   }
 
   try {
-    // Valida token em BD
     const result = await AuthService.validateSession(sessionToken);
 
     if (!result.valid) {
-      // Limpa session se token não é válido
-      req.session.destroy(() => {});
+      if (req.session) req.session.destroy(() => {});
       return res.redirect(`${basePath}/login`);
     }
 
-    // Atualiza session data com dados do BD (garante sincronização)
+    // Popula req.session.user para uso downstream (headers de proxy, etc.)
     req.session.user = {
       id: result.userId,
       userName: result.userName,
@@ -58,7 +49,7 @@ async function requireAuth(req, res, next) {
     return next();
   } catch (error) {
     console.error('Erro ao validar sessão no middleware:', error);
-    req.session.destroy(() => {});
+    if (req.session) req.session.destroy(() => {});
     return res.redirect(`${basePath}/login`);
   }
 }

@@ -156,39 +156,22 @@ async function setPassword(req, res) {
   const { userId, password, passwordConfirm } = req.body;
 
   if (!req.session.tempUser) {
-    return res.redirect(`${basePath}/login`);
+    return res.status(401).json({ status: 'error', error: 'Sessão expirada.', redirect: `${basePath}/login` });
   }
 
-  // Validações
   if (!password || !passwordConfirm) {
-    return res.status(400).render('auth/set-password', {
-      pageTitle: 'Definir Password',
-      userId,
-      userName: req.session.tempUser.userName,
-      errorMessage: 'Introduza e confirme a password.'
-    });
+    return res.status(400).json({ status: 'error', error: 'Introduza e confirme a password.' });
   }
 
   if (password !== passwordConfirm) {
-    return res.status(400).render('auth/set-password', {
-      pageTitle: 'Definir Password',
-      userId,
-      userName: req.session.tempUser.userName,
-      errorMessage: 'As passwords não coincidem.'
-    });
+    return res.status(400).json({ status: 'error', error: 'As passwords não coincidem.' });
   }
 
   if (password.length < 8) {
-    return res.status(400).render('auth/set-password', {
-      pageTitle: 'Definir Password',
-      userId,
-      userName: req.session.tempUser.userName,
-      errorMessage: 'Password deve ter no mínimo 8 caracteres.'
-    });
+    return res.status(400).json({ status: 'error', error: 'Password deve ter no mínimo 8 caracteres.' });
   }
 
   try {
-    // Define password
     const result = await AuthService.setPassword(
       userId,
       password,
@@ -197,15 +180,9 @@ async function setPassword(req, res) {
     );
 
     if (result.error) {
-      return res.status(400).render('auth/set-password', {
-        pageTitle: 'Definir Password',
-        userId,
-        userName: req.session.tempUser.userName,
-        errorMessage: result.error
-      });
+      return res.status(400).json({ status: 'error', error: result.error });
     }
 
-    // Sucesso: armazena dados em sessão
     const user = req.session.tempUser;
     req.session.user = {
       id: result.userId || user.id,
@@ -215,30 +192,24 @@ async function setPassword(req, res) {
       role: result.role
     };
     req.session.sessionToken = result.sessionToken;
-
     delete req.session.tempUser;
 
-    // Save session before redirecting
     return req.session.save((err) => {
       if (err) {
         console.error('Erro ao salvar session após setPassword:', err);
-        return res.status(500).render('auth/set-password', {
-          pageTitle: 'Definir Password',
-          userId,
-          userName: user.userName,
-          errorMessage: 'Erro ao processar autenticação.'
-        });
+        return res.status(500).json({ status: 'error', error: 'Erro ao processar autenticação.' });
       }
-      return res.redirect(`${basePath}/apps`);
+      return res.json({
+        status: 'ok',
+        accessToken: result.sessionToken,
+        refreshToken: null,
+        expiresIn: 1200,
+        redirect: `${basePath}/apps`
+      });
     });
   } catch (error) {
     console.error('Erro ao definir password:', error);
-    return res.status(500).render('auth/set-password', {
-      pageTitle: 'Definir Password',
-      userId,
-      userName: req.session.tempUser.userName,
-      errorMessage: 'Erro ao definir password. Tente novamente.'
-    });
+    return res.status(500).json({ status: 'error', error: 'Erro ao definir password. Tente novamente.' });
   }
 }
 
@@ -270,21 +241,15 @@ async function verifyPassword(req, res) {
   const { userId, password } = req.body;
 
   if (!req.session.tempUser) {
-    return res.redirect(`${basePath}/login`);
+    return res.status(401).json({ status: 'error', error: 'Sessão expirada.', redirect: `${basePath}/login` });
   }
 
   if (!password) {
-    return res.status(400).render('auth/ask-password', {
-      pageTitle: 'Entrar',
-      userId,
-      userName: req.session.tempUser.userName,
-      errorMessage: 'Introduza a password.'
-    });
+    return res.status(400).json({ status: 'error', error: 'Introduza a password.' });
   }
 
   try {
-    // Valida password (precisa de user name para buscar na BD)
-    const result = await AuthService.loginWithPassword(
+    const result = await AuthService.loginWithTokens(
       req.session.tempUser.userName,
       password,
       req.ip,
@@ -292,47 +257,35 @@ async function verifyPassword(req, res) {
     );
 
     if (result.error) {
-      return res.status(401).render('auth/ask-password', {
-        pageTitle: 'Entrar',
-        userId,
-        userName: req.session.tempUser.userName,
-        errorMessage: result.error
-      });
+      return res.status(401).json({ status: 'error', error: result.error });
     }
 
-    // Sucesso: armazena dados em sessão
     req.session.user = {
-      id: result.userId,
-      userName: result.userName,
-      email: result.email,
-      roleId: result.roleId,
-      role: result.role
+      id: result.user.id,
+      userName: result.user.userName,
+      email: result.user.email,
+      roleId: result.user.roleId,
+      role: result.user.role
     };
-    req.session.sessionToken = result.sessionToken;
-
+    req.session.sessionToken = result.accessToken;
     delete req.session.tempUser;
 
-    // Save session before redirecting
     return req.session.save((err) => {
       if (err) {
         console.error('Erro ao salvar session após verifyPassword:', err);
-        return res.status(500).render('auth/ask-password', {
-          pageTitle: 'Entrar',
-          userId,
-          userName: req.session.tempUser?.userName || 'Utilizador',
-          errorMessage: 'Erro ao processar autenticação.'
-        });
+        return res.status(500).json({ status: 'error', error: 'Erro ao processar autenticação.' });
       }
-      return res.redirect(`${basePath}/apps`);
+      return res.json({
+        status: 'ok',
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+        expiresIn: result.expiresIn,
+        redirect: `${basePath}/apps`
+      });
     });
   } catch (error) {
     console.error('Erro ao verificar password:', error);
-    return res.status(500).render('auth/ask-password', {
-      pageTitle: 'Entrar',
-      userId,
-      userName: req.session.tempUser.userName,
-      errorMessage: 'Erro ao processar autenticação. Tente novamente.'
-    });
+    return res.status(500).json({ status: 'error', error: 'Erro ao processar autenticação. Tente novamente.' });
   }
 }
 

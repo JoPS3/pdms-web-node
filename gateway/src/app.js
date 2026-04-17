@@ -42,6 +42,10 @@ app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
+
+// Trust the first proxy (nginx) so req.secure reflects the original HTTPS connection
+app.set('trust proxy', 1);
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET || 'change-me-in-production',
@@ -50,7 +54,8 @@ app.use(
     store: sessionStore,
     cookie: {
       httpOnly: true,
-      sameSite: 'lax'
+      sameSite: 'lax',
+      secure: 'auto'  // true when request is HTTPS (requires trust proxy), false on HTTP
     }
   })
 );

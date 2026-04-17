@@ -43,28 +43,90 @@ const getProxyUrl = (appName) => {
   return hostUrls[appName];
 };
 
-const proxyOptions = {
-  changeOrigin: true,
-  preserveHeaderKeyCase: true,
-  filter: (req, res) => {
-    return req.method !== 'TRACE';
-  },
-  proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
-    const sessionToken = String(srcReq.session?.sessionToken || '').trim();
-    if (sessionToken) {
-      proxyReqOpts.headers['Authorization'] = `Bearer ${sessionToken}`;
-    }
-    const user = srcReq.session?.user;
-    if (user) {
-      proxyReqOpts.headers['X-Gateway-User-Id'] = String(user.id || '');
-      proxyReqOpts.headers['X-Gateway-User-Name'] = String(user.userName || '');
-      proxyReqOpts.headers['X-Gateway-User-Email'] = String(user.email || '');
-      proxyReqOpts.headers['X-Gateway-User-Role'] = String(user.role || '');
-      proxyReqOpts.headers['X-Gateway-User-Role-Id'] = String(user.roleId || '');
-    }
-    return proxyReqOpts;
+function buildProxyReqPath(appName, req) {
+  const originalUrl = String(req.originalUrl || '').trim();
+  if (!originalUrl) {
+    return originalUrl;
   }
-};
+
+  const canonicalSegment = `/apps/${appName}`;
+  if (!originalUrl.includes(canonicalSegment)) {
+    return originalUrl;
+  }
+
+  return originalUrl.replace(canonicalSegment, `/${appName}`);
+}
+
+function rewriteLocationHeader(appName, location) {
+  const rawLocation = String(location || '').trim();
+  if (!rawLocation) {
+    return rawLocation;
+  }
+
+  const basePath = String(process.env.BASE_PATH_DEV || '').replace(/\/+$/, '');
+  const legacyPrefix = `${basePath}/${appName}`;
+  const canonicalPrefix = `${basePath}/apps/${appName}`;
+
+  if (rawLocation.startsWith(legacyPrefix)) {
+    return rawLocation.replace(legacyPrefix, canonicalPrefix);
+  }
+
+  if (!/^https?:\/\//i.test(rawLocation)) {
+    return rawLocation;
+  }
+
+  try {
+    const parsed = new URL(rawLocation);
+    if (parsed.pathname.startsWith(legacyPrefix)) {
+      parsed.pathname = parsed.pathname.replace(legacyPrefix, canonicalPrefix);
+      return parsed.toString();
+    }
+    return rawLocation;
+  } catch (_error) {
+    return rawLocation;
+  }
+}
+
+function buildProxyOptions(appName) {
+  return {
+    changeOrigin: true,
+    preserveHeaderKeyCase: true,
+    filter: (req, res) => {
+      return req.method !== 'TRACE';
+    },
+    proxyReqPathResolver: (req) => {
+      return buildProxyReqPath(appName, req);
+    },
+    proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
+      const sessionToken = String(srcReq.session?.sessionToken || '').trim();
+      if (sessionToken) {
+        proxyReqOpts.headers['Authorization'] = `Bearer ${sessionToken}`;
+      }
+      const user = srcReq.session?.user;
+      if (user) {
+        proxyReqOpts.headers['X-Gateway-User-Id'] = String(user.id || '');
+        proxyReqOpts.headers['X-Gateway-User-Name'] = String(user.userName || '');
+        proxyReqOpts.headers['X-Gateway-User-Email'] = String(user.email || '');
+        proxyReqOpts.headers['X-Gateway-User-Role'] = String(user.role || '');
+        proxyReqOpts.headers['X-Gateway-User-Role-Id'] = String(user.roleId || '');
+      }
+      return proxyReqOpts;
+    },
+    userResHeaderDecorator: (headers = {}) => {
+      const location = headers.location || headers.Location;
+      const rewrittenLocation = rewriteLocationHeader(appName, location);
+      if (rewrittenLocation && rewrittenLocation !== location) {
+        if (headers.location) {
+          headers.location = rewrittenLocation;
+        }
+        if (headers.Location) {
+          headers.Location = rewrittenLocation;
+        }
+      }
+      return headers;
+    }
+  };
+}
 
 /**
  * ALL APPS ROUTES - Centralized routing for all applications
@@ -87,7 +149,11 @@ router.get('/apps', requireAuth, appsController.listApps);
 // Proxy routes to apps - all require auth
 const apps = ['usuarios', 'mapas', 'vendas', 'compras', 'rh'];
 apps.forEach(appName => {
-  router.use(`/${appName}`, requireAuth, httpProxy(getProxyUrl(appName), proxyOptions));
+  // Canonical routes used by desktop links.
+  router.use(`/apps/${appName}`, requireAuth, httpProxy(getProxyUrl(appName), buildProxyOptions(appName)));
+
+  // Backward-compatible legacy routes.
+  router.use(`/${appName}`, requireAuth, httpProxy(getProxyUrl(appName), buildProxyOptions(appName)));
 });
 
 module.exports = router;
