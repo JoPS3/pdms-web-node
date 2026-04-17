@@ -52,15 +52,24 @@ function renderLogin(req, res) {
  * 1. Valida username
  * 2. Se username válido e sem password → redireciona para set-password
  * 3. Se username válido e com password → redireciona para ask-password
+ * 
+ * Phase 2: Suporta também respostas JSON para clientes AJAX
  */
 async function login(req, res) {
   const { username } = req.body;
+  const isJsonRequest = req.headers.accept?.includes('application/json') || 
+                       (req.headers['content-type']?.includes('application/json') && 
+                        req.method === 'POST');
 
   // Validação básica
   if (!username) {
+    const error = 'Introduza um utilizador para continuar.';
+    if (isJsonRequest) {
+      return res.status(400).json({ status: 'error', error });
+    }
     return res.status(400).render('auth/login', {
       pageTitle: 'Login',
-      errorMessage: 'Introduza um utilizador para continuar.'
+      errorMessage: error
     });
   }
 
@@ -69,6 +78,9 @@ async function login(req, res) {
     const result = await AuthService.checkUsername(username.trim());
 
     if (result.error) {
+      if (isJsonRequest) {
+        return res.status(401).json({ status: 'error', error: result.error });
+      }
       return res.status(401).render('auth/login', {
         pageTitle: 'Login',
         errorMessage: result.error
@@ -81,6 +93,19 @@ async function login(req, res) {
       userName: result.userName
     };
 
+    // Para JSON, retornar redirecionamento
+    if (isJsonRequest) {
+      const nextPath = result.status === 'set_password' 
+        ? `${basePath}/set-password` 
+        : `${basePath}/ask-password`;
+      
+      return res.json({
+        status: 'ok',
+        redirect: nextPath
+      });
+    }
+
+    // Para HTML, redirecionar tradicional
     // Se não tem password, vai para set-password
     if (result.status === 'set_password') {
       return res.redirect(`${basePath}/set-password`);
@@ -90,9 +115,13 @@ async function login(req, res) {
     return res.redirect(`${basePath}/ask-password`);
   } catch (error) {
     console.error('Erro ao fazer login:', error);
+    const errorMsg = 'Erro ao processar login. Tente novamente.';
+    if (isJsonRequest) {
+      return res.status(500).json({ status: 'error', error: errorMsg });
+    }
     return res.status(500).render('auth/login', {
       pageTitle: 'Login',
-      errorMessage: 'Erro ao processar login. Tente novamente.'
+      errorMessage: errorMsg
     });
   }
 }
