@@ -43,21 +43,20 @@ class OneDriveDAO {
     await pool.execute(sql, { connectionId, actor });
   }
 
-  async createOrUpdatePendingConnection(userId, actor) {
-    const existing = await this.getActiveConnectionByUser(userId);
-    if (existing) {
-      const updateSql = `
-        UPDATE onedrive_connections
-        SET status = 'pending',
-            changed_at = NOW(),
-            changed_by = :actor
-        WHERE id = :id
-      `;
-      await pool.execute(updateSql, { actor, id: existing.id });
-      return existing.id;
-    }
+  async updateConnectionStatus(connectionId, status, actor) {
+    const sql = `
+      UPDATE onedrive_connections
+      SET status = :status,
+          changed_at = NOW(),
+          changed_by = :actor
+      WHERE id = :connectionId
+    `;
 
-    const insertSql = `
+    await pool.execute(sql, { status, actor, connectionId });
+  }
+
+  async createConnection(userId, actor) {
+    const sql = `
       INSERT INTO onedrive_connections (
         id, owner_user_id, provider, status, created_by
       ) VALUES (
@@ -65,7 +64,7 @@ class OneDriveDAO {
       )
     `;
 
-    await pool.execute(insertSql, { userId, actor });
+    await pool.execute(sql, { userId, actor });
 
     const created = await this.getActiveConnectionByUser(userId);
     return created?.id || null;

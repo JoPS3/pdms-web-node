@@ -13,13 +13,15 @@ function listApps(req, res) {
   const protocol = String(forwardedProto || req.protocol || 'http').trim() || 'http';
   const isProxied = Boolean(forwardedHost || forwardedProto);
 
+  const user = req.authUser || null;
+
   return res.render('apps/index', {
     pageTitle: 'Aplicações',
-    user: req.session.user,
+    user,
     apps: getApps({ host, protocol, isProxied }),
-    userName: req.session.user?.userName || 'Utilizador',
-    userEmail: req.session.user?.email || '',
-    userRole: req.session.user?.role || ''
+    userName: user?.userName || 'Utilizador',
+    userEmail: user?.email || '',
+    userRole: user?.role || ''
   });
 }
 

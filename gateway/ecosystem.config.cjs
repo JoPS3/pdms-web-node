@@ -11,7 +11,9 @@ module.exports = {
       watch_delay: 500,
       env: {
         NODE_ENV: 'development',
-        PORT: 6000
+        PORT: Number(process.env.PORT) || 6000,
+        SESSION_INACTIVITY_MINUTES: Number(process.env.SESSION_INACTIVITY_MINUTES) || 20,
+        SESSION_RENEWAL_THRESHOLD_MINUTES: Number(process.env.SESSION_RENEWAL_THRESHOLD_MINUTES) || 5
       }
     }
   ]

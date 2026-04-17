@@ -3,7 +3,7 @@
  * Tests for: POST /refresh-token endpoint
  */
 
-const authController = require('../src/controllers/auth.controller');
+const authController = require('../src/controllers/auth.api.controller');
 const AuthService = require('../src/services/AuthService');
 const SessionDAO = require('../src/daos/SessionDAO');
 const { createResponseMock } = require('./helpers/http-mocks');

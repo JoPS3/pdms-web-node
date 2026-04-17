@@ -82,6 +82,7 @@ class SessionDAO {
 
       return {
         valid: true,
+        sessionId: session.id,
         userId: session.user_id,
         roleId: session.role_id,
         role: session.role,
@@ -101,7 +102,11 @@ class SessionDAO {
   async invalidate(sessionToken) {
     const sql = `
       UPDATE sessions
-      SET is_valid = 0, changed_at = NOW(), changed_by = :changedBy
+      SET is_valid = 0,
+          refresh_token = NULL,
+          refresh_token_expires_at = NULL,
+          changed_at = NOW(),
+          changed_by = :changedBy
       WHERE session_token = :sessionToken AND is_deleted = 0
     `;
 
@@ -141,7 +146,7 @@ class SessionDAO {
    * @param {number} renewalThresholdMinutes - Minutos antes de expiração para renovar (padrão: 5 min)
    * @returns {Promise<Object>} { valid, userId, roleId, role, userName, email, renewed }
    */
-  async validateAndRenew(sessionToken, renewalThresholdMinutes = 5) {
+  async validateAndRenew(sessionToken, renewalThresholdMinutes = 5, renewalDurationMinutes = 20) {
     const validation = await this.validate(sessionToken);
     
     if (!validation.valid) {
@@ -170,7 +175,7 @@ class SessionDAO {
       // Se faltam menos de X minutos, renovar
       if (minutesLeft < renewalThresholdMinutes) {
         const newExpiresAt = new Date();
-        newExpiresAt.setMinutes(newExpiresAt.getMinutes() + 20); // Renovar com 20 minutos
+        newExpiresAt.setMinutes(newExpiresAt.getMinutes() + renewalDurationMinutes);
 
         const updateSql = `
           UPDATE sessions
@@ -338,6 +343,7 @@ class SessionDAO {
 
       return {
         sessionId: session.id,
+        userId: session.user_id,
         newRefreshToken,
         expiresAt: newExpiresAt
       };

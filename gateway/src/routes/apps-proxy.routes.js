@@ -98,11 +98,11 @@ function buildProxyOptions(appName) {
       return buildProxyReqPath(appName, req);
     },
     proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
-      const sessionToken = String(srcReq.session?.sessionToken || '').trim();
+      const sessionToken = String(srcReq.accessToken || '').trim();
       if (sessionToken) {
         proxyReqOpts.headers['Authorization'] = `Bearer ${sessionToken}`;
       }
-      const user = srcReq.session?.user;
+      const user = srcReq.authUser;
       if (user) {
         proxyReqOpts.headers['X-Gateway-User-Id'] = String(user.id || '');
         proxyReqOpts.headers['X-Gateway-User-Name'] = String(user.userName || '');

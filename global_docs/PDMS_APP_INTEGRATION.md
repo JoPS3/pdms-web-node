@@ -4,7 +4,7 @@ Documento global para padronizar a integracao entre o `pdms-gateway` e as apps d
 
 ## Principio de arquitetura
 
-- Gateway centraliza autenticacao e sessao.
+- Gateway centraliza autenticacao e emissao de tokens.
 - A navegacao externa de apps e canonicamente via gateway: `/apps/<app>`.
 - Sub-apps recebem contexto autenticado por `Authorization: Bearer <token>` e headers `X-Gateway-User-*`.
 - Sub-apps podem validar token via HTTP no gateway em fallback (`GET /validate-session`).
@@ -33,14 +33,17 @@ Documento global para padronizar a integracao entre o `pdms-gateway` e as apps d
 
 `Authorization: Bearer <accessToken>` e obrigatorio para comunicacao entre servicos.
 
-`connect.sid` e apenas transporte de compatibilidade para navegacao MPA browser -> gateway.
+`X-Refresh-Token: <refreshToken>` e opcional quando o caller quer permitir refresh automatico no gateway.
+
+`connect.sid` nao e contrato de autenticacao entre apps. So pode existir no bootstrap temporario do login do gateway.
 
 ### Requisicao
 
 `GET <gatewayBasePath>/validate-session`
 
-- Obrigatorio (service-to-service): `Authorization: Bearer <session_token>`
-- Compatibilidade browser: sessao Express existente
+- Obrigatorio (service-to-service): `Authorization: Bearer <accessToken>`
+- Opcional: `X-Refresh-Token: <refreshToken>`
+- Browser via gateway: cookies HttpOnly do gateway
 
 ### Resposta valida (200)
 
@@ -61,6 +64,24 @@ Documento global para padronizar a integracao entre o `pdms-gateway` e as apps d
 {
   "valid": false,
   "reason": "no_token|expired|invalidated"
+}
+```
+
+### Resposta valida com refresh (200)
+
+```json
+{
+  "valid": true,
+  "userId": "...",
+  "userName": "...",
+  "email": "...",
+  "roleId": "...",
+  "role": "...",
+  "accessToken": "...",
+  "refreshToken": "...",
+  "expiresIn": 1200,
+  "tokenType": "Bearer",
+  "refreshed": true
 }
 ```
 

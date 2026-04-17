@@ -2,7 +2,46 @@ const bcrypt = require('bcrypt');
 const UserDAO = require('../daos/UserDAO');
 const SessionDAO = require('../daos/SessionDAO');
 
+function parsePositiveInt(value, fallback) {
+  const parsed = Number.parseInt(String(value || '').trim(), 10);
+  if (Number.isNaN(parsed) || parsed <= 0) {
+    return fallback;
+  }
+  return parsed;
+}
+
+const SESSION_INACTIVITY_MINUTES = parsePositiveInt(process.env.SESSION_INACTIVITY_MINUTES, 20);
+const rawRenewalThreshold = parsePositiveInt(process.env.SESSION_RENEWAL_THRESHOLD_MINUTES, 5);
+const SESSION_RENEWAL_THRESHOLD_MINUTES = Math.min(
+  rawRenewalThreshold,
+  Math.max(SESSION_INACTIVITY_MINUTES - 1, 1)
+);
+
 class AuthService {
+  async createTokenPairForUser(userId, ipAddress, userAgent) {
+    const accessToken = await SessionDAO.create(
+      userId,
+      ipAddress,
+      userAgent,
+      SESSION_INACTIVITY_MINUTES
+    );
+
+    const sessionValidation = await SessionDAO.validate(accessToken);
+    if (!sessionValidation.valid) {
+      throw new Error('Nao foi possivel validar a sessao criada');
+    }
+
+    const refreshToken = SessionDAO.generateRefreshToken();
+    await SessionDAO.linkRefreshToken(sessionValidation.sessionId, refreshToken, 7);
+
+    return {
+      accessToken,
+      refreshToken,
+      expiresIn: SESSION_INACTIVITY_MINUTES * 60,
+      tokenType: 'Bearer'
+    };
+  }
+
   /**
    * Faz hash de uma password com bcrypt
    * @param {string} password - Password em plain text
@@ -69,13 +108,7 @@ class AuthService {
         return { error: 'Password incorreta' };
       }
 
-      // Cria sessão
-      const sessionToken = await SessionDAO.create(
-        user.id,
-        ipAddress,
-        userAgent,
-        20 // 20 minutos
-      );
+      const tokenPair = await this.createTokenPairForUser(user.id, ipAddress, userAgent);
 
       return {
         success: true,
@@ -84,7 +117,10 @@ class AuthService {
         role: user.role,
         userName: user.user_name,
         email: user.email,
-        sessionToken
+        sessionToken: tokenPair.accessToken,
+        refreshToken: tokenPair.refreshToken,
+        expiresIn: tokenPair.expiresIn,
+        tokenType: tokenPair.tokenType
       };
     } catch (error) {
       throw new Error(`Erro ao fazer login: ${error.message}`);
@@ -98,7 +134,7 @@ class AuthService {
    */
   async validateSession(sessionToken) {
     try {
-      return await SessionDAO.validateAndRenew(sessionToken);
+      return await SessionDAO.validateAndRenew(sessionToken, SESSION_RENEWAL_THRESHOLD_MINUTES, SESSION_INACTIVITY_MINUTES);
     } catch (error) {
       throw new Error(`Erro ao validar e renovar sessão: ${error.message}`);
     }
@@ -237,17 +273,7 @@ class AuthService {
       }
 
       // Atualiza password na BD
-      const updateSql = `
-        UPDATE users 
-        SET password = :password, changed_at = NOW(), changed_by = :changedBy
-        WHERE id = :userId AND is_deleted = 0
-      `;
-
-      await require('../db/pool').execute(updateSql, {
-        password: passwordHash,
-        userId,
-        changedBy: 'gateway-auth'
-      });
+      await UserDAO.updatePassword(userId, passwordHash, 'gateway-auth');
 
       // Cria sessão
       const sessionToken = await SessionDAO.create(
@@ -306,30 +332,7 @@ class AuthService {
         return { error: 'Password incorreta' };
       }
 
-      // Cria sessão no BD
-      const sessionToken = await SessionDAO.create(
-        user.id,
-        ipAddress,
-        userAgent,
-        20 // 20 minutos
-      );
-
-      // Obtém a sessão criada para pegar no ID
-      const sessionValidation = await SessionDAO.validate(sessionToken);
-      
-      if (!sessionValidation.valid) {
-        throw new Error('Não foi possível validar a sessão criada');
-      }
-
-      // Para Phase 2, o accessToken é o mesmo que o sessionToken (pode ser JWT depois)
-      // O refreshToken é um token opaco armazenado na BD
-      const refreshToken = SessionDAO.generateRefreshToken();
-      
-      // Liga refresh token à sessão (expira em 7 dias)
-      await SessionDAO.linkRefreshToken(sessionValidation.userId, refreshToken, 7);
-
-      // TODO: Aqui pode-se gerar um JWT com expiração curta em vez de sessionToken
-      // Para agora, mantemos compatibilidade com o sessionToken
+      const tokenPair = await this.createTokenPairForUser(user.id, ipAddress, userAgent);
 
       return {
         success: true,
@@ -339,10 +342,10 @@ class AuthService {
           email: user.email,
           role: user.role
         },
-        accessToken: sessionToken, // Em Phase 2b, será um JWT com 15 min
-        refreshToken: refreshToken,
-        expiresIn: 900, // 15 minutos (em segundos)
-        tokenType: 'Bearer'
+        accessToken: tokenPair.accessToken,
+        refreshToken: tokenPair.refreshToken,
+        expiresIn: tokenPair.expiresIn,
+        tokenType: tokenPair.tokenType
       };
     } catch (error) {
       throw new Error(`Erro ao fazer login com tokens: ${error.message}`);
@@ -365,20 +368,25 @@ class AuthService {
         userAgent
       );
 
-      // Cria novo sessionToken (accessToken) para a sessão
-      // TODO: Em Phase 2b, isso será um JWT com expiração curta
-      const newSessionToken = await SessionDAO.create(
-        rotationResult.sessionId,
+      const accessToken = await SessionDAO.create(
+        rotationResult.userId,
         ipAddress,
         userAgent,
-        20 // 20 minutos
+        20
       );
+
+      const sessionValidation = await SessionDAO.validate(accessToken);
+      if (!sessionValidation.valid) {
+        throw new Error('Nao foi possivel validar a sessao apos refresh');
+      }
+
+      await SessionDAO.linkRefreshToken(sessionValidation.sessionId, rotationResult.newRefreshToken, 7);
 
       return {
         success: true,
-        accessToken: newSessionToken, // Em Phase 2b, será um JWT com 15 min
+        accessToken,
         refreshToken: rotationResult.newRefreshToken,
-        expiresIn: 900, // 15 minutos (em segundos)
+        expiresIn: 1200,
         tokenType: 'Bearer'
       };
     } catch (error) {

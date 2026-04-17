@@ -1,11 +1,9 @@
 const { listApps } = require('../src/controllers/apps.controller');
 const { createResponseMock } = require('./helpers/http-mocks');
 
-function createRequest(sessionUser = {}) {
+function createRequest(authUser = {}) {
   return {
-    session: {
-      user: sessionUser
-    },
+    authUser,
     hostname: 'localhost',
     protocol: 'http',
     get: () => ''

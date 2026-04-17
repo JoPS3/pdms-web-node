@@ -93,16 +93,16 @@ All apps **must**:
 2. ✅ Support being accessed via `http://localhost:<port>/` in dev
 3. ✅ Handle authentication via token in `Authorization` header
 4. ✅ Implement their own routes (the gateway only proxies)
-5. ✅ Use the same token-client pattern for token management
+5. ✅ Use the same gateway token contract for token validation and proxy access
 
 ## Token Integration
 
-All apps share the same token management:
+All apps share the same gateway token contract:
 
-1. **Token Client**: `gateway/src/public/scripts/token-client.js`
-2. **Storage**: `sessionStorage` (cleared on tab close)
-3. **Auto-Refresh**: Automatic refresh 5 minutes before expiry
-4. **Error Handling**: Auto-refresh on 401 responses
+1. **Browser Flow**: auth cookies are managed by the gateway
+2. **Proxy Flow**: apps receive `Authorization: Bearer <accessToken>` and `X-Gateway-User-*`
+3. **Fallback Flow**: apps call gateway `GET /validate-session` when the request reaches them directly
+4. **Refresh Flow**: apps may send `X-Refresh-Token` if they need refresh fallback during validation
 
 ## Example: Complete Checklist for New App
 
@@ -114,7 +114,7 @@ All apps share the same token management:
 □ Add to apps.js config/apps.js list
 □ Implement auth middleware to validate Bearer token
 □ Test via http://localhost:6000/pdms-new/newapp/
-□ Verify token auto-refresh works
+□ Verify gateway refresh fallback works
 □ Add .env production URL
 ```
 
@@ -122,7 +122,7 @@ All apps share the same token management:
 
 - 🔐 **Single Auth Gateway**: All authentication flows through one point
 - 📊 **Monitoring**: Centralized logging and metrics
-- 🔄 **Token Management**: Shared token lifecycle
+- 🔄 **Token Management**: Shared gateway-managed token lifecycle
 - 🚀 **Scalability**: Easy to add apps without modifying multiple files
 - 📝 **Consistency**: All apps follow the same routing pattern
 
@@ -130,5 +130,4 @@ All apps share the same token management:
 
 - `gateway/src/routes/apps-proxy.routes.js` - Centralized proxy configuration
 - `gateway/src/config/apps.js` - Apps metadata and URLs
-- `gateway/src/public/scripts/token-client.js` - Client-side token management
 - `gateway/src/middlewares/auth.middleware.js` - Authentication enforcement

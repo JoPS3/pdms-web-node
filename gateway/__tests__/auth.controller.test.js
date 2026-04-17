@@ -1,42 +1,51 @@
-const authController = require('../src/controllers/auth.controller');
+const authController = require('../src/controllers/auth.gui.controller');
+const AuthService = require('../src/services/AuthService');
 const { basePath } = require('../src/config/runtime');
 const { createResponseMock } = require('./helpers/http-mocks');
+
+jest.mock('../src/services/AuthService');
 
 const appsUrl = `${basePath}/apps`;
 const loginUrl = `${basePath}/login`;
 
-test('redirectRoot sends authenticated users to apps', () => {
-  const req = { session: { user: { id: 'u1' } } };
+test('redirectRoot sends authenticated users to apps', async () => {
+  AuthService.validateSession.mockResolvedValue({ valid: true });
+  const req = {
+    headers: { authorization: 'Bearer token-123' },
+    cookies: {},
+    ip: '127.0.0.1',
+    get: jest.fn(() => 'agent')
+  };
   const res = createResponseMock();
 
-  authController.redirectRoot(req, res);
+  await authController.redirectRoot(req, res);
 
   expect(res.redirectUrl).toBe(appsUrl);
 });
 
-test('redirectRoot sends anonymous users to login', () => {
-  const req = { session: {} };
+test('redirectRoot sends anonymous users to login', async () => {
+  const req = { headers: {}, cookies: {} };
   const res = createResponseMock();
 
-  authController.redirectRoot(req, res);
+  await authController.redirectRoot(req, res);
 
   expect(res.redirectUrl).toBe(loginUrl);
 });
 
-test('renderLogin redirects when already authenticated', () => {
-  const req = { session: { user: { id: 'u1' } } };
+test('renderLogin redirects when already authenticated', async () => {
+  const req = { headers: { authorization: 'Bearer token-123' }, cookies: {} };
   const res = createResponseMock();
 
-  authController.renderLogin(req, res);
+  await authController.renderLogin(req, res);
 
   expect(res.redirectUrl).toBe(appsUrl);
 });
 
-test('renderLogin renders login view for anonymous users', () => {
-  const req = { session: {} };
+test('renderLogin renders login view for anonymous users', async () => {
+  const req = { headers: {}, cookies: {} };
   const res = createResponseMock();
 
-  authController.renderLogin(req, res);
+  await authController.renderLogin(req, res);
 
   expect(res.view).toBe('auth/login');
   expect(res.viewData.pageTitle).toBe('Login');

@@ -92,6 +92,20 @@ class UserDAO {
       throw new Error(`Erro ao buscar utilizador por ID: ${error.message}`);
     }
   }
+
+  async updatePassword(userId, passwordHash, changedBy) {
+    const sql = `
+      UPDATE users
+      SET password = :passwordHash, changed_at = NOW(), changed_by = :changedBy
+      WHERE id = :userId AND is_deleted = 0
+    `;
+
+    try {
+      await pool.execute(sql, { userId, passwordHash, changedBy });
+    } catch (error) {
+      throw new Error(`Erro ao atualizar password: ${error.message}`);
+    }
+  }
 }
 
 module.exports = new UserDAO();

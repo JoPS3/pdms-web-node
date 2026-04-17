@@ -24,12 +24,10 @@
       <p class="hint">Apenas utilizadores autorizados podem entrar. Introduza o seu utilizador para continuar.</p>
     </main>
 
-    <!-- Phase 2: Token client library for handling Bearer tokens -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="<%= basePath %>/scripts/token-client.js"></script>
 
     <script>
-      (function initLoginFormPhase2() {
+      (function initLoginForm() {
         const form = document.getElementById('login-form');
         const statusDiv = document.getElementById('status');
         const basePath = '<%= basePath %>';
@@ -44,22 +42,9 @@
           }
 
           try {
-            // Use token client to make the request
-            const response = await window.pdmsHttpClient.post(`${basePath}/login`, { username });
+            const response = await axios.post(`${basePath}/login`, { username });
 
             if (response.status === 200 && response.data.status === 'ok') {
-              // Phase 2: Store tokens if present
-              if (response.data.accessToken && response.data.refreshToken) {
-                window.pdmsTokenClient.setTokens(
-                  response.data.accessToken,
-                  response.data.refreshToken,
-                  response.data.expiresIn
-                );
-                window.pdmsTokenClient.setupAutoRefresh();
-              }
-
-              // For now, redirect to the same /login endpoint to continue flow
-              // (which will redirect to /set-password or /ask-password)
               window.location.href = response.data.redirect || `${basePath}/login`;
             }
           } catch (error) {

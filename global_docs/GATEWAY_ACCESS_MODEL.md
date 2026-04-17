@@ -4,10 +4,21 @@
 
 O gateway e o ponto de entrada unico do PDMS e concentra:
 
-1. Autenticacao e sessao.
+1. Autenticacao.
 2. Launcher de apps (`/apps`).
 3. Proxy canonico para sub-apps (`/apps/<app>`).
-4. Validacao de sessao (`/validate-session`).
+4. Validacao e refresh de tokens (`/validate-session`, `/refresh-token`).
+
+## Contrato Atual
+
+O modelo oficial e `accessToken + refreshToken`.
+
+1. O browser recebe ambos no login final.
+2. O browser nao guarda tokens em `sessionStorage`.
+3. O gateway persiste tokens em cookies HttpOnly no seu dominio.
+4. Requests protegidos usam o `accessToken`.
+5. Se o `accessToken` falhar e existir `refreshToken`, o gateway tenta refresh automaticamente.
+6. Se o refresh falhar, o acesso volta a login.
 
 ## Modelo de Navegacao
 
@@ -20,44 +31,50 @@ O browser nao deve navegar para `localhost:<porta>` diretamente.
 
 ### Service-to-service
 
-- Uso obrigatorio de Bearer token.
+- Uso obrigatorio de `Authorization: Bearer <accessToken>`.
+- Pode enviar `X-Refresh-Token: <refreshToken>` quando quiser permitir refresh remoto.
 - Validacao por `GET /validate-session`.
-
-## Modelo de Autenticacao
-
-### Regra principal
-
-`Authorization: Bearer <accessToken>` e o mecanismo obrigatorio entre servicos.
-
-### Compatibilidade
-
-`connect.sid` e mantido apenas para navegacao MPA browser -> gateway.
 
 ## Pipeline de Request Protegida
 
-1. Request chega ao gateway.
-2. Middleware `requireAuth` resolve token por prioridade:
-   - Bearer header
-   - `req.session.sessionToken`
-3. Gateway valida sessao em base de dados.
-4. Em sucesso, popula `req.session.user`.
-5. No proxy para sub-app, injeta:
-   - `Authorization: Bearer <token>`
+1. O request chega ao gateway.
+2. O middleware `requireAuth` resolve o `accessToken` por prioridade:
+   - `Authorization: Bearer <accessToken>`
+   - cookie HttpOnly `pdms_access_token`
+3. Resolve o `refreshToken` por prioridade:
+   - header `X-Refresh-Token`
+   - cookie HttpOnly `pdms_refresh_token`
+4. Valida `accessToken` na tabela `sessions`.
+5. Se o `accessToken` falhar mas houver `refreshToken`, tenta refresh automatico.
+6. Em sucesso, o gateway injeta no proxy:
+   - `Authorization: Bearer <accessToken>`
    - `X-Gateway-User-*`
+7. Em falha definitiva, limpa cookies de auth e redireciona para login.
 
-## Fluxo de Login Atual
+## Login e Logout
 
-1. `POST /login` valida username e devolve proximo passo.
-2. `POST /verify-password` ou `POST /set-password` devolve JSON com tokens e `redirect`.
-3. Cliente guarda tokens em `sessionStorage`.
-4. Cliente envia Bearer automaticamente (interceptor HTTP).
+### Login
+
+1. `POST /login` valida username e devolve o proximo passo.
+2. `POST /verify-password` ou `POST /set-password` conclui autenticacao.
+3. O gateway responde com `Set-Cookie` para `pdms_access_token` e `pdms_refresh_token`.
+4. O browser segue para `/apps` sem precisar de `sessionStorage`.
+
+### Logout
+
+1. `POST /logout` invalida a sessao em BD.
+2. O gateway limpa `pdms_access_token` e `pdms_refresh_token`.
 
 ## Contratos Relevantes
 
 ### `GET /validate-session`
 
-- Entrada: `Authorization: Bearer <accessToken>` (ou fallback de sessao interna)
-- Saida valida:
+Entrada:
+
+- `Authorization: Bearer <accessToken>` ou cookie `pdms_access_token`
+- opcionalmente `X-Refresh-Token: <refreshToken>` ou cookie `pdms_refresh_token`
+
+Saida valida:
 
 ```json
 {
@@ -70,22 +87,48 @@ O browser nao deve navegar para `localhost:<porta>` diretamente.
 }
 ```
 
+Se precisar de refresh e ele for bem-sucedido, a resposta pode incluir tambem:
+
+```json
+{
+  "accessToken": "...",
+  "refreshToken": "...",
+  "expiresIn": 1200,
+  "tokenType": "Bearer",
+  "refreshed": true
+}
+```
+
 ### `POST /refresh-token`
 
-- Entrada: `refreshToken`
-- Saida: novos `accessToken` e `refreshToken`
+Entrada:
+
+- body `refreshToken`, ou
+- header `X-Refresh-Token`, ou
+- cookie `pdms_refresh_token`
+
+Saida:
+
+```json
+{
+  "status": "ok",
+  "accessToken": "...",
+  "refreshToken": "...",
+  "expiresIn": 1200,
+  "tokenType": "Bearer"
+}
+```
 
 ## Sub-apps
 
 As sub-apps devem:
 
 1. Aplicar middleware auth Bearer-first.
-2. Usar fast path por headers `X-Gateway-User-*`.
-3. Fazer fallback para `/validate-session` quando necessario.
+2. Usar fast path por headers `X-Gateway-User-*` quando o request veio pelo proxy do gateway.
+3. Fazer fallback para `GET /validate-session` quando o request chegar diretamente ao servico.
 4. Redirecionar para `/login` em falha de auth.
 
-## Decisoes de Arquitetura
+## Nota Importante
 
-1. Proxy no gateway e padrao oficial de abertura de apps.
-2. Bearer e contrato oficial entre servicos.
-3. Cookie nao e contrato de autenticacao entre servicos.
+`connect.sid` continua a existir apenas para o passo temporario de bootstrap do login em duas etapas (`tempUser`).
+Nao e parte do contrato oficial de autenticacao das apps.

@@ -1,19 +1,11 @@
 const { basePath } = require('../config/runtime');
 const AuthService = require('../services/AuthService');
-
-function parseBearerToken(req) {
-  const authorization = String(req.headers.authorization || '').trim();
-  if (!authorization) {
-    return '';
-  }
-
-  const [scheme, token] = authorization.split(' ');
-  if (String(scheme || '').toLowerCase() === 'bearer' && String(token || '').trim()) {
-    return String(token).trim();
-  }
-
-  return '';
-}
+const {
+  getAccessToken,
+  getRefreshToken,
+  setAuthCookies,
+  clearAuthCookies
+} = require('../utils/authTokens');
 
 /**
  * Middleware de autenticação obrigatória
@@ -21,35 +13,54 @@ function parseBearerToken(req) {
  * Se não estiver autenticado, redireciona para /login
  */
 async function requireAuth(req, res, next) {
-  const bearerToken = parseBearerToken(req);
-  const sessionToken = String(req.session?.sessionToken || '').trim() || bearerToken;
+  const sessionToken = getAccessToken(req);
+  const refreshToken = getRefreshToken(req);
 
   if (!sessionToken) {
+    clearAuthCookies(req, res);
     return res.redirect(`${basePath}/login`);
   }
 
   try {
-    const result = await AuthService.validateSession(sessionToken);
+    let result = await AuthService.validateSession(sessionToken);
+    let effectiveAccessToken = sessionToken;
+
+    if (!result.valid && refreshToken) {
+      const refreshResult = await AuthService.refreshTokens(
+        refreshToken,
+        req.ip,
+        req.get('user-agent')
+      );
+
+      if (!refreshResult.error) {
+        effectiveAccessToken = refreshResult.accessToken;
+        result = await AuthService.validateSession(effectiveAccessToken);
+        if (result.valid) {
+          setAuthCookies(req, res, refreshResult.accessToken, refreshResult.refreshToken);
+          res.set('x-access-token', refreshResult.accessToken);
+          res.set('x-refresh-token', refreshResult.refreshToken);
+        }
+      }
+    }
 
     if (!result.valid) {
-      if (req.session) req.session.destroy(() => {});
+      clearAuthCookies(req, res);
       return res.redirect(`${basePath}/login`);
     }
 
-    // Popula req.session.user para uso downstream (headers de proxy, etc.)
-    req.session.user = {
+    req.authUser = {
       id: result.userId,
       userName: result.userName,
       email: result.email,
       roleId: result.roleId,
       role: result.role
     };
-    req.session.sessionToken = sessionToken;
+    req.accessToken = effectiveAccessToken;
 
     return next();
   } catch (error) {
     console.error('Erro ao validar sessão no middleware:', error);
-    if (req.session) req.session.destroy(() => {});
+    clearAuthCookies(req, res);
     return res.redirect(`${basePath}/login`);
   }
 }
@@ -60,13 +71,13 @@ async function requireAuth(req, res, next) {
  */
 function requireRole(role) {
   return (req, res, next) => {
-    if (!req.session.user) {
+    if (!req.authUser) {
       return res.status(401).json({ error: 'Not authenticated' });
     }
 
     // Aqui iria buscar nome do role_id da BD
     // Por enquanto, deixamos apenas verificar que roleId existe
-    if (!req.session.user.roleId) {
+    if (!req.authUser.roleId) {
       return res.status(403).json({ error: 'No role assigned' });
     }
 

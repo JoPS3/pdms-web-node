@@ -1,62 +1,18 @@
 const { basePath } = require('../config/runtime');
 const AuthService = require('../services/AuthService');
+const {
+  getAccessToken,
+  getRefreshToken,
+  setAuthCookies,
+  clearAuthCookies
+} = require('../utils/authTokens');
 
-function parseSessionToken(req) {
-  const authorization = String(req.headers.authorization || '').trim();
-  if (!authorization) {
-    return '';
-  }
-
-  const [scheme, token] = authorization.split(' ');
-  if (String(scheme || '').toLowerCase() === 'bearer' && String(token || '').trim()) {
-    return String(token).trim();
-  }
-
-  return '';
-}
-
-/**
- * Redireciona root baseado em autenticação
- * Se autenticado → /apps
- * Se não autenticado → /login
- */
-function redirectRoot(req, res) {
-  if (req.session.user) {
-    return res.redirect(`${basePath}/apps`);
-  }
-  return res.redirect(`${basePath}/login`);
-}
-
-/**
- * Renderiza página de login
- * Redireciona se já autenticado
- */
-function renderLogin(req, res) {
-  if (req.session.user) {
-    return res.redirect(`${basePath}/apps`);
-  }
-
-  return res.render('auth/login', {
-    pageTitle: 'Login',
-    errorMessage: null
-  });
-}
-
-/**
- * Processa login POST - 1º passo
- * 1. Valida username
- * 2. Se username válido e sem password → redireciona para set-password
- * 3. Se username válido e com password → redireciona para ask-password
- * 
- * Phase 2: Suporta também respostas JSON para clientes AJAX
- */
 async function login(req, res) {
   const { username } = req.body;
-  const isJsonRequest = req.headers.accept?.includes('application/json') || 
-                       (req.headers['content-type']?.includes('application/json') && 
+  const isJsonRequest = req.headers.accept?.includes('application/json') ||
+                       (req.headers['content-type']?.includes('application/json') &&
                         req.method === 'POST');
 
-  // Validação básica
   if (!username) {
     const error = 'Introduza um utilizador para continuar.';
     if (isJsonRequest) {
@@ -69,7 +25,6 @@ async function login(req, res) {
   }
 
   try {
-    // Verifica se username existe e o status
     const result = await AuthService.checkUsername(username.trim());
 
     if (result.error) {
@@ -82,38 +37,29 @@ async function login(req, res) {
       });
     }
 
-    // Armazena em session temporário
     req.session.tempUser = {
       id: result.userId,
       userName: result.userName
     };
 
-    // Para JSON, retornar redirecionamento
     if (isJsonRequest) {
-      const nextPath = result.status === 'set_password' 
-        ? `${basePath}/set-password` 
+      const nextPath = result.status === 'set_password'
+        ? `${basePath}/set-password`
         : `${basePath}/ask-password`;
-      
-      // Save session before responding with JSON
+
       return req.session.save((err) => {
         if (err) {
           console.error('Erro ao salvar session tempUser:', err);
           return res.status(500).json({ status: 'error', error: 'Erro ao processar login.' });
         }
-        return res.json({
-          status: 'ok',
-          redirect: nextPath
-        });
+        return res.json({ status: 'ok', redirect: nextPath });
       });
     }
 
-    // Para HTML, redirecionar tradicional
-    // Se não tem password, vai para set-password
     if (result.status === 'set_password') {
       return res.redirect(`${basePath}/set-password`);
     }
 
-    // Se tem password, vai para ask-password
     return res.redirect(`${basePath}/ask-password`);
   } catch (error) {
     console.error('Erro ao fazer login:', error);
@@ -128,30 +74,6 @@ async function login(req, res) {
   }
 }
 
-/**
- * Renderiza página de set-password
- * Usada quando user não tem password definida
- */
-function renderSetPassword(req, res) {
-  if (!req.session.tempUser) {
-    return res.redirect(`${basePath}/login`);
-  }
-
-  return res.render('auth/set-password', {
-    pageTitle: 'Definir Password',
-    userId: req.session.tempUser.id,
-    userName: req.session.tempUser.userName,
-    errorMessage: null
-  });
-}
-
-/**
- * Processa form set-password
- * 1. Valida nova password
- * 2. Faz hash e atualiza na BD
- * 3. Cria sessão
- * 4. Redireciona para /apps
- */
 async function setPassword(req, res) {
   const { userId, password, passwordConfirm } = req.body;
 
@@ -191,7 +113,7 @@ async function setPassword(req, res) {
       roleId: result.roleId,
       role: result.role
     };
-    req.session.sessionToken = result.sessionToken;
+    setAuthCookies(req, res, result.sessionToken, result.refreshToken);
     delete req.session.tempUser;
 
     return req.session.save((err) => {
@@ -202,8 +124,8 @@ async function setPassword(req, res) {
       return res.json({
         status: 'ok',
         accessToken: result.sessionToken,
-        refreshToken: null,
-        expiresIn: 1200,
+        refreshToken: result.refreshToken,
+        expiresIn: result.expiresIn || 1200,
         redirect: `${basePath}/apps`
       });
     });
@@ -213,32 +135,8 @@ async function setPassword(req, res) {
   }
 }
 
-/**
- * Renderiza página ask-password
- * Usada quando user já tem password definida
- */
-function renderAskPassword(req, res) {
-  if (!req.session.tempUser) {
-    return res.redirect(`${basePath}/login`);
-  }
-
-  return res.render('auth/ask-password', {
-    pageTitle: 'Entrar',
-    userId: req.session.tempUser.id,
-    userName: req.session.tempUser.userName,
-    errorMessage: null
-  });
-}
-
-/**
- * Processa form verify-password (2º passo)
- * 1. Valida password
- * 2. Cria sessão em BD
- * 3. Armazena em session e cookie
- * 4. Redireciona para /apps
- */
 async function verifyPassword(req, res) {
-  const { userId, password } = req.body;
+  const { password } = req.body;
 
   if (!req.session.tempUser) {
     return res.status(401).json({ status: 'error', error: 'Sessão expirada.', redirect: `${basePath}/login` });
@@ -267,7 +165,7 @@ async function verifyPassword(req, res) {
       roleId: result.user.roleId,
       role: result.user.role
     };
-    req.session.sessionToken = result.accessToken;
+    setAuthCookies(req, res, result.accessToken, result.refreshToken);
     delete req.session.tempUser;
 
     return req.session.save((err) => {
@@ -289,22 +187,43 @@ async function verifyPassword(req, res) {
   }
 }
 
-/**
- * Valida sessão ativa
- * Usado por outras apps para verificar se token ainda é válido
- * GET /validate-session
- */
 async function validateSession(req, res) {
-  const sessionToken = parseSessionToken(req);
+  const sessionToken = getAccessToken(req);
+  const refreshToken = getRefreshToken(req);
 
   if (!sessionToken) {
     return res.status(401).json({ valid: false, reason: 'no_token' });
   }
 
   try {
-    const result = await AuthService.validateSession(sessionToken);
+    let result = await AuthService.validateSession(sessionToken);
+
+    if (!result.valid && refreshToken) {
+      const refreshResult = await AuthService.refreshTokens(
+        refreshToken,
+        req.ip,
+        req.get('user-agent')
+      );
+
+      if (!refreshResult.error) {
+        const refreshedValidation = await AuthService.validateSession(refreshResult.accessToken);
+        if (refreshedValidation.valid) {
+          setAuthCookies(req, res, refreshResult.accessToken, refreshResult.refreshToken);
+
+          return res.json({
+            ...refreshedValidation,
+            accessToken: refreshResult.accessToken,
+            refreshToken: refreshResult.refreshToken,
+            expiresIn: refreshResult.expiresIn,
+            tokenType: refreshResult.tokenType,
+            refreshed: true
+          });
+        }
+      }
+    }
 
     if (!result.valid) {
+      clearAuthCookies(req, res);
       return res.status(401).json(result);
     }
 
@@ -315,54 +234,9 @@ async function validateSession(req, res) {
   }
 }
 
-/**
- * Faz logout
- * 1. Marca sessão como inválida em BD
- * 2. Limpa session
- * 3. Remove cookie
- * 4. Redireciona para /login
- */
-async function logout(req, res) {
-  const sessionToken = parseSessionToken(req) || String(req.session?.sessionToken || '').trim();
-
-  try {
-    // Marca sessão como inválida em BD
-    if (sessionToken) {
-      await AuthService.logout(sessionToken);
-    }
-
-    // Limpa session Express
-    req.session.destroy(() => {
-      res.redirect(`${basePath}/login`);
-    });
-  } catch (error) {
-    console.error('Erro ao fazer logout:', error);
-    // Mesmo com erro, limpa tudo
-    req.session.destroy(() => {
-      res.redirect(`${basePath}/login`);
-    });
-  }
-}
-
-/**
- * Renderiza página de erro 401 (Unauthorized)
- * Usado quando acesso é negado
- */
-function render401(req, res, reason = 'unauthorized') {
-  return res.status(401).render('errors/401', {
-    basePath,
-    reason
-  });
-}
-
-/**
- * Phase 2: Endpoint para renovação de tokens
- * POST /refresh-token
- * Body: { refreshToken }
- * Returns: { accessToken, refreshToken, expiresIn, tokenType } ou { error, code }
- */
 async function refreshToken(req, res) {
-  const { refreshToken } = req.body;
+  const bodyRefreshToken = String(req.body?.refreshToken || '').trim();
+  const refreshToken = bodyRefreshToken || getRefreshToken(req);
 
   if (!refreshToken) {
     return res.status(400).json({
@@ -380,6 +254,7 @@ async function refreshToken(req, res) {
     );
 
     if (result.error) {
+      clearAuthCookies(req, res);
       return res.status(401).json({
         status: 'error',
         code: result.code || 'REFRESH_FAILED',
@@ -387,7 +262,8 @@ async function refreshToken(req, res) {
       });
     }
 
-    // Sucesso: retorna novos tokens
+    setAuthCookies(req, res, result.accessToken, result.refreshToken);
+
     return res.json({
       status: 'ok',
       accessToken: result.accessToken,
@@ -406,15 +282,9 @@ async function refreshToken(req, res) {
 }
 
 module.exports = {
-  redirectRoot,
-  renderLogin,
   login,
-  renderSetPassword,
   setPassword,
-  renderAskPassword,
   verifyPassword,
-  logout,
   validateSession,
-  render401,
   refreshToken
 };
