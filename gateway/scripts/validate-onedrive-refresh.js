@@ -103,7 +103,7 @@ async function callOneDriveStatus(statusUrl, sessionToken) {
     const req = client.request(parsed, {
       method: 'GET',
       headers: {
-        'x-session-token': sessionToken,
+        Authorization: `Bearer ${sessionToken}`,
         Accept: 'application/json'
       }
     }, (res) => {

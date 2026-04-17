@@ -21,7 +21,7 @@ const router = express.Router();
 const getProxyUrl = (appName) => {
   const isDev = process.env.NODE_ENV === 'development';
   const ports = {
-    usuarios: process.env.USUARIOS_PORT_DEV || process.env.USUARIOS_PORT || process.env.AUTH_PORT_DEV || process.env.AUTH_PORT || 6001,
+    usuarios: process.env.USUARIOS_PORT_DEV || process.env.USUARIOS_PORT || 6001,
     mapas: process.env.MAPAS_PORT_DEV || 6002,
     vendas: process.env.VENDAS_PORT_DEV || 6003,
     compras: process.env.COMPRAS_PORT_DEV || 6004,
@@ -29,7 +29,7 @@ const getProxyUrl = (appName) => {
   };
 
   const hostUrls = {
-    usuarios: process.env.USUARIOS_URL || process.env.AUTH_URL,
+    usuarios: process.env.USUARIOS_URL,
     mapas: process.env.MAPAS_URL,
     vendas: process.env.VENDAS_URL,
     compras: process.env.COMPRAS_URL,

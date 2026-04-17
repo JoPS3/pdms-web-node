@@ -7,8 +7,6 @@ function getApps(runtime = {}) {
   const usuariosPort = Number(
     process.env.USUARIOS_PORT
     || process.env.USUARIOS_PORT_DEV
-    || process.env.AUTH_PORT
-    || process.env.AUTH_PORT_DEV
     || 6001
   );
   const mapasPort = Number(process.env.MAPAS_PORT || process.env.MAPAS_PORT_DEV || 6002);
@@ -25,7 +23,7 @@ function getApps(runtime = {}) {
     return raw || withBasePath(fallbackPath);
   };
 
-  const usuariosUrl = String(process.env.APP_USUARIOS_URL_DEV || process.env.APP_AUTH_URL_DEV || '').trim()
+  const usuariosUrl = String(process.env.APP_USUARIOS_URL_DEV || '').trim()
     || withBasePath('/usuarios');
   const mapasUrl = byEnvOrDefault('APP_MAPAS_URL_DEV', '/mapas');
 

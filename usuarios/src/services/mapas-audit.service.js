@@ -36,8 +36,7 @@ async function createPasswordChangeAuditLog({
     },
     {
       headers: {
-        Authorization: `Bearer ${sessionToken}`,
-        Cookie: `session_token=${sessionToken}`
+        Authorization: `Bearer ${sessionToken}`
       },
       timeout: 5000,
       validateStatus: () => true
@@ -94,8 +93,7 @@ async function createUserUpdateAuditLog({
     },
     {
       headers: {
-        Authorization: `Bearer ${sessionToken}`,
-        Cookie: `session_token=${sessionToken}`
+        Authorization: `Bearer ${sessionToken}`
       },
       timeout: 5000,
       validateStatus: () => true

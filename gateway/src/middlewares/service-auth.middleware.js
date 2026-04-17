@@ -1,16 +1,6 @@
 const AuthService = require('../services/AuthService');
 
 function parseSessionToken(req) {
-  const cookieToken = String(req.cookies?.session_token || '').trim();
-  if (cookieToken) {
-    return cookieToken;
-  }
-
-  const headerToken = String(req.headers['x-session-token'] || '').trim();
-  if (headerToken) {
-    return headerToken;
-  }
-
   const authorization = String(req.headers.authorization || '').trim();
   if (!authorization) {
     return '';

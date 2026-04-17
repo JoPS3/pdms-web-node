@@ -367,8 +367,7 @@ async function getInternalOneDriveStatus(req, res) {
   try {
     const response = await axios.get(gatewayUrl, {
       headers: {
-        Cookie: `session_token=${sessionToken}`,
-        'x-session-token': sessionToken
+        Authorization: `Bearer ${sessionToken}`
       },
       timeout: 7000,
       validateStatus: () => true
@@ -397,8 +396,7 @@ async function getInternalOneDriveSetup(req, res) {
   try {
     const response = await axios.get(gatewayUrl, {
       headers: {
-        Cookie: `session_token=${sessionToken}`,
-        'x-session-token': sessionToken
+        Authorization: `Bearer ${sessionToken}`
       },
       timeout: 7000,
       validateStatus: () => true
@@ -427,8 +425,7 @@ async function saveInternalOneDriveSetup(req, res) {
   try {
     const response = await axios.post(gatewayUrl, req.body || {}, {
       headers: {
-        Cookie: `session_token=${sessionToken}`,
-        'x-session-token': sessionToken
+        Authorization: `Bearer ${sessionToken}`
       },
       timeout: 7000,
       validateStatus: () => true
@@ -457,8 +454,7 @@ async function startInternalOneDriveConnect(req, res) {
   try {
     const response = await axios.post(gatewayUrl, {}, {
       headers: {
-        Cookie: `session_token=${sessionToken}`,
-        'x-session-token': sessionToken
+        Authorization: `Bearer ${sessionToken}`
       },
       timeout: 7000,
       validateStatus: () => true
@@ -487,8 +483,7 @@ async function disconnectInternalOneDrive(req, res) {
   try {
     const response = await axios.post(gatewayUrl, {}, {
       headers: {
-        Cookie: `session_token=${sessionToken}`,
-        'x-session-token': sessionToken
+        Authorization: `Bearer ${sessionToken}`
       },
       timeout: 7000,
       validateStatus: () => true

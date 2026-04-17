@@ -2,11 +2,6 @@ const { basePath } = require('../config/runtime');
 const AuthService = require('../services/AuthService');
 
 function parseSessionToken(req) {
-  const cookieToken = String(req.cookies?.session_token || '').trim();
-  if (cookieToken) {
-    return cookieToken;
-  }
-
   const authorization = String(req.headers.authorization || '').trim();
   if (!authorization) {
     return '';
@@ -358,7 +353,7 @@ async function validateSession(req, res) {
  * 4. Redireciona para /login
  */
 async function logout(req, res) {
-  const sessionToken = req.cookies.session_token;
+  const sessionToken = parseSessionToken(req);
 
   try {
     // Marca sessão como inválida em BD
@@ -368,15 +363,12 @@ async function logout(req, res) {
 
     // Limpa session Express
     req.session.destroy(() => {
-      // Remove cookie
-      res.clearCookie('session_token');
       res.redirect(`${basePath}/login`);
     });
   } catch (error) {
     console.error('Erro ao fazer logout:', error);
     // Mesmo com erro, limpa tudo
     req.session.destroy(() => {
-      res.clearCookie('session_token');
       res.redirect(`${basePath}/login`);
     });
   }

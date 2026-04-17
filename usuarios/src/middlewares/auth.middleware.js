@@ -7,11 +7,6 @@ function firstHeaderValue(headerValue) {
 }
 
 function parseSessionToken(req) {
-  const cookieToken = String(req.cookies?.session_token || '').trim();
-  if (cookieToken) {
-    return cookieToken;
-  }
-
   const authorization = String(req.headers.authorization || '').trim();
   if (!authorization) {
     return '';
@@ -44,8 +39,7 @@ async function validateGatewaySession(req) {
   const gatewayValidateUrl = req.app.get('gatewayValidateUrl');
   const response = await axios.get(gatewayValidateUrl, {
     headers: {
-      Authorization: `Bearer ${sessionToken}`,
-      Cookie: `session_token=${sessionToken}`
+      Authorization: `Bearer ${sessionToken}`
     },
     timeout: 5000,
     validateStatus: () => true
@@ -77,7 +71,6 @@ async function requireGatewayAuth(req, res, next) {
   try {
     const validation = await validateGatewaySession(req);
     if (!validation.valid) {
-      res.clearCookie('session_token');
       return res.redirect(`${gatewayBasePath}/login`);
     }
 
@@ -86,14 +79,13 @@ async function requireGatewayAuth(req, res, next) {
     return next();
   } catch (error) {
     console.error('[auth] Erro ao validar sessão com gateway:', error.message);
-    res.clearCookie('session_token');
     return res.redirect(`${gatewayBasePath}/login`);
   }
 }
 
 /**
  * Middleware para APIs internas entre serviços.
- * Aceita session_token por cookie ou Bearer token e devolve JSON em falha.
+ * Aceita apenas Bearer token e devolve JSON em falha.
  */
 async function requireGatewaySessionApi(req, res, next) {
   try {
