@@ -117,7 +117,7 @@ async function getHomePage(req, res) {
     tableFilterOptions = await getUsersTableFilterOptions(tableFilters);
     userRoleOptions = await listActiveUserRoles();
   } catch (error) {
-    console.error('[auth] Erro ao obter lista de utilizadores:', error.message);
+    console.error('[usuarios] Erro ao obter lista de utilizadores:', error.message);
     // Fallback to empty list
     usersData = {
       rows: [],
@@ -128,7 +128,7 @@ async function getHomePage(req, res) {
   }
 
   res.status(200).render('index', {
-    pageTitle: 'Auth',
+    pageTitle: 'Utilizadores',
     userName: req.user?.userName || 'Utilizador',
     userRole: req.user?.role || '',
     userId: req.user?.id || '',
@@ -162,17 +162,17 @@ async function exportUsersList(req, res) {
     if (format === 'odf') {
       const body = createFlatOdf(result.rows);
       res.setHeader('Content-Type', 'application/vnd.oasis.opendocument.spreadsheet; charset=utf-8');
-      res.setHeader('Content-Disposition', `attachment; filename="auth-utilizadores-filtrados-${stamp}.fods"`);
+      res.setHeader('Content-Disposition', `attachment; filename="usuarios-filtrados-${stamp}.fods"`);
       res.status(200).send(body);
       return;
     }
 
     const body = createCsv(result.rows);
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="auth-utilizadores-filtrados-${stamp}.csv"`);
+    res.setHeader('Content-Disposition', `attachment; filename="usuarios-filtrados-${stamp}.csv"`);
     res.status(200).send(body);
   } catch (error) {
-    console.error('[auth] Erro ao exportar utilizadores filtrados:', error.message);
+    console.error('[usuarios] Erro ao exportar utilizadores filtrados:', error.message);
     res.status(500).json({
       error: 'export_failed',
       message: 'Nao foi possivel exportar a listagem filtrada.'
@@ -203,7 +203,7 @@ async function getEditUserPage(req, res) {
       userToEdit
     });
   } catch (error) {
-    console.error('[auth] Erro ao abrir view de edicao de utilizador:', error.message);
+    console.error('[usuarios] Erro ao abrir view de edicao de utilizador:', error.message);
     return res.status(500).render('error', {
       title: 'Erro',
       error: 'Nao foi possivel abrir a view de edicao do utilizador.'
@@ -298,7 +298,7 @@ async function updateUserFromEdit(req, res) {
         message: 'Utilizador atualizado com sucesso.'
       });
     } catch (auditError) {
-      console.error('[auth] Utilizador atualizado mas auditoria falhou:', auditError.message);
+      console.error('[usuarios] Utilizador atualizado mas auditoria falhou:', auditError.message);
       return res.status(200).json({
         status: 'ok',
         auditStatus: 'failed',
@@ -306,7 +306,7 @@ async function updateUserFromEdit(req, res) {
       });
     }
   } catch (error) {
-    console.error('[auth] Erro ao atualizar utilizador:', error.message);
+    console.error('[usuarios] Erro ao atualizar utilizador:', error.message);
     return res.status(500).json({
       error: 'user_update_failed',
       message: 'Erro interno ao atualizar utilizador.'
@@ -598,7 +598,7 @@ async function changeInternalSessionPassword(req, res) {
         message: 'Password alterada com sucesso.'
       });
     } catch (auditError) {
-      console.error('[auth] Password alterada mas auditoria falhou:', auditError.message);
+      console.error('[usuarios] Password alterada mas auditoria falhou:', auditError.message);
       return res.status(200).json({
         status: 'ok',
         auditStatus: 'failed',
@@ -606,7 +606,7 @@ async function changeInternalSessionPassword(req, res) {
       });
     }
   } catch (error) {
-    console.error('[auth] Erro ao alterar password:', error.message);
+    console.error('[usuarios] Erro ao alterar password:', error.message);
     return res.status(500).json({
       error: 'password_change_failed',
       message: 'Erro interno ao alterar password.'

@@ -78,7 +78,7 @@ async function requireGatewayAuth(req, res, next) {
 
     return next();
   } catch (error) {
-    console.error('[auth] Erro ao validar sessão com gateway:', error.message);
+    console.error('[usuarios] Erro ao validar sessão com gateway:', error.message);
     return res.redirect(`${gatewayBasePath}/login`);
   }
 }
@@ -100,7 +100,7 @@ async function requireGatewaySessionApi(req, res, next) {
     req.user = validation.user;
     return next();
   } catch (error) {
-    console.error('[auth] Erro API ao validar sessão com gateway:', error.message);
+    console.error('[usuarios] Erro API ao validar sessão com gateway:', error.message);
     return res.status(502).json({
       error: 'gateway_validation_unavailable',
       message: 'Nao foi possivel validar sessao no gateway.'

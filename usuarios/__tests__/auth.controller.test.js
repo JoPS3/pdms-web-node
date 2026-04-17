@@ -46,7 +46,7 @@ function createResMock(basePath = '/pdms-new/usuarios') {
   return res;
 }
 
-describe('auth.controller', () => {
+describe('usuarios.controller', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -71,7 +71,7 @@ describe('auth.controller', () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(listUsersWithPagination).toHaveBeenCalledWith(1, 50, {}, 'userName', 'ASC');
     expect(res.render).toHaveBeenCalledWith('index', expect.objectContaining({
-      pageTitle: 'Auth',
+      pageTitle: 'Utilizadores',
       userName: 'alice',
       userRole: 'ADMINISTRADOR',
       userId: 'u-1',

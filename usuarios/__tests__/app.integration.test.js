@@ -61,7 +61,7 @@ jest.mock('../src/middlewares/auth.middleware', () => ({
   }
 }));
 
-describe('auth app integration routes', () => {
+describe('usuarios app integration routes', () => {
   let app;
   const basePath = '/pdms-new/usuarios';
 
