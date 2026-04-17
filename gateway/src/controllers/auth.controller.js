@@ -94,9 +94,16 @@ async function login(req, res) {
         ? `${basePath}/set-password` 
         : `${basePath}/ask-password`;
       
-      return res.json({
-        status: 'ok',
-        redirect: nextPath
+      // Save session before responding with JSON
+      return req.session.save((err) => {
+        if (err) {
+          console.error('Erro ao salvar session tempUser:', err);
+          return res.status(500).json({ status: 'error', error: 'Erro ao processar login.' });
+        }
+        return res.json({
+          status: 'ok',
+          redirect: nextPath
+        });
       });
     }
 
@@ -211,7 +218,19 @@ async function setPassword(req, res) {
 
     delete req.session.tempUser;
 
-    return res.redirect(`${basePath}/apps`);
+    // Save session before redirecting
+    return req.session.save((err) => {
+      if (err) {
+        console.error('Erro ao salvar session após setPassword:', err);
+        return res.status(500).render('auth/set-password', {
+          pageTitle: 'Definir Password',
+          userId,
+          userName: user.userName,
+          errorMessage: 'Erro ao processar autenticação.'
+        });
+      }
+      return res.redirect(`${basePath}/apps`);
+    });
   } catch (error) {
     console.error('Erro ao definir password:', error);
     return res.status(500).render('auth/set-password', {
@@ -293,7 +312,19 @@ async function verifyPassword(req, res) {
 
     delete req.session.tempUser;
 
-    return res.redirect(`${basePath}/apps`);
+    // Save session before redirecting
+    return req.session.save((err) => {
+      if (err) {
+        console.error('Erro ao salvar session após verifyPassword:', err);
+        return res.status(500).render('auth/ask-password', {
+          pageTitle: 'Entrar',
+          userId,
+          userName: req.session.tempUser?.userName || 'Utilizador',
+          errorMessage: 'Erro ao processar autenticação.'
+        });
+      }
+      return res.redirect(`${basePath}/apps`);
+    });
   } catch (error) {
     console.error('Erro ao verificar password:', error);
     return res.status(500).render('auth/ask-password', {
