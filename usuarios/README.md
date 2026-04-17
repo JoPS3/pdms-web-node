@@ -22,7 +22,7 @@ Aplicacao Node.js + Express para o modulo `usuarios`, integrada com autenticacao
 - `src/server.js`: bootstrap da app e leitura de `.env`
 - `src/app.js`: middlewares, rotas, basePath e integracao com gateway
 - `src/controllers/auth.controller.js`: paginas e endpoints internos do modulo
-- `src/middlewares/auth.middleware.js`: validacao de sessao no gateway
+- `src/middlewares/auth.middleware.js`: middleware gerado a partir de `shared/gatewayAuth`
 - `src/views/`: templates EJS
 - `src/public/`: estilos estaticos
 
@@ -42,11 +42,20 @@ Arquivo local: `.env`
 ## Fluxo de autenticacao
 
 1. Utilizador autentica no gateway.
-2. Gateway emite `accessToken` (Bearer) para o cliente.
+2. Gateway grava cookies HttpOnly `pdms_access_token` e `pdms_refresh_token` no dominio do gateway.
 3. Utilizador entra em `/pdms-new/usuarios` (ou `/pdms/usuarios`).
-4. `requireGatewayAuth` chama `GET /validate-session` no gateway enviando `Authorization: Bearer <accessToken>`.
-5. Se valido, popula `req.user` e segue para a rota.
-6. Se invalido, redireciona para `<gatewayBasePath>/login`.
+4. O proxy do gateway injeta `Authorization: Bearer <accessToken>` e `X-Gateway-User-*`.
+5. `requireGatewayAuth` usa fast path por `X-Gateway-User-*`.
+6. Sem headers do proxy (acesso direto/inter-servico), faz fallback para `GET /validate-session`.
+7. Se existir `X-Refresh-Token`, o fallback envia esse header para permitir refresh remoto no gateway.
+8. Se valido, popula `req.user` e segue para a rota.
+9. Se invalido, redireciona para `<gatewayBasePath>/login`.
+
+## Contrato entre servicos
+
+- Obrigatorio: `Authorization: Bearer <accessToken>`
+- Opcional: `X-Refresh-Token: <refreshToken>`
+- `connect.sid` nao faz parte do contrato entre apps.
 
 ## Rotas atuais
 

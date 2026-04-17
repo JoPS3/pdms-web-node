@@ -1,14 +1,27 @@
 # PDMS Gateway
 
-Gateway em Node.js/Express para autenticação, sessões e acesso a aplicações do ecossistema PDMS.
+Gateway em Node.js/Express para autenticacao, tokens e acesso centralizado as apps do ecossistema PDMS.
+
+## Contrato atual
+
+- Browser: cookies HttpOnly (`pdms_access_token`, `pdms_refresh_token`) geridos pelo gateway.
+- Service-to-service: `Authorization: Bearer <accessToken>`.
+- Refresh remoto opcional: `X-Refresh-Token`.
+- Em request para apps, o gateway injeta `Authorization` e `X-Gateway-User-*` no proxy.
+
+Referencia oficial:
+
+- `global_docs/GATEWAY_ACCESS_MODEL.md`
+- `global_docs/PDMS_APP_INTEGRATION.md`
+- `global_docs/AUTHENTICATION_ARCHITECTURE.md`
 
 ## O que inclui
 
-- Estrutura base de pastas por camadas (`routes`, `controllers`, `middlewares`, `views`)
-- Fluxo de autenticação em 2 passos (`username` -> `password` ou `set-password`)
-- Sessões persistentes em MariaDB (`express-mysql-session`)
-- Área protegida com página de apps (mobile + desktop-like UI)
-- Páginas de erro `401` e `404` com estilo dedicado
+- Estrutura base por camadas (`routes`, `controllers`, `services`, `daos`, `middlewares`, `views`)
+- Fluxo de autenticacao em 2 passos (`username` -> `password` ou `set-password`)
+- Gestao de access/refresh tokens no backend
+- Proxy canonico para sub-apps via `/apps/<app>`
+- Pags de erro `401` e `404`
 
 ## Requisitos
 
@@ -21,31 +34,34 @@ npm install
 npm run dev
 ```
 
-Abrir: `http://localhost:6000/apps/pdms-new/login` (ou o `PORT`/`BASE_PATH_DEV` configurado)
+Abrir: `http://localhost:6000/pdms-new/login` (ou `PORT` + `BASE_PATH_DEV` configurados)
 
-## Configuração de ambiente
+## Configuracao de ambiente
 
-Este projeto lê variáveis de `.env`.
+Este projeto le variaveis de `.env`.
 
 Exemplo:
 
 ```env
 PORT=6000
-BASE_PATH_DEV=/apps/pdms-new
+BASE_PATH_DEV=/pdms-new
+BASE_PATH_PROD=/pdms
 SESSION_SECRET=change-me-in-production
+SESSION_INACTIVITY_MINUTES=20
+SESSION_RENEWAL_THRESHOLD_MINUTES=5
 ```
 
-Com esta configuração, o login fica disponível em `http://localhost:6000/apps/pdms-new/login`.
+Com esta configuracao, o login fica em `http://localhost:6000/pdms-new/login`.
 
 ## Scripts
 
 - `npm run dev`: desenvolvimento com `nodemon`
 - `npm start`: execução normal
-- `npm run get:session-token`: procura `session_token` ativo no DB por utilizador (`USER_NAME`)
+- `npm run get:session-token`: procura `accessToken` ativo no DB por utilizador (`USER_NAME`)
 - `npm run validate:onedrive-refresh`: valida refresh ativo OneDrive (forca expiracao de access token)
 - `npm run validate:onedrive-refresh:readonly`: valida estado OneDrive sem alterar expiracao no DB
 - `npm run validate:onedrive-refresh:readonly:auto`: modo read-only com descoberta automatica de token por `USER_NAME`
-- `npm test`: executa testes (`node:test`)
+- `npm test`: executa testes (`jest`)
 - `npm run test:watch`: executa testes em watch mode
 - `npm run pm2:start`: inicia processo PM2 (`pdms-gateway`)
 - `npm run pm2:restart`: reinicia processo PM2 e atualiza env
@@ -55,11 +71,11 @@ Com esta configuração, o login fica disponível em `http://localhost:6000/apps
 
 ## Testes
 
-Os testes estão em `test/*.test.js` e cobrem:
+Os testes estao em `__tests__/` e cobrem:
 
-- Normalização de `basePath` (`src/config/runtime.js`)
-- Renderização do `apps.controller`
-- Fluxos síncronos do `auth.controller` (`redirectRoot`, `renderLogin`, `render401`)
+- Renderizacao do `apps.controller`
+- Fluxos de controllers GUI/API de autenticacao
+- Fluxos de refresh e runtime
 
 Executar:
 
@@ -69,11 +85,9 @@ npm test
 
 ## Sessões
 
-- Sessão de aplicação via `express-session`
-- Store persistente em MariaDB via `express-mysql-session`
-- Tabela `express_sessions` criada automaticamente no arranque
-
-Isto evita perda de sessão em reinícios do processo (por exemplo, quando usar PM2 com watch).
+- Sessao de bootstrap via `express-session` (etapa temporaria `tempUser` no login em dois passos)
+- Tokens/sessoes de acesso persistidos em MariaDB na tabela de dominio `sessions`
+- Contrato de acesso das apps e token-based (nao depende de `connect.sid`)
 
 ## OneDrive: validacao operacional
 

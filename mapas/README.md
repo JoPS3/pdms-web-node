@@ -20,8 +20,8 @@ Aplicacao Node.js + Express para o modulo `mapas`, integrada com autenticacao ce
 ## Estrutura
 
 - `src/server.js`: bootstrap da app e leitura de `.env`
-- `src/app.js`: middlewares, rotas, basePath e integracao com gateway
-- `src/middlewares/auth.middleware.js`: validacao de sessao no gateway
+- `src/app.js`: bootstrap HTTP comum via `shared/createModuleApp`
+- `src/middlewares/auth.middleware.js`: middleware gerado a partir de `shared/gatewayAuth`
 - `src/views/`: templates EJS
 - `src/public/`: estilos e assets estaticos
 
@@ -41,18 +41,22 @@ Arquivo local: `.env`
 ## Fluxo de autenticacao
 
 1. Utilizador autentica no gateway.
-2. Gateway grava cookie `session_token`.
+2. Gateway grava cookies HttpOnly `pdms_access_token` e `pdms_refresh_token`.
 3. Utilizador entra em `/pdms-new/mapas` (ou `/pdms/mapas`).
-4. `requireGatewayAuth` chama `GET /validate-session` no gateway enviando o cookie.
-5. Se valido, popula `req.user` e segue para a rota.
-6. Se invalido, redireciona para `<gatewayBasePath>/login`.
+4. O proxy do gateway injeta `Authorization: Bearer <accessToken>` e `X-Gateway-User-*`.
+5. `requireGatewayAuth` usa fast path por `X-Gateway-User-*`.
+6. Sem headers do proxy (acesso direto/inter-servico), faz fallback para `GET /validate-session` com `Authorization: Bearer <accessToken>`.
+7. Se existir `X-Refresh-Token`, o fallback envia esse header para permitir refresh remoto no gateway.
+8. Se valido, popula `req.user` e segue para a rota.
+9. Se invalido, redireciona para `<gatewayBasePath>/login`.
 
 ### APIs internas (integracao entre apps)
 
 As rotas internas usam o mesmo servico de autenticacao do gateway.
 
 - Nao usam mais `X-Internal-Token`.
-- Aceitam `session_token` por cookie **ou** `Authorization: Bearer <session_token>`.
+- Aceitam `Authorization: Bearer <accessToken>`.
+- Opcionalmente aceitam `X-Refresh-Token` para refresh remoto durante `GET /validate-session`.
 - O middleware valida sempre no gateway antes de executar a operacao.
 - Em sucesso, `req.user` fica disponivel para auditoria (`userName`, `id`, etc.).
 
