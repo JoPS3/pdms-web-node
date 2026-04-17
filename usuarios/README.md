@@ -22,7 +22,7 @@ Aplicacao Node.js + Express para o modulo `usuarios`, integrada com autenticacao
 - `src/server.js`: bootstrap da app e leitura de `.env`
 - `src/app.js`: middlewares, rotas, basePath e integracao com gateway
 - `src/controllers/auth.controller.js`: paginas e endpoints internos do modulo
-- `src/middlewares/auth.middleware.js`: middleware gerado a partir de `shared/gatewayAuth`
+- `src/middlewares/auth.middleware.js`: middleware local do modulo
 - `src/views/`: templates EJS
 - `src/public/`: estilos estaticos
 

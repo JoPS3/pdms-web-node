@@ -1,6 +1,9 @@
 require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 
-const { startModuleServer } = require('../../shared/startModuleServer');
 const app = require('./app');
 
-startModuleServer(app, 6005, 'RH');
+const port = process.env.PORT || 6005;
+
+app.listen(port, () => {
+	console.log(`RH server running on http://localhost:${port}`);
+});

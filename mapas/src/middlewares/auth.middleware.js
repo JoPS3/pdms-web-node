@@ -1,7 +1,7 @@
 const {
   createRequireGatewayAuth,
   createRequireGatewaySessionApi
-} = require('../../../shared/gatewayAuth');
+} = require('./gatewayAuth.local');
 
 /**
  * Middleware que valida sessão chamando o gateway

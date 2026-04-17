@@ -11,8 +11,8 @@ Aplicacao Node.js + Express para o modulo `vendas`, integrada com autenticacao c
 ## Estrutura
 
 - `src/server.js`: bootstrap da app e leitura de `.env`
-- `src/app.js`: bootstrap HTTP comum via `shared/createModuleApp`
-- `src/middlewares/auth.middleware.js`: middleware gerado a partir de `shared/gatewayAuth`
+- `src/app.js`: bootstrap HTTP local do modulo
+- `src/middlewares/auth.middleware.js`: middleware local do modulo
 - `src/controllers/index.controller.js`: render da pagina principal
 - `src/views/`: templates EJS
 - `src/public/`: estilos e assets estaticos

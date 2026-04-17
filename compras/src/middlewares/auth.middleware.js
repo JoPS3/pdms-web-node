@@ -1,4 +1,4 @@
-const { createRequireGatewayAuth } = require('../../../shared/gatewayAuth');
+const { createRequireGatewayAuth } = require('./gatewayAuth.local');
 
 const requireGatewayAuth = createRequireGatewayAuth('compras');
 
