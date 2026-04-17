@@ -1,9 +1,23 @@
 const { basePath } = require('../config/runtime');
 const AuthService = require('../services/AuthService');
 
+function parseBearerToken(req) {
+  const authorization = String(req.headers.authorization || '').trim();
+  if (!authorization) {
+    return '';
+  }
+
+  const [scheme, token] = authorization.split(' ');
+  if (String(scheme || '').toLowerCase() === 'bearer' && String(token || '').trim()) {
+    return String(token).trim();
+  }
+
+  return '';
+}
+
 /**
  * Middleware de autenticação obrigatória
- * Verifica se utilizador está autenticado (session + cookie válido)
+ * Verifica se utilizador está autenticado (session + token válido)
  * Se não estiver, redireciona para /login
  */
 async function requireAuth(req, res, next) {
@@ -12,8 +26,8 @@ async function requireAuth(req, res, next) {
     return res.redirect(`${basePath}/login`);
   }
 
-  // Valida cookie de session token
-  const sessionToken = req.cookies.session_token;
+  // Preferir token guardado na sessão do servidor.
+  const sessionToken = String(req.session.sessionToken || '').trim() || parseBearerToken(req);
 
   if (!sessionToken) {
     // Limpa session se não tem token
@@ -28,7 +42,6 @@ async function requireAuth(req, res, next) {
     if (!result.valid) {
       // Limpa session se token não é válido
       req.session.destroy(() => {});
-      res.clearCookie('session_token');
       return res.redirect(`${basePath}/login`);
     }
 
@@ -40,12 +53,12 @@ async function requireAuth(req, res, next) {
       roleId: result.roleId,
       role: result.role
     };
+    req.session.sessionToken = sessionToken;
 
     return next();
   } catch (error) {
     console.error('Erro ao validar sessão no middleware:', error);
     req.session.destroy(() => {});
-    res.clearCookie('session_token');
     return res.redirect(`${basePath}/login`);
   }
 }

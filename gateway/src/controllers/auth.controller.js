@@ -207,16 +207,9 @@ async function setPassword(req, res) {
       roleId: result.roleId,
       role: result.role
     };
+    req.session.sessionToken = result.sessionToken;
 
     delete req.session.tempUser;
-
-    // Define cookie
-    res.cookie('session_token', result.sessionToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 24 * 60 * 60 * 1000
-    });
 
     return res.redirect(`${basePath}/apps`);
   } catch (error) {
@@ -296,16 +289,9 @@ async function verifyPassword(req, res) {
       roleId: result.roleId,
       role: result.role
     };
+    req.session.sessionToken = result.sessionToken;
 
     delete req.session.tempUser;
-
-    // Define cookie
-    res.cookie('session_token', result.sessionToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 24 * 60 * 60 * 1000
-    });
 
     return res.redirect(`${basePath}/apps`);
   } catch (error) {
@@ -353,7 +339,7 @@ async function validateSession(req, res) {
  * 4. Redireciona para /login
  */
 async function logout(req, res) {
-  const sessionToken = parseSessionToken(req);
+  const sessionToken = parseSessionToken(req) || String(req.session?.sessionToken || '').trim();
 
   try {
     // Marca sessão como inválida em BD
