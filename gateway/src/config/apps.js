@@ -19,7 +19,7 @@ function getApps(runtime = {}) {
     return raw || withBasePath(fallbackPath);
   };
 
-  const authUrl = byEnvOrDefault('APP_AUTH_URL_DEV', '/auth');
+  const authUrl = byEnvOrDefault('APP_AUTH_URL_DEV', '/usuarios');
   const mapasUrl = byEnvOrDefault('APP_MAPAS_URL_DEV', '/mapas');
 
   const resolveServiceUrl = (url, port) => {
@@ -68,9 +68,9 @@ function getApps(runtime = {}) {
       url: byEnvOrDefault('APP_RH_URL_DEV', '/rh')
     },
     {
-      id: 'autenticacao',
-      name: 'Autenticação',
-      description: 'Gestão de acesso e permissões',
+      id: 'usuarios',
+      name: 'Utilizadores',
+      description: 'Gestão de utilizadores e acesso OneDrive',
       icon: '🔐',
       url: resolvedAuthUrl
     }

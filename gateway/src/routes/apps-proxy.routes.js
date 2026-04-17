@@ -1,7 +1,6 @@
 const express = require('express');
 const httpProxy = require('express-http-proxy');
 const { requireAuth } = require('../middlewares/auth.middleware');
-const { getApps } = require('../config/apps');
 const appsController = require('../controllers/apps.controller');
 
 const router = express.Router();
@@ -21,18 +20,20 @@ const router = express.Router();
  */
 const getProxyUrl = (appName) => {
   const isDev = process.env.NODE_ENV === 'development';
+  const serviceName = appName === 'usuarios' ? 'auth' : appName;
   const ports = {
+    auth: process.env.AUTH_PORT_DEV || process.env.AUTH_PORT || 6001,
     mapas: process.env.MAPAS_PORT_DEV || 6002,
     vendas: process.env.VENDAS_PORT_DEV || 6003,
     compras: process.env.COMPRAS_PORT_DEV || 6004,
     rh: process.env.RH_PORT_DEV || 6005
   };
 
-  if (isDev || !process.env[`${appName.toUpperCase()}_URL`]) {
-    return `http://localhost:${ports[appName]}`;
+  if (isDev || !process.env[`${serviceName.toUpperCase()}_URL`]) {
+    return `http://localhost:${ports[serviceName]}`;
   }
 
-  return process.env[`${appName.toUpperCase()}_URL`];
+  return process.env[`${serviceName.toUpperCase()}_URL`];
 };
 
 const proxyOptions = {
@@ -49,6 +50,7 @@ const proxyOptions = {
  * 
  * Route structure:
  * - GET /apps - List all available apps
+ * - /usuarios/* - Proxy to auth service
  * - /mapas/* - Proxy to mapas service
  * - /vendas/* - Proxy to vendas service
  * - /compras/* - Proxy to compras service
@@ -61,7 +63,7 @@ const proxyOptions = {
 router.get('/apps', requireAuth, appsController.listApps);
 
 // Proxy routes to apps - all require auth
-const apps = ['mapas', 'vendas', 'compras', 'rh'];
+const apps = ['usuarios', 'mapas', 'vendas', 'compras', 'rh'];
 apps.forEach(appName => {
   router.use(`/${appName}`, requireAuth, httpProxy(getProxyUrl(appName), proxyOptions));
 });

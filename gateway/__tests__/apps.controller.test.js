@@ -42,15 +42,15 @@ test('apps controller uses fallback user values', () => {
   expect(res.viewData.userRole).toBe('');
 });
 
-test('apps controller includes autenticacao desktop entry', () => {
+test('apps controller includes usuarios desktop entry', () => {
   const req = createRequest({});
   const res = createResponseMock();
 
   listApps(req, res);
 
-  const authApp = res.viewData.apps.find((app) => app.id === 'autenticacao');
+  const authApp = res.viewData.apps.find((app) => app.id === 'usuarios');
 
   expect(authApp).toBeTruthy();
-  expect(authApp.name).toBe('Autenticação');
+  expect(authApp.name).toBe('Utilizadores');
   expect(authApp.icon).toBe('🔐');
 });
