@@ -17,4 +17,7 @@ router.post('/verify-password', authController.verifyPassword);
 router.post('/logout', authController.logout);
 router.get('/validate-session', authController.validateSession);
 
+// Phase 2: Token-based authentication endpoints
+router.post('/refresh-token', authController.refreshToken);
+
 module.exports = router;

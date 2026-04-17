@@ -270,6 +270,154 @@ class AuthService {
       throw new Error(`Erro ao definir password: ${error.message}`);
     }
   }
+
+  /**
+   * Phase 2: Login com geração de tokens (accessToken + refreshToken)
+   * @param {string} userName - Username
+   * @param {string} password - Password em plain text
+   * @param {string} ipAddress - IP da requisição
+   * @param {string} userAgent - User-Agent da requisição
+   * @returns {Promise<Object>} { success, user, accessToken, refreshToken, expiresIn } ou erro
+   */
+  async loginWithTokens(userName, password, ipAddress, userAgent) {
+    try {
+      // Valida credenciais (reutiliza lógica existente)
+      const user = await UserDAO.findByUserName(userName);
+
+      if (!user) {
+        return { error: 'Utilizador não encontrado' };
+      }
+
+      if (user.is_deleted) {
+        return { error: 'Utilizador não encontrado' };
+      }
+
+      if (!user.is_authorized) {
+        return { error: 'Utilizador não autorizado' };
+      }
+
+      if (!user.password) {
+        return { error: 'Utilizador não tem password definida' };
+      }
+
+      const passwordValid = await this.verifyPassword(password, user.password);
+
+      if (!passwordValid) {
+        return { error: 'Password incorreta' };
+      }
+
+      // Cria sessão no BD
+      const sessionToken = await SessionDAO.create(
+        user.id,
+        ipAddress,
+        userAgent,
+        20 // 20 minutos
+      );
+
+      // Obtém a sessão criada para pegar no ID
+      const sessionValidation = await SessionDAO.validate(sessionToken);
+      
+      if (!sessionValidation.valid) {
+        throw new Error('Não foi possível validar a sessão criada');
+      }
+
+      // Para Phase 2, o accessToken é o mesmo que o sessionToken (pode ser JWT depois)
+      // O refreshToken é um token opaco armazenado na BD
+      const refreshToken = SessionDAO.generateRefreshToken();
+      
+      // Liga refresh token à sessão (expira em 7 dias)
+      await SessionDAO.linkRefreshToken(sessionValidation.userId, refreshToken, 7);
+
+      // TODO: Aqui pode-se gerar um JWT com expiração curta em vez de sessionToken
+      // Para agora, mantemos compatibilidade com o sessionToken
+
+      return {
+        success: true,
+        user: {
+          id: user.id,
+          userName: user.user_name,
+          email: user.email,
+          role: user.role
+        },
+        accessToken: sessionToken, // Em Phase 2b, será um JWT com 15 min
+        refreshToken: refreshToken,
+        expiresIn: 900, // 15 minutos (em segundos)
+        tokenType: 'Bearer'
+      };
+    } catch (error) {
+      throw new Error(`Erro ao fazer login com tokens: ${error.message}`);
+    }
+  }
+
+  /**
+   * Phase 2: Rotaciona refresh token (emite novo access + refresh token)
+   * @param {string} refreshToken - Token de refresh atual
+   * @param {string} ipAddress - IP da requisição
+   * @param {string} userAgent - User-Agent da requisição
+   * @returns {Promise<Object>} { success, accessToken, refreshToken, expiresIn } ou erro
+   */
+  async refreshTokens(refreshToken, ipAddress, userAgent) {
+    try {
+      // Valida e rotaciona o refresh token
+      const rotationResult = await SessionDAO.rotateRefreshToken(
+        refreshToken,
+        ipAddress,
+        userAgent
+      );
+
+      // Cria novo sessionToken (accessToken) para a sessão
+      // TODO: Em Phase 2b, isso será um JWT com expiração curta
+      const newSessionToken = await SessionDAO.create(
+        rotationResult.sessionId,
+        ipAddress,
+        userAgent,
+        20 // 20 minutos
+      );
+
+      return {
+        success: true,
+        accessToken: newSessionToken, // Em Phase 2b, será um JWT com 15 min
+        refreshToken: rotationResult.newRefreshToken,
+        expiresIn: 900, // 15 minutos (em segundos)
+        tokenType: 'Bearer'
+      };
+    } catch (error) {
+      // Converte mensagens de erro em respostas HTTP-friendly
+      if (error.message.includes('inválido') || error.message.includes('expirado')) {
+        return { 
+          error: 'Refresh token inválido ou expirado',
+          code: 'INVALID_REFRESH_TOKEN'
+        };
+      }
+      throw new Error(`Erro ao renovar tokens: ${error.message}`);
+    }
+  }
+
+  /**
+   * Phase 2: Logout - invalida todos os tokens de um utilizador
+   * @param {string} sessionId - ID da sessão (ou sessionToken)
+   * @param {string} refreshToken - Token de refresh (opcional, para invalidar ambos)
+   * @returns {Promise<Object>} { success }
+   */
+  async logoutUser(sessionId, refreshToken = null) {
+    try {
+      // Invalida a sessão e o refresh token
+      await SessionDAO.invalidateRefreshToken(sessionId);
+      
+      // Se tiver refresh token, tenta invalidar através dele também
+      if (refreshToken) {
+        try {
+          await SessionDAO.rotateRefreshToken(refreshToken, null, null);
+        } catch (_err) {
+          // Silent fail - se o token já estava inválido, tudo bem
+        }
+      }
+
+      return { success: true };
+    } catch (error) {
+      throw new Error(`Erro ao fazer logout: ${error.message}`);
+    }
+  }
 }
 
 module.exports = new AuthService();

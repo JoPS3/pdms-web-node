@@ -364,6 +364,56 @@ function render401(req, res, reason = 'unauthorized') {
   });
 }
 
+/**
+ * Phase 2: Endpoint para renovação de tokens
+ * POST /refresh-token
+ * Body: { refreshToken }
+ * Returns: { accessToken, refreshToken, expiresIn, tokenType } ou { error, code }
+ */
+async function refreshToken(req, res) {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return res.status(400).json({
+      status: 'error',
+      code: 'MISSING_REFRESH_TOKEN',
+      message: 'Refresh token é obrigatório'
+    });
+  }
+
+  try {
+    const result = await AuthService.refreshTokens(
+      refreshToken,
+      req.ip,
+      req.get('user-agent')
+    );
+
+    if (result.error) {
+      return res.status(401).json({
+        status: 'error',
+        code: result.code || 'REFRESH_FAILED',
+        message: result.error
+      });
+    }
+
+    // Sucesso: retorna novos tokens
+    return res.json({
+      status: 'ok',
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+      expiresIn: result.expiresIn,
+      tokenType: result.tokenType
+    });
+  } catch (error) {
+    console.error('Erro ao renovar tokens:', error);
+    return res.status(500).json({
+      status: 'error',
+      code: 'REFRESH_ERROR',
+      message: 'Erro ao processar renovação de tokens'
+    });
+  }
+}
+
 module.exports = {
   redirectRoot,
   renderLogin,
@@ -374,5 +424,6 @@ module.exports = {
   verifyPassword,
   logout,
   validateSession,
-  render401
+  render401,
+  refreshToken
 };

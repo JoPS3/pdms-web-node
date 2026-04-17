@@ -219,6 +219,213 @@ class SessionDAO {
       throw new Error(`Erro ao limpar sessões expiradas: ${error.message}`);
     }
   }
+
+  /**
+   * Gera um refresh token opaco (não JWT)
+   * @param {number} length - Comprimento do token em bytes (padrão: 32)
+   * @returns {string} Token opaco em hex
+   */
+  generateRefreshToken(length = 32) {
+    return crypto.randomBytes(length).toString('hex');
+  }
+
+  /**
+   * Liga um refresh token a uma sessão existente
+   * @param {string} sessionId - ID da sessão
+   * @param {string} refreshToken - Token de refresh opaco
+   * @param {number} expiresInDays - Dias até expiração (padrão: 7)
+   * @returns {Promise<void>}
+   */
+  async linkRefreshToken(sessionId, refreshToken, expiresInDays = 7) {
+    const refreshTokenExpiresAt = new Date();
+    refreshTokenExpiresAt.setDate(refreshTokenExpiresAt.getDate() + expiresInDays);
+
+    const sql = `
+      UPDATE sessions
+      SET 
+        refresh_token = :refreshToken,
+        refresh_token_expires_at = :expiresAt,
+        refresh_token_rotated = 0,
+        changed_at = NOW(),
+        changed_by = :changedBy
+      WHERE id = :sessionId AND is_deleted = 0
+    `;
+
+    try {
+      await pool.execute(sql, {
+        sessionId,
+        refreshToken,
+        expiresAt: refreshTokenExpiresAt,
+        changedBy: 'gateway-auth-token'
+      });
+    } catch (error) {
+      throw new Error(`Erro ao ligar refresh token: ${error.message}`);
+    }
+  }
+
+  /**
+   * Valida e rotaciona um refresh token (gera novo, invalida o antigo)
+   * @param {string} oldRefreshToken - Token de refresh anterior
+   * @param {string} ipAddress - IP da requisição
+   * @param {string} userAgent - User-Agent da requisição
+   * @returns {Promise<Object>} { sessionId, newRefreshToken, expiresAt }
+   */
+  async rotateRefreshToken(oldRefreshToken, ipAddress, userAgent) {
+    const sql = `
+      SELECT 
+        s.id,
+        s.user_id,
+        s.refresh_token_expires_at,
+        s.is_deleted
+      FROM sessions s
+      WHERE s.refresh_token = :oldRefreshToken AND s.is_deleted = 0
+    `;
+
+    try {
+      const [rows] = await pool.execute(sql, { oldRefreshToken });
+
+      if (rows.length === 0) {
+        throw new Error('Refresh token inválido ou não encontrado');
+      }
+
+      const session = rows[0];
+
+      // Verifica se o refresh token está expirado
+      if (new Date() > new Date(session.refresh_token_expires_at)) {
+        throw new Error('Refresh token expirado');
+      }
+
+      // Gera novo refresh token
+      const newRefreshToken = this.generateRefreshToken();
+      const newExpiresAt = new Date();
+      newExpiresAt.setDate(newExpiresAt.getDate() + 7);
+
+      // Atualiza sessão com novo token
+      const updateSql = `
+        UPDATE sessions
+        SET 
+          refresh_token = :newRefreshToken,
+          refresh_token_expires_at = :newExpiresAt,
+          refresh_token_rotated = 1,
+          changed_at = NOW(),
+          changed_by = :changedBy
+        WHERE id = :sessionId
+      `;
+
+      await pool.execute(updateSql, {
+        newRefreshToken,
+        newExpiresAt,
+        sessionId: session.id,
+        changedBy: 'gateway-auth-refresh'
+      });
+
+      // Log da rotação no audit trail
+      const logSql = `
+        INSERT INTO session_refresh_log 
+          (session_id, old_refresh_token, new_refresh_token, ip_address, user_agent, created_by)
+        VALUES 
+          (:sessionId, :oldToken, :newToken, :ipAddress, :userAgent, :createdBy)
+      `;
+
+      await pool.execute(logSql, {
+        sessionId: session.id,
+        oldToken: oldRefreshToken,
+        newToken: newRefreshToken,
+        ipAddress: ipAddress || null,
+        userAgent: userAgent || null,
+        createdBy: 'gateway-auth-rotation'
+      });
+
+      return {
+        sessionId: session.id,
+        newRefreshToken,
+        expiresAt: newExpiresAt
+      };
+    } catch (error) {
+      throw new Error(`Erro ao rotar refresh token: ${error.message}`);
+    }
+  }
+
+  /**
+   * Invalida todos os tokens de uma sessão (logout)
+   * @param {string} sessionId - ID da sessão
+   * @returns {Promise<void>}
+   */
+  async invalidateRefreshToken(sessionId) {
+    const sql = `
+      UPDATE sessions
+      SET 
+        refresh_token = NULL,
+        refresh_token_expires_at = NULL,
+        is_valid = 0,
+        changed_at = NOW(),
+        changed_by = :changedBy
+      WHERE id = :sessionId AND is_deleted = 0
+    `;
+
+    try {
+      await pool.execute(sql, {
+        sessionId,
+        changedBy: 'gateway-auth-logout'
+      });
+    } catch (error) {
+      throw new Error(`Erro ao invalidar refresh token: ${error.message}`);
+    }
+  }
+
+  /**
+   * Limpa refresh tokens expirados (para manutenção)
+   * @returns {Promise<number>} Número de linhas afetadas
+   */
+  async cleanupExpiredRefreshTokens() {
+    const sql = `
+      UPDATE sessions
+      SET 
+        refresh_token = NULL,
+        refresh_token_expires_at = NULL,
+        is_deleted = 1,
+        changed_at = NOW(),
+        changed_by = :changedBy
+      WHERE refresh_token_expires_at < NOW() AND is_deleted = 0
+    `;
+
+    try {
+      const [result] = await pool.execute(sql, { changedBy: 'gateway-maintenance' });
+      return result.affectedRows;
+    } catch (error) {
+      throw new Error(`Erro ao limpar refresh tokens expirados: ${error.message}`);
+    }
+  }
+
+  /**
+   * Obtém histórico de rotações de um utilizador (audit)
+   * @param {string} sessionId - ID da sessão
+   * @returns {Promise<Array>} Array com histórico de rotações
+   */
+  async getRefreshTokenHistory(sessionId) {
+    const sql = `
+      SELECT 
+        id,
+        session_id,
+        old_refresh_token,
+        new_refresh_token,
+        ip_address,
+        user_agent,
+        refreshed_at,
+        created_by
+      FROM session_refresh_log
+      WHERE session_id = :sessionId
+      ORDER BY refreshed_at DESC
+      LIMIT 50
+    `;
+
+    try {
+      const [rows] = await pool.execute(sql, { sessionId });
+      return rows;
+    } catch (error) {
+      throw new Error(`Erro ao obter histórico de refresh tokens: ${error.message}`);
+    }
+  }
 }
 
 module.exports = new SessionDAO();
