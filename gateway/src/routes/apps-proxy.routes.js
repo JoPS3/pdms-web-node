@@ -48,6 +48,21 @@ const proxyOptions = {
   preserveHeaderKeyCase: true,
   filter: (req, res) => {
     return req.method !== 'TRACE';
+  },
+  proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
+    const sessionToken = String(srcReq.session?.sessionToken || '').trim();
+    if (sessionToken) {
+      proxyReqOpts.headers['Authorization'] = `Bearer ${sessionToken}`;
+    }
+    const user = srcReq.session?.user;
+    if (user) {
+      proxyReqOpts.headers['X-Gateway-User-Id'] = String(user.id || '');
+      proxyReqOpts.headers['X-Gateway-User-Name'] = String(user.userName || '');
+      proxyReqOpts.headers['X-Gateway-User-Email'] = String(user.email || '');
+      proxyReqOpts.headers['X-Gateway-User-Role'] = String(user.role || '');
+      proxyReqOpts.headers['X-Gateway-User-Role-Id'] = String(user.roleId || '');
+    }
+    return proxyReqOpts;
   }
 };
 

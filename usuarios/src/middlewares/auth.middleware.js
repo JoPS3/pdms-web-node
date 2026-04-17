@@ -30,6 +30,18 @@ function buildNormalizedUser(payload = {}) {
   };
 }
 
+function buildUserFromHeaders(req) {
+  const id = String(req.headers['x-gateway-user-id'] || '').trim();
+  if (!id) return null;
+  return {
+    id,
+    userName: String(req.headers['x-gateway-user-name'] || '').trim(),
+    email: String(req.headers['x-gateway-user-email'] || '').trim(),
+    role: String(req.headers['x-gateway-user-role'] || '').trim(),
+    roleId: String(req.headers['x-gateway-user-role-id'] || '').trim() || null
+  };
+}
+
 async function validateGatewaySession(req) {
   const sessionToken = parseSessionToken(req);
   if (!sessionToken) {
@@ -68,14 +80,25 @@ async function requireGatewayAuth(req, res, next) {
       ? gatewayBasePathRaw.replace(/\/+$/, '')
       : `${req.protocol}://${req.hostname}:${gatewayPort}${gatewayBasePathRaw.replace(/\/+$/, '')}`);
 
+  const sessionToken = parseSessionToken(req);
+  if (!sessionToken) {
+    return res.redirect(`${gatewayBasePath}/login`);
+  }
+
+  // Fast path: gateway injected user context headers
+  const user = buildUserFromHeaders(req);
+  if (user) {
+    req.user = user;
+    return next();
+  }
+
+  // Fallback: validate via HTTP (acesso direto/inter-serviço)
   try {
     const validation = await validateGatewaySession(req);
     if (!validation.valid) {
       return res.redirect(`${gatewayBasePath}/login`);
     }
-
     req.user = validation.user;
-
     return next();
   } catch (error) {
     console.error('[usuarios] Erro ao validar sessão com gateway:', error.message);
@@ -88,6 +111,22 @@ async function requireGatewayAuth(req, res, next) {
  * Aceita apenas Bearer token e devolve JSON em falha.
  */
 async function requireGatewaySessionApi(req, res, next) {
+  const sessionToken = parseSessionToken(req);
+  if (!sessionToken) {
+    return res.status(401).json({
+      error: 'invalid_gateway_session',
+      message: 'Sessao invalida ou expirada no gateway.'
+    });
+  }
+
+  // Fast path: gateway injected user context headers
+  const user = buildUserFromHeaders(req);
+  if (user) {
+    req.user = user;
+    return next();
+  }
+
+  // Fallback: validate via HTTP
   try {
     const validation = await validateGatewaySession(req);
     if (!validation.valid) {
