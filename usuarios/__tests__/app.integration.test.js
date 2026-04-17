@@ -63,12 +63,12 @@ jest.mock('../src/middlewares/auth.middleware', () => ({
 
 describe('auth app integration routes', () => {
   let app;
-  const basePath = '/pdms-new/auth';
+  const basePath = '/pdms-new/usuarios';
 
   beforeAll(() => {
     process.env.NODE_ENV = 'development';
     process.env.BASE_PATH_DEV = basePath;
-    process.env.BASE_PATH_PROD = '/pdms/auth';
+    process.env.BASE_PATH_PROD = '/pdms/usuarios';
     process.env.GATEWAY_BASE_PATH_DEV = '/pdms-new';
     process.env.GATEWAY_BASE_PATH_PROD = '/pdms';
     process.env.GATEWAY_VALIDATE_DEV = 'http://localhost:6000/pdms-new/validate-session';
@@ -87,7 +87,7 @@ describe('auth app integration routes', () => {
     const response = await request(app).get(`${basePath}/health`);
 
     expect(response.status).toBe(200);
-    expect(response.body.service).toBe('auth');
+    expect(response.body.service).toBe('usuarios');
     expect(response.body.status).toBe('ok');
     expect(response.body.timestamp).toBeTruthy();
   });

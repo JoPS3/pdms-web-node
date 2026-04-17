@@ -6,9 +6,9 @@ const router = express.Router();
 
 router.get('/health', (_req, res) => {
   res.status(200).json({
-    service: 'auth',
+    service: 'usuarios',
     status: 'ok',
-    db: process.env.DB_NAME || 'pedaco-auth',
+    db: process.env.DB_NAME || 'pedaco-usuarios',
     timestamp: new Date().toISOString()
   });
 });

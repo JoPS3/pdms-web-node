@@ -1,11 +1,11 @@
 module.exports = {
   apps: [
     {
-      name: 'pdms-auth',
+      name: 'pdms-usuarios',
       script: 'npm',
       args: 'run start',
       interpreter: 'none',
-      cwd: '/home/joao/Projects/node/pdms-web-node/auth',
+      cwd: '/home/joao/Projects/node/pdms-web-node/usuarios',
       watch: true,
       ignore_watch: ['node_modules', '.git', 'logs', 'tmp', 'src/public/styles/style.css'],
       watch_delay: 500,

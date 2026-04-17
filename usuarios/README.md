@@ -1,6 +1,6 @@
-# Auth (PDMS)
+# Usuarios (PDMS)
 
-Aplicacao Node.js + Express para o modulo `auth`, integrada com autenticacao centralizada no `pdms-gateway`.
+Aplicacao Node.js + Express para o modulo `usuarios`, integrada com autenticacao centralizada no `pdms-gateway`.
 
 ## Objetivo
 
@@ -32,8 +32,8 @@ Arquivo local: `.env`
 
 - `NODE_ENV=development`
 - `PORT=6001`
-- `BASE_PATH_DEV=/pdms-new/auth`
-- `BASE_PATH_PROD=/pdms/auth`
+- `BASE_PATH_DEV=/pdms-new/usuarios`
+- `BASE_PATH_PROD=/pdms/usuarios`
 - `GATEWAY_BASE_PATH_DEV=/pdms-new`
 - `GATEWAY_BASE_PATH_PROD=/pdms`
 - `GATEWAY_VALIDATE_DEV=http://localhost:6000/pdms-new/validate-session`
@@ -43,7 +43,7 @@ Arquivo local: `.env`
 
 1. Utilizador autentica no gateway.
 2. Gateway grava cookie `session_token`.
-3. Utilizador entra em `/pdms-new/auth` (ou `/pdms/auth`).
+3. Utilizador entra em `/pdms-new/usuarios` (ou `/pdms/usuarios`).
 4. `requireGatewayAuth` chama `GET /validate-session` no gateway enviando o cookie.
 5. Se valido, popula `req.user` e segue para a rota.
 6. Se invalido, redireciona para `<gatewayBasePath>/login`.
@@ -80,4 +80,4 @@ O desktop shell da app instala um guard global para chamadas `fetch` a rotas int
 
 Nome do processo desta app:
 
-- `pdms-auth`
+- `pdms-usuarios`

@@ -4,7 +4,13 @@ function getApps(runtime = {}) {
   const host = String(runtime.host || '').trim();
   const protocol = String(runtime.protocol || 'http').trim() || 'http';
   const isProxied = Boolean(runtime.isProxied);
-  const authPort = Number(process.env.AUTH_PORT || process.env.AUTH_PORT_DEV || 6001);
+  const usuariosPort = Number(
+    process.env.USUARIOS_PORT
+    || process.env.USUARIOS_PORT_DEV
+    || process.env.AUTH_PORT
+    || process.env.AUTH_PORT_DEV
+    || 6001
+  );
   const mapasPort = Number(process.env.MAPAS_PORT || process.env.MAPAS_PORT_DEV || 6002);
 
   const withHostPort = (path, port) => {
@@ -19,7 +25,8 @@ function getApps(runtime = {}) {
     return raw || withBasePath(fallbackPath);
   };
 
-  const authUrl = byEnvOrDefault('APP_AUTH_URL_DEV', '/usuarios');
+  const usuariosUrl = String(process.env.APP_USUARIOS_URL_DEV || process.env.APP_AUTH_URL_DEV || '').trim()
+    || withBasePath('/usuarios');
   const mapasUrl = byEnvOrDefault('APP_MAPAS_URL_DEV', '/mapas');
 
   const resolveServiceUrl = (url, port) => {
@@ -35,7 +42,7 @@ function getApps(runtime = {}) {
     return withHostPort(url, port);
   };
 
-  const resolvedAuthUrl = resolveServiceUrl(authUrl, authPort);
+  const resolvedUsuariosUrl = resolveServiceUrl(usuariosUrl, usuariosPort);
   const resolvedMapasUrl = resolveServiceUrl(mapasUrl, mapasPort);
 
   return [
@@ -72,7 +79,7 @@ function getApps(runtime = {}) {
       name: 'Utilizadores',
       description: 'Gestão de utilizadores e acesso OneDrive',
       icon: '🔐',
-      url: resolvedAuthUrl
+      url: resolvedUsuariosUrl
     }
   ];
 }

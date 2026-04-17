@@ -33,7 +33,7 @@ const { getUserPasswordById, updateUserPasswordById } = require('../src/services
 const { listUsersWithPagination, getUsersTableFilterOptions, getUserByIdForEdit, listActiveUserRoles } = require('../src/services/users-list.service');
 const { createPasswordChangeAuditLog } = require('../src/services/mapas-audit.service');
 
-function createResMock(basePath = '/pdms-new/auth') {
+function createResMock(basePath = '/pdms-new/usuarios') {
   const res = {
     locals: { basePath },
     app: { get: jest.fn((key) => (key === 'mapasAuditLogUrl' ? 'http://localhost:6002/pdms-new/mapas/internal/auditoria/log' : undefined)) },

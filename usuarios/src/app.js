@@ -9,7 +9,11 @@ const authController = require('./controllers/auth.controller');
 
 const app = express();
 const isDev = process.env.NODE_ENV === 'development';
-const basePath = isDev ? process.env.BASE_PATH_DEV : process.env.BASE_PATH_PROD;
+const configuredBasePath = isDev ? process.env.BASE_PATH_DEV : process.env.BASE_PATH_PROD;
+const preferredBasePath = isDev ? '/pdms-new/usuarios' : '/pdms/usuarios';
+const legacyBasePath = isDev ? '/pdms-new/auth' : '/pdms/auth';
+const basePath = configuredBasePath || preferredBasePath;
+const appBasePaths = Array.from(new Set([basePath, preferredBasePath, legacyBasePath]));
 const gatewayBasePath = isDev ? process.env.GATEWAY_BASE_PATH_DEV : process.env.GATEWAY_BASE_PATH_PROD;
 const gatewayPort = Number(isDev ? process.env.GATEWAY_PORT_DEV : process.env.GATEWAY_PORT_PROD) || 6000;
 const gatewayValidateUrl = isDev ? process.env.GATEWAY_VALIDATE_DEV : process.env.GATEWAY_VALIDATE_PROD;
@@ -65,26 +69,34 @@ app.use((req, res, next) => {
       ? String(gatewayBasePathRaw || '').replace(/\/+$/, '')
       : `${req.protocol}://${req.hostname}:${gatewayPort}${String(gatewayBasePathRaw || '').replace(/\/+$/, '')}`);
 
-  res.locals.basePath = basePath;
+  res.locals.basePath = preferredBasePath;
   res.locals.gatewayBasePath = gatewayBasePathPublic;
   res.locals.assetVersion = assetVersion;
   next();
 });
 
 // Estáticos servidos antes do middleware de auth
-app.use(basePath, express.static(path.join(__dirname, 'public')));
+appBasePaths.forEach((currentBasePath) => {
+  app.use(currentBasePath, express.static(path.join(__dirname, 'public')));
+});
 
 // Rotas técnicas/públicas e integrações internas
-app.use(basePath, internalRoutes);
+appBasePaths.forEach((currentBasePath) => {
+  app.use(currentBasePath, internalRoutes);
+});
 app.use('/', internalRoutes);
 
 // Middleware de autenticação para rotas protegidas
-app.use(basePath, requireGatewayAuth);
+appBasePaths.forEach((currentBasePath) => {
+  app.use(currentBasePath, requireGatewayAuth);
+});
 
 // Rotas protegidas
-app.get(basePath + '/', authController.getHomePage);
-app.get(basePath + '/users/export', authController.exportUsersList);
-app.get(basePath + '/users/:userId/edit', authController.getEditUserPage);
+appBasePaths.forEach((currentBasePath) => {
+  app.get(currentBasePath + '/', authController.getHomePage);
+  app.get(currentBasePath + '/users/export', authController.exportUsersList);
+  app.get(currentBasePath + '/users/:userId/edit', authController.getEditUserPage);
+});
 
 // 404 Handler
 app.use((req, res) => {
