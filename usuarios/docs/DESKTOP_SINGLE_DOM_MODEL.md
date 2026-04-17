@@ -1,7 +1,7 @@
-# Auth Desktop Single-DOM Model
+# Usuarios Desktop Single-DOM Model
 
 ## Objetivo
-Documentar o modelo de janelas desktop-like no modulo auth usando um unico DOM, sem iframes, com estado de visibilidade controlado por JavaScript.
+Documentar o modelo de janelas desktop-like no modulo usuarios usando um unico DOM, sem iframes, com estado de visibilidade controlado por JavaScript.
 
 ## Decisao de Arquitetura
 - URL do browser representa apenas navegacao real entre paginas.
@@ -68,8 +68,8 @@ Definidos no CSS por classes especificas:
 - Sem alteracao de URL durante navegacao interna.
 
 ## Endpoints e Roteamento
-- Pagina principal: `GET /auth` (base path configurado por ambiente).
-- Endpoint interno: `POST /auth/internal/session/status`.
+- Pagina principal: `GET /usuarios` (base path configurado por ambiente).
+- Endpoint interno: `POST /usuarios/internal/session/status`.
 - Endpoint interno nao e rota de navegacao de UI.
 
 ## Checklist para evolucao
@@ -81,7 +81,7 @@ Definidos no CSS por classes especificas:
 ## Extensao: Janela Users List (Paridade com mapas)
 
 ### Objetivo
-Aplicar na listagem de utilizadores do modulo auth o mesmo modelo funcional e visual das listagens em mapas:
+Aplicar na listagem de utilizadores do modulo usuarios o mesmo modelo funcional e visual das listagens em mapas:
 1. Filtros por coluna.
 2. Ordenacao no menu de filtro.
 3. Paginacao server-side.
@@ -161,7 +161,7 @@ Para previsibilidade:
 - Resolucao: definir explicitamente cores de `tbody` e conteudo de celulas.
 - Regra: qualquer mudanca de tema exige verificacao de contraste em dados reais.
 
-## Checklist de regressao do auth
+## Checklist de regressao do usuarios
 1. Abrir `Utilizadores` e depois `Lista de Utilizadores` funciona em desktop sem recarregar manualmente.
 2. Fechar `users-list` restaura `users` quando aplicavel.
 3. `Aplicar` em filtros reabre `users-list` e mantem estado esperado.

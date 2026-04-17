@@ -42,9 +42,9 @@ Arquivo local: `.env`
 ## Fluxo de autenticacao
 
 1. Utilizador autentica no gateway.
-2. Gateway grava cookie `session_token`.
+2. Gateway emite `accessToken` (Bearer) para o cliente.
 3. Utilizador entra em `/pdms-new/usuarios` (ou `/pdms/usuarios`).
-4. `requireGatewayAuth` chama `GET /validate-session` no gateway enviando o cookie.
+4. `requireGatewayAuth` chama `GET /validate-session` no gateway enviando `Authorization: Bearer <accessToken>`.
 5. Se valido, popula `req.user` e segue para a rota.
 6. Se invalido, redireciona para `<gatewayBasePath>/login`.
 
