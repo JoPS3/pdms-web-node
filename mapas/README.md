@@ -76,6 +76,7 @@ Na pagina inicial desktop do modulo (`GET <basePath>/`):
 - A janela pode ser redimensionada por drag no canto inferior direito.
 - O fecho da janela e feito apenas no botao `x` da propria janela.
 - Existe botao de logout no canto superior direito, ao lado do botao de voltar.
+- Se uma chamada inline (`fetch`) receber `401` por sessao expirada, a app redireciona automaticamente para `<gatewayBasePath>/login`.
 
 ## Modelo de filtros de tabela (local)
 

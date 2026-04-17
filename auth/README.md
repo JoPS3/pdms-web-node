@@ -55,6 +55,13 @@ Arquivo local: `.env`
 - `GET <basePath>/session` (protegida)
 - `POST <basePath>/internal/session/status` (sessao gateway obrigatoria)
 
+## Comportamento de sessao expirada (frontend)
+
+O desktop shell da app instala um guard global para chamadas `fetch` a rotas internas (`/internal/...`).
+
+- Se uma resposta vier com `401`, a app faz redirecionamento imediato para `<gatewayBasePath>/login`.
+- Isto evita estado visual "preso" no desktop quando a sessao no gateway expira durante a navegacao.
+
 ## Scripts
 
 - `npm start`

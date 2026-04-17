@@ -1,6 +1,7 @@
 <div class="users-list-wrap">
   <form method="get" action="<%= basePath %>/" data-grid-form>
     <input type="hidden" name="openWindow" value="users-list" />
+    <input type="hidden" name="owSrc" value="auth" />
     <input type="hidden" name="page" value="<%= pagination.currentPage %>" data-page-input />
     <input type="hidden" name="pageSize" value="<%= pagination.pageSize %>" />
     <input type="hidden" name="sortBy" value="<%= sortBy %>" />

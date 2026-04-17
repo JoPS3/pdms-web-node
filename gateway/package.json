@@ -6,6 +6,10 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
+    "get:session-token": "node scripts/get-session-token.js",
+    "validate:onedrive-refresh": "node scripts/validate-onedrive-refresh.js",
+    "validate:onedrive-refresh:readonly": "OD_READ_ONLY=1 node scripts/validate-onedrive-refresh.js",
+    "validate:onedrive-refresh:readonly:auto": "SESSION_TOKEN=$(USER_NAME=${USER_NAME:-admin} node scripts/get-session-token.js | sed -n 's/^export SESSION_TOKEN=//p' | tail -n 1) OD_READ_ONLY=1 node scripts/validate-onedrive-refresh.js",
     "start:pm2": "npm run styles:build && node src/server.js",
     "styles:build": "sass src/public/styles/scss/app.scss src/public/styles/app.css --no-source-map",
     "styles:watch": "sass --watch src/public/styles/scss/app.scss:src/public/styles/app.css",

@@ -41,6 +41,10 @@ Com esta configuração, o login fica disponível em `http://localhost:6000/apps
 
 - `npm run dev`: desenvolvimento com `nodemon`
 - `npm start`: execução normal
+- `npm run get:session-token`: procura `session_token` ativo no DB por utilizador (`USER_NAME`)
+- `npm run validate:onedrive-refresh`: valida refresh ativo OneDrive (forca expiracao de access token)
+- `npm run validate:onedrive-refresh:readonly`: valida estado OneDrive sem alterar expiracao no DB
+- `npm run validate:onedrive-refresh:readonly:auto`: modo read-only com descoberta automatica de token por `USER_NAME`
 - `npm test`: executa testes (`node:test`)
 - `npm run test:watch`: executa testes em watch mode
 - `npm run pm2:start`: inicia processo PM2 (`pdms-gateway`)
@@ -70,3 +74,30 @@ npm test
 - Tabela `express_sessions` criada automaticamente no arranque
 
 Isto evita perda de sessão em reinícios do processo (por exemplo, quando usar PM2 com watch).
+
+## OneDrive: validacao operacional
+
+Para diagnosticar renovacao de token OneDrive no backend:
+
+1. Obter token de sessao ativo do utilizador (exemplo: `admin`):
+
+```bash
+USER_NAME=admin npm run get:session-token
+```
+
+2. Validar estado sem mutacoes de token (read-only):
+
+```bash
+USER_NAME=admin npm run validate:onedrive-refresh:readonly:auto
+```
+
+3. Validar renovacao real via refresh token (forca expiracao do access token):
+
+```bash
+SESSION_TOKEN=... npm run validate:onedrive-refresh
+```
+
+Notas:
+
+- O refresh token e opaco e nao expoe `refresh_expires_at` no retorno do token endpoint.
+- A validade exata do refresh token nao e observavel localmente; a confianca operacional vem do sucesso do fluxo de refresh.

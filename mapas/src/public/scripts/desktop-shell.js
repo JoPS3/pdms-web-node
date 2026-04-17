@@ -248,6 +248,14 @@
       frame.innerHTML = '<div class="window-inline-state is-error">' + String(message || 'Falha ao carregar conteudo.') + '</div>';
     }
 
+    function resolveGatewayLoginUrl() {
+      var gatewayBasePath = String(document.body.getAttribute('data-gateway-base-path') || '').replace(/\/+$/, '');
+      if (!gatewayBasePath) {
+        return '/login';
+      }
+      return gatewayBasePath + '/login';
+    }
+
     function getInlineScopeRoot() {
       return frame.querySelector('[data-mapas-table-filter-scope]') || frame;
     }
@@ -263,6 +271,10 @@
 
       fetch(currentUrl, { credentials: 'same-origin' })
         .then(function (response) {
+          if (response.status === 401) {
+            window.location.assign(resolveGatewayLoginUrl());
+            throw new Error('HTTP 401');
+          }
           if (!response.ok) {
             throw new Error('HTTP ' + response.status);
           }

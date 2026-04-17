@@ -9,11 +9,16 @@
   const desktopShell = {
     overlay: null,
     activeWindow: null,
+    debugEnabled: false,
+    zCounter: 1010,
     windows: Object.create(null),
     windowParent: Object.create(null),
     hiddenOnOpen: Object.create(null),
     
     init() {
+      this._initDebug();
+      this._installInternalApiSessionGuard();
+
       this.overlay = document.getElementById('desktopOverlay');
       if (!this.overlay) {
         console.warn('[desktop-shell] overlay not found');
@@ -53,6 +58,95 @@
       
       // Inicializar clock
       this._initClock();
+
+      this._debug('init complete', {
+        windows: Object.keys(this.windows),
+        href: window.location.href
+      });
+    },
+
+    _initDebug() {
+      const params = new URLSearchParams(window.location.search || '');
+      const queryDebug = params.get('dsDebug');
+      let persisted = false;
+
+      try {
+        if (queryDebug === '1') {
+          window.localStorage.setItem('authDesktopDebug', '1');
+        } else if (queryDebug === '0') {
+          window.localStorage.removeItem('authDesktopDebug');
+        }
+        persisted = window.localStorage.getItem('authDesktopDebug') === '1';
+      } catch (_error) {
+        persisted = false;
+      }
+
+      this.debugEnabled = queryDebug === '1' || persisted;
+      if (this.debugEnabled) {
+        console.info('[desktop-shell][debug] enabled', {
+          queryDebug,
+          persisted,
+          href: window.location.href
+        });
+      }
+    },
+
+    _debug(message, payload) {
+      if (!this.debugEnabled) {
+        return;
+      }
+      if (typeof payload === 'undefined') {
+        console.info('[desktop-shell][debug]', message);
+        return;
+      }
+      console.info('[desktop-shell][debug]', message, payload);
+    },
+
+    _installInternalApiSessionGuard() {
+      if (window.__pdmsInternalApiSessionGuardInstalled) {
+        return;
+      }
+
+      if (typeof window.fetch !== 'function') {
+        return;
+      }
+
+      const originalFetch = window.fetch.bind(window);
+      const gatewayBasePath = String(document.body?.dataset?.gatewayBasePath || '').replace(/\/+$/, '');
+      const loginUrl = `${gatewayBasePath}/login`;
+
+      const requestPath = (input) => {
+        try {
+          if (typeof input === 'string') {
+            return new URL(input, window.location.origin).pathname;
+          }
+          if (input && typeof input.url === 'string') {
+            return new URL(input.url, window.location.origin).pathname;
+          }
+        } catch (_error) {
+          return '';
+        }
+        return '';
+      };
+
+      const isInternalApi = (pathName) => pathName.includes('/internal/');
+
+      window.fetch = async (...args) => {
+        const response = await originalFetch(...args);
+        const pathName = requestPath(args[0]);
+
+        if (response?.status === 401 && isInternalApi(pathName)) {
+          // API routes return JSON 401; force full login redirect to avoid stale desktop shell state.
+          if (!window.location.pathname.endsWith('/login')) {
+            window.location.assign(loginUrl);
+          }
+        }
+
+        return response;
+      };
+
+      window.__pdmsInternalApiSessionGuardInstalled = true;
+      this._debug('internal API session guard installed', { loginUrl });
     },
     
     _initClock() {
@@ -108,6 +202,12 @@
           const windowId = trigger.dataset.openWindow;
           const parentWindow = trigger.dataset.parentWindow || null;
           const hideParent = trigger.dataset.hideWindowOnOpen === '1';
+          this._debug('trigger click', {
+            windowId,
+            parentWindow,
+            hideParent,
+            triggerText: String(trigger.textContent || '').trim().slice(0, 40)
+          });
           this.openWindow(windowId, { parentWindow, hideParent });
         });
       });
@@ -498,6 +598,13 @@
     },
 
     openWindow(windowId, options = {}) {
+      this._debug('openWindow called', {
+        windowId,
+        options,
+        activeWindow: this.activeWindow,
+        href: window.location.href
+      });
+
       if (!this.windows[windowId]) {
         console.warn(`[desktop-shell] window "${windowId}" not found`);
         return;
@@ -505,8 +612,14 @@
 
       // Rebuild users list from server on every reopen for deterministic clean state.
       if (windowId === 'users-list' && !options.skipRebuild) {
+        this._debug('users-list requested without skipRebuild -> reload clean');
         this._reloadUsersListClean();
         return;
+      }
+
+      // For top-level launches, keep only one root window visible.
+      if (!options.parentWindow) {
+        this._hideAllWindows();
       }
 
       if (options.parentWindow && this.windows[options.parentWindow]) {
@@ -524,14 +637,29 @@
       w.element.hidden = false;
       this.overlay.hidden = false;
       this.activeWindow = windowId;
+      this._bringToFront(windowId);
       
       // Reset to center + focus
       this._resetWindowPosition(windowId);
       document.body.classList.add('desktop-window-open');
+
+      this._debug('openWindow applied', {
+        windowId,
+        parentWindow: this.windowParent[windowId],
+        hiddenParent: this.hiddenOnOpen[windowId],
+        activeWindow: this.activeWindow
+      });
     },
     
     closeWindow(windowId) {
       if (!this.windows[windowId]) return;
+
+      this._debug('closeWindow called', {
+        windowId,
+        activeWindow: this.activeWindow,
+        parentWindow: this.windowParent[windowId],
+        hiddenParent: this.hiddenOnOpen[windowId]
+      });
       
       const w = this.windows[windowId];
       this._stopDrag(windowId);
@@ -551,6 +679,7 @@
       if (this.activeWindow === windowId) {
         if (parentWindow && this.windows[parentWindow]) {
           this.activeWindow = parentWindow;
+          this._bringToFront(parentWindow);
           this.overlay.hidden = false;
           document.body.classList.add('desktop-window-open');
         } else {
@@ -559,6 +688,18 @@
           document.body.classList.remove('desktop-window-open');
         }
       }
+
+      if (!this._hasVisibleWindows()) {
+        this.activeWindow = null;
+        this.overlay.hidden = true;
+        document.body.classList.remove('desktop-window-open');
+      }
+
+      this._debug('closeWindow applied', {
+        windowId,
+        activeWindow: this.activeWindow,
+        hasVisibleWindows: this._hasVisibleWindows()
+      });
     },
 
     _reloadUsersListClean() {
@@ -576,6 +717,11 @@
       params.delete('sortBy');
       params.delete('sortDir');
       params.set('openWindow', 'users-list');
+      params.set('owSrc', 'auth');
+      this._debug('reload users-list clean', {
+        pathname: url.pathname,
+        query: params.toString()
+      });
 
       const nextUrl = url.pathname + (params.toString() ? `?${params.toString()}` : '') + url.hash;
       window.location.assign(nextUrl);
@@ -616,12 +762,39 @@
       w.element.style.top = rect.top + 'px';
       w.element.style.transform = 'none';
     },
+
+    _hasVisibleWindows() {
+      return Object.values(this.windows).some((w) => w.element && !w.element.hidden);
+    },
+
+    _hideAllWindows() {
+      Object.keys(this.windows).forEach((id) => {
+        const w = this.windows[id];
+        if (!w.element) return;
+        w.element.hidden = true;
+        w.state.visible = false;
+        this.windowParent[id] = null;
+        this.hiddenOnOpen[id] = null;
+      });
+      this.activeWindow = null;
+      this.overlay.hidden = true;
+      document.body.classList.remove('desktop-window-open');
+    },
+
+    _bringToFront(windowId) {
+      const w = this.windows[windowId];
+      if (!w || !w.element) return;
+      this.zCounter += 1;
+      w.element.style.zIndex = String(this.zCounter);
+    },
     
     _onTitlebarPointerDown(event, windowId) {
       if (event.button !== 0) return;
       if (event.target.closest('.desktop-window-close')) return;
       
       const w = this.windows[windowId];
+      this.activeWindow = windowId;
+      this._bringToFront(windowId);
       this._materializeWindowPosition(windowId);
       
       const rect = w.element.getBoundingClientRect();

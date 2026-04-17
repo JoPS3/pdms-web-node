@@ -1285,6 +1285,10 @@ body.in-desktop-iframe .desktop-only-feature {
   grid-template-rows: 44px auto minmax(0, 1fr);
 }
 
+.desktop-window.window-table-content[hidden] {
+  display: none;
+}
+
 .desktop-window.window-table-content .desktop-window-content,
 .desktop-window.window-table-content .users-list-wrap,
 .desktop-window.window-table-content [data-grid-form] {
