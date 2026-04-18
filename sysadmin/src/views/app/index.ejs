@@ -182,7 +182,7 @@
             </button>
           </div>
           <div class="desktop-window-content">
-            <%- include('../session/window-session', { session: session }) %>
+            <%- include('./window-session', { session: session }) %>
           </div>
         </div>
 
@@ -201,7 +201,7 @@
             </button>
           </div>
           <div class="desktop-window-content">
-            <%- include('../session/window-session-info', { session: session }) %>
+            <%- include('./window-session-info', { session: session }) %>
           </div>
         </div>
 
@@ -220,7 +220,7 @@
             </button>
           </div>
           <div class="desktop-window-content">
-            <%- include('../session/window-session-password') %>
+            <%- include('./window-session-password') %>
           </div>
         </div>
         
@@ -239,7 +239,7 @@
             </button>
           </div>
           <div class="desktop-window-content">
-            <%- include('../users/window-users', { session: session }) %>
+            <%- include('./window-users', { session: session }) %>
           </div>
         </div>
 
@@ -258,7 +258,7 @@
             </button>
           </div>
           <div class="desktop-window-content">
-            <%- include('../onedrive/window-onedrive') %>
+            <%- include('./window-onedrive') %>
           </div>
         </div>
 
@@ -277,7 +277,7 @@
             </button>
           </div>
           <div class="desktop-window-content">
-            <%- include('../onedrive/window-onedrive-setup') %>
+            <%- include('./window-onedrive-setup') %>
           </div>
         </div>
 
@@ -324,7 +324,7 @@
             </div>
           </nav>
           <div class="desktop-window-content">
-            <%- include('../users/window-users-list', { usersList: usersList || [] }) %>
+            <%- include('./window-users-list', { usersList: usersList || [] }) %>
           </div>
         </div>
 
@@ -343,7 +343,7 @@
             </button>
           </div>
           <div class="desktop-window-content">
-            <%- include('../users/window-user-edit') %>
+            <%- include('./window-user-edit') %>
           </div>
         </div>
       </div>

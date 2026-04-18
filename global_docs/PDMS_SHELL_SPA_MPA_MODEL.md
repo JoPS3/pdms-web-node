@@ -44,8 +44,8 @@ A shell apenas encaminha para estas paginas via links.
 
 Para todas as apps com shell desktop/mobile, a organizacao de `views/` deve seguir o padrao:
 
-- `app/`: view principal da shell do modulo (launcher e composicao de janelas)
-- `<dominio>/`: uma pasta por icon/modulo interno (ex.: `session/`, `users/`, `onedrive/`)
+- `app/`: view principal da shell (`index.ejs`) e componentes SPA de janelas (`window-*`)
+- `<dominio>/`: paginas MPA reais (views de endpoint), quando existirem
 - `errors/`: views de erro (`404`, `500`, etc.)
 
 Exemplo canonico:
@@ -54,12 +54,11 @@ Exemplo canonico:
 views/
 	app/
 		index.ejs
-	session/
-		...
+		window-session.ejs
+		window-users.ejs
+		window-onedrive.ejs
 	users/
-		...
-	onedrive/
-		...
+		user-edit.ejs
 	errors/
 		404.ejs
 		error.ejs
@@ -68,8 +67,9 @@ views/
 Regras obrigatorias deste padrao:
 
 1. `res.render()` deve usar path completo por pasta (`app/index`, `users/user-edit`, `errors/404`).
-2. Includes EJS devem apontar para as novas pastas de dominio, evitando pastas genericas antigas.
-3. Novas janelas/partials devem entrar na pasta do icon correspondente, nao em `partials/desktop` global.
+2. Includes de janelas SPA devem ser `app/window-*`.
+3. Novas janelas desktop (`desktop-window`) entram em `app/` e nao em pastas de MPA.
+4. Pastas por dominio devem conter apenas views MPA de endpoint (quando existirem).
 
 ## Modelo de Interacao
 

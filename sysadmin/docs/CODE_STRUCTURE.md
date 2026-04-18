@@ -110,20 +110,18 @@ Browser → gateway proxy
   src/views/
     app/
       index.ejs
-      window-backdrop.ejs
-      window-frame.ejs
-    session/
       window-session.ejs
       window-session-info.ejs
       window-session-password.ejs
-    users/
       window-users.ejs
       window-users-list.ejs
       window-user-edit.ejs
-      user-edit.ejs
-    onedrive/
       window-onedrive.ejs
       window-onedrive-setup.ejs
+      window-backdrop.ejs
+      window-frame.ejs
+    users/
+      user-edit.ejs
     errors/
       404.ejs
       error.ejs
@@ -132,9 +130,10 @@ Browser → gateway proxy
   Regras de manutencao:
 
   1. A shell principal e sempre `app/index.ejs`.
-  2. Cada icon do desktop/dock tem a sua propria pasta de views.
-  3. Views de erro ficam exclusivamente em `views/errors/`.
-  4. Nao voltar a introduzir `views/index.ejs`, `views/user-edit.ejs` ou `views/partials/desktop/`.
+  2. Componentes `desktop-window` (`window-*`) vivem em `views/app/` por serem SPA da shell.
+  3. Pastas de dominio (ex.: `users/`) guardam apenas paginas MPA de endpoint.
+  4. Views de erro ficam exclusivamente em `views/errors/`.
+  5. Nao voltar a introduzir `views/index.ejs`, `views/user-edit.ejs` ou `views/partials/desktop/`.
 
 ## Fluxo de uma request API tipica
 

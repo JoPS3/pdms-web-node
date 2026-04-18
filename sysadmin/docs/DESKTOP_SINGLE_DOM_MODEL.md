@@ -89,7 +89,7 @@ Aplicar na listagem de utilizadores do modulo sysadmin o mesmo modelo funcional 
 
 ### Ficheiros envolvidos
 - `src/views/app/index.ejs`
-- `src/views/users/window-users-list.ejs`
+- `src/views/app/window-users-list.ejs`
 - `src/public/scripts/table-filters.js`
 - `src/public/scripts/shell.js`
 - `src/public/styles/style.css`
@@ -101,16 +101,18 @@ Aplicar na listagem de utilizadores do modulo sysadmin o mesmo modelo funcional 
 ```
 src/views/
   app/
-  session/
+    index.ejs
+    window-*.ejs
   users/
-  onedrive/
+    user-edit.ejs
   errors/
 ```
 
 Regra de arquitetura UI do modulo:
 1. `app/` para composicao da shell.
-2. Uma pasta por icon/area funcional interna (`session`, `users`, `onedrive`).
-3. `errors/` para paginas de erro renderizadas por `app.js` e controllers.
+2. `desktop-window` e subviews `window-*` sao componentes SPA e ficam em `app/`.
+3. Pastas de dominio (ex.: `users/`) guardam apenas paginas MPA reais de endpoint.
+4. `errors/` para paginas de erro renderizadas por `app.js` e controllers.
 
 ### Contrato implementado
 1. Query params suportados:
