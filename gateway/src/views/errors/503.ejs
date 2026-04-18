@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Serviço indisponível | Gateway</title>
+    <link rel="stylesheet" href="<%= basePath %>/styles/app.css" />
+  </head>
+  <body class="d-grid place-center bg-warm p-24">
+    <main class="ui-card ui-card--mobile ui-card--elevated">
+      <p class="ui-error-code">503</p>
+      <h1 class="ui-error-title">Serviço Temporariamente Indisponível</h1>
+      <p class="ui-error-message">
+        A aplicação <strong><%= appLabel %></strong> não está acessível neste momento.
+        <% if (unavailable) { %>
+          O serviço de backend pode estar parado ou em reinício.
+        <% } %>
+      </p>
+
+      <div class="ui-error-actions">
+        <% if (basePath) { %>
+          <a href="<%= basePath %>/apps" class="btn btn-primary">Voltar às Apps</a>
+        <% } else { %>
+          <a href="/apps" class="btn btn-primary">Voltar às Apps</a>
+        <% } %>
+        <a href="javascript:location.reload()" class="btn btn-secondary">Tentar novamente</a>
+      </div>
+
+      <p class="ui-error-hint">
+        Se o problema persistir, confirme se o processo da app está online no servidor.
+      </p>
+    </main>
+  </body>
+</html>

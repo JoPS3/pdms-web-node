@@ -2,8 +2,66 @@ const express = require('express');
 const httpProxy = require('express-http-proxy');
 const { requireAuth } = require('../middlewares/session.middleware');
 const appsController = require('../controllers/apps.controller');
+const { basePath } = require('../config/runtime');
 
 const router = express.Router();
+
+const APP_LABEL_BY_ID = {
+  sysadmin: 'Administração do Sistema',
+  mapas: 'Mapas',
+  vendas: 'Vendas',
+  compras: 'Compras',
+  rh: 'RH'
+};
+
+function isConnectionRefused(error) {
+  if (!error) {
+    return false;
+  }
+
+  if (String(error.code || '').toUpperCase() === 'ECONNREFUSED') {
+    return true;
+  }
+
+  const nestedErrors = Array.isArray(error.errors) ? error.errors : [];
+  if (nestedErrors.some((item) => String(item?.code || '').toUpperCase() === 'ECONNREFUSED')) {
+    return true;
+  }
+
+  return String(error.message || '').toUpperCase().includes('ECONNREFUSED');
+}
+
+function respondsWithHtml(req) {
+  const accept = String(req.headers?.accept || '').toLowerCase();
+  return accept.includes('text/html');
+}
+
+function handleProxyFailure(appName, error, req, res) {
+  if (res.headersSent) {
+    return;
+  }
+
+  const appLabel = APP_LABEL_BY_ID[appName] || appName;
+  const unavailable = isConnectionRefused(error);
+  const statusCode = unavailable ? 503 : 502;
+
+  if (respondsWithHtml(req)) {
+    return res.status(statusCode).render('errors/503', {
+      basePath,
+      appName,
+      appLabel,
+      unavailable
+    });
+  }
+
+  return res.status(statusCode).json({
+    error: unavailable ? 'upstream_service_unavailable' : 'upstream_proxy_failed',
+    app: appName,
+    message: unavailable
+      ? `A aplicação ${appLabel} está temporariamente indisponível.`
+      : `O gateway não conseguiu comunicar com a aplicação ${appLabel}.`
+  });
+}
 
 /**
  * Resolves the proxy URL for an app.
@@ -124,6 +182,13 @@ function buildProxyOptions(appName) {
         }
       }
       return headers;
+    },
+    proxyErrorHandler: (error, res, next) => {
+      try {
+        return handleProxyFailure(appName, error, res.req, res);
+      } catch (renderError) {
+        return next(renderError);
+      }
     }
   };
 }

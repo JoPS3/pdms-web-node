@@ -74,6 +74,56 @@ if (basePath) {
 app.use(basePath || '/', express.static(path.join(__dirname, 'public')));
 app.use(basePath || '/', indexRoutes);
 
+function isConnectionRefused(error) {
+  if (!error) {
+    return false;
+  }
+
+  if (String(error.code || '').toUpperCase() === 'ECONNREFUSED') {
+    return true;
+  }
+
+  const nestedErrors = Array.isArray(error.errors) ? error.errors : [];
+  if (nestedErrors.some((item) => String(item?.code || '').toUpperCase() === 'ECONNREFUSED')) {
+    return true;
+  }
+
+  return String(error.message || '').toUpperCase().includes('ECONNREFUSED');
+}
+
+app.use((error, req, res, _next) => {
+  if (res.headersSent) {
+    return;
+  }
+
+  const unavailable = isConnectionRefused(error);
+  const statusCode = unavailable ? 503 : (Number(error.status || error.statusCode) || 500);
+  const accept = String(req.headers?.accept || '').toLowerCase();
+  const acceptsHtml = accept.includes('text/html');
+
+  if (acceptsHtml) {
+    if (unavailable) {
+      return res.status(statusCode).render('errors/503', {
+        basePath,
+        appName: 'unknown',
+        appLabel: 'serviço solicitado',
+        unavailable: true
+      });
+    }
+
+    return res.status(statusCode).render('errors/500', {
+      basePath
+    });
+  }
+
+  return res.status(statusCode).json({
+    error: unavailable ? 'service_unavailable' : 'internal_error',
+    message: unavailable
+      ? 'O serviço solicitado está temporariamente indisponível.'
+      : 'Erro interno no gateway.'
+  });
+});
+
 // Error handlers
 app.use((req, res) => {
   res.status(404).render('errors/404', {
