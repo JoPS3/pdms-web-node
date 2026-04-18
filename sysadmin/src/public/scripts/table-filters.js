@@ -384,7 +384,9 @@
 
         function exportFiltered(format) {
           const actionUrl = String(form.getAttribute('action') || window.location.pathname || '').replace(/\/$/, '');
-          const exportBase = `${actionUrl}/users/export`;
+          const exportBase = actionUrl.endsWith('/users/list')
+            ? `${actionUrl.slice(0, -('/users/list'.length))}/users/export`
+            : `${actionUrl}/users/export`;
           const params = new URLSearchParams();
 
           Array.from(new FormData(form).entries()).forEach(([name, value]) => {
@@ -622,6 +624,11 @@
 
     root.querySelectorAll('tr[data-user-id]').forEach((row) => {
       row.addEventListener('dblclick', () => {
+        const userId = String(row.getAttribute('data-user-id') || '').trim();
+        if (!userId) {
+          return;
+        }
+
         initUserEditWindowActions();
         fillUserEditWindowFromRow(row);
         const shell = window.desktopShell;
@@ -630,7 +637,15 @@
             parentWindow: 'users-list',
             hideParent: true
           });
+          return;
         }
+
+        const actionBase = String(form.getAttribute('action') || window.location.pathname || '').replace(/\/$/, '');
+        const appBase = actionBase.endsWith('/users/list')
+          ? actionBase.slice(0, -('/users/list'.length))
+          : actionBase;
+        const targetUrl = `${appBase}/users/${encodeURIComponent(userId)}/edit`;
+        window.location.assign(targetUrl);
       });
     });
   }

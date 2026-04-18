@@ -10,7 +10,48 @@ const {
   listUsersForExport
 } = require('../services/users-filters.service');
 
-async function getHomePage(req, res) {
+function trimTrailingSlash(value) {
+  const normalized = String(value || '').trim();
+  if (!normalized) {
+    return '';
+  }
+  if (normalized === '/') {
+    return '/';
+  }
+  return normalized.replace(/\/+$/, '');
+}
+
+function getRequestPath(req) {
+  return String(req.originalUrl || req.url || req.path || '/').split('?')[0] || '/';
+}
+
+function buildAppRootPath(req) {
+  const forwardedPrefixValue = typeof req.get === 'function'
+    ? req.get('x-forwarded-prefix')
+    : req.headers?.['x-forwarded-prefix'];
+  const forwardedPrefix = trimTrailingSlash(forwardedPrefixValue);
+  if (forwardedPrefix) {
+    return forwardedPrefix;
+  }
+
+  const pathName = getRequestPath(req);
+  if (pathName.endsWith('/users/list')) {
+    return trimTrailingSlash(pathName.slice(0, -('/users/list'.length))) || '/';
+  }
+
+  const matchEdit = pathName.match(/^(.*)\/users\/[^/]+\/edit$/);
+  if (matchEdit && matchEdit[1]) {
+    return trimTrailingSlash(matchEdit[1]) || '/';
+  }
+
+  return trimTrailingSlash(pathName) || '/';
+}
+
+function buildUsersListPath(req) {
+  return `${buildAppRootPath(req).replace(/\/+$/, '')}/users/list`;
+}
+
+async function loadUsersListModel(req) {
   const page = Math.max(1, Number(req.query.page) || 1);
   const pageSize = Math.max(10, Math.min(Number(req.query.pageSize) || 50, 200));
   const sortBy = req.query.sortBy || 'userName';
@@ -20,12 +61,10 @@ async function getHomePage(req, res) {
 
   let usersData = { rows: [], pagination: {}, sortBy, sortDir };
   let tableFilterOptions = {};
-  let userRoleOptions = [];
 
   try {
     usersData = await listUsersWithPagination(page, pageSize, tableFilters, sortBy, sortDir);
     tableFilterOptions = await getUsersTableFilterOptions(tableFilters);
-    userRoleOptions = await listActiveUserRoles();
   } catch (error) {
     console.error('[sysadmin] Erro ao obter lista de utilizadores:', error.message);
     usersData = {
@@ -34,6 +73,28 @@ async function getHomePage(req, res) {
       sortBy,
       sortDir
     };
+  }
+
+  return {
+    usersList: usersData.rows,
+    pagination: usersData.pagination,
+    tableFilters,
+    tableFilterOptions,
+    sortBy: usersData.sortBy,
+    sortDir: usersData.sortDir
+  };
+}
+
+async function getHomePage(req, res) {
+  const listModel = await loadUsersListModel(req);
+  const appRootPath = buildAppRootPath(req);
+  const usersListPath = buildUsersListPath(req);
+  let userRoleOptions = [];
+
+  try {
+    userRoleOptions = await listActiveUserRoles();
+  } catch (error) {
+    console.error('[sysadmin] Erro ao obter perfis ativos:', error.message);
   }
 
   res.status(200).render('app/index', {
@@ -48,13 +109,36 @@ async function getHomePage(req, res) {
       role: req.user?.role || null,
       roleId: req.user?.roleId || null
     },
-    usersList: usersData.rows,
+    usersList: listModel.usersList,
+    appRootPath,
+    usersListPath,
     userRoleOptions,
-    pagination: usersData.pagination,
-    tableFilters,
-    tableFilterOptions,
-    sortBy: usersData.sortBy,
-    sortDir: usersData.sortDir
+    pagination: listModel.pagination,
+    tableFilters: listModel.tableFilters,
+    tableFilterOptions: listModel.tableFilterOptions,
+    sortBy: listModel.sortBy,
+    sortDir: listModel.sortDir
+  });
+}
+
+async function getUsersListPage(req, res) {
+  const listModel = await loadUsersListModel(req);
+  const appRootPath = buildAppRootPath(req);
+  const usersListPath = buildUsersListPath(req);
+
+  return res.status(200).render('users/users-list.ejs', {
+    pageTitle: 'Lista de Utilizadores',
+    userName: req.user?.userName || 'Utilizador',
+    userRole: req.user?.role || '',
+    userId: req.user?.id || '',
+    appRootPath,
+    usersListPath,
+    usersList: listModel.usersList,
+    pagination: listModel.pagination,
+    tableFilters: listModel.tableFilters,
+    tableFilterOptions: listModel.tableFilterOptions,
+    sortBy: listModel.sortBy,
+    sortDir: listModel.sortDir
   });
 }
 
@@ -109,6 +193,7 @@ async function getEditUserPage(req, res) {
       userName: req.user?.userName || 'Utilizador',
       userRole: req.user?.role || '',
       userId: req.user?.id || '',
+      usersListPath: buildUsersListPath(req),
       userToEdit
     });
   } catch (error) {
@@ -122,6 +207,7 @@ async function getEditUserPage(req, res) {
 
 module.exports = {
   getHomePage,
+  getUsersListPage,
   exportUsersList,
   getEditUserPage
 };

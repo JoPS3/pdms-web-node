@@ -1,7 +1,10 @@
-<div class="users-list-wrap">
-  <form method="get" action="<%= basePath %>/" data-grid-form>
-    <input type="hidden" name="openWindow" value="users-list" />
-    <input type="hidden" name="owSrc" value="auth" />
+<% const isStandaloneListPage = Boolean(typeof standaloneListPage !== 'undefined' && standaloneListPage); %>
+<div class="users-list-wrap" data-users-list-page-mode="<%= isStandaloneListPage ? 'standalone' : 'embedded' %>">
+  <form method="get" action="<%= isStandaloneListPage ? usersListPath : (basePath + '/') %>" data-grid-form>
+    <% if (!isStandaloneListPage) { %>
+      <input type="hidden" name="openWindow" value="users-list" />
+      <input type="hidden" name="owSrc" value="auth" />
+    <% } %>
     <input type="hidden" name="page" value="<%= pagination.currentPage %>" data-page-input />
     <input type="hidden" name="pageSize" value="<%= pagination.pageSize %>" />
     <input type="hidden" name="sortBy" value="<%= sortBy %>" />
@@ -29,7 +32,11 @@
         <button type="button" class="btn btn-muted users-table-filter-summary-clear" data-table-filter-clear-all>Limpar filtros</button>
       </div>
     </div>
-    <p class="users-table-edit-hint">Dica: duplo clique numa linha para abrir a janela de edicao do utilizador.</p>
+    <p class="users-table-edit-hint">
+      <%= isStandaloneListPage
+        ? 'Dica: duplo clique numa linha para abrir a pagina de edicao do utilizador.'
+        : 'Dica: duplo clique numa linha para abrir a janela de edicao do utilizador.' %>
+    </p>
 
     <div class="table-wrap">
       <table class="users-list-table" data-table-filter-root>

@@ -1,0 +1,186 @@
+<%
+  const mobileHeading = typeof standaloneMobileHeading !== 'undefined' ? standaloneMobileHeading : windowTitle;
+  const mobileMessage = typeof standaloneMobileMessage !== 'undefined'
+    ? standaloneMobileMessage
+    : 'Esta vista foi desenhada para desktop. Volte ao desktop principal ou use um ecrã maior.';
+  const closeTarget = typeof standaloneCloseHref !== 'undefined' ? standaloneCloseHref : (appRootPath + '/');
+  const launcherTarget = typeof standaloneLauncherHref !== 'undefined' ? standaloneLauncherHref : (gatewayBasePath + '/apps');
+  const windowCssClass = typeof standaloneWindowClass !== 'undefined' ? standaloneWindowClass : '';
+  const windowBodyPartialPath = typeof standaloneWindowBodyPartial !== 'undefined' ? standaloneWindowBodyPartial : null;
+  const windowBodyLocals = typeof standaloneWindowBodyLocals !== 'undefined' ? standaloneWindowBodyLocals : {};
+  const windowMenuPartialPath = typeof standaloneWindowMenuPartial !== 'undefined' ? standaloneWindowMenuPartial : null;
+  const windowMenuLocals = typeof standaloneWindowMenuLocals !== 'undefined' ? standaloneWindowMenuLocals : {};
+  const usersDockActive = typeof standaloneActiveItem !== 'undefined' ? standaloneActiveItem === 'users' : false;
+%>
+<div class="mobile-shell bg-mobile">
+  <header class="mobile-header">
+    <div class="mobile-header-content">
+      <div>
+        <h1>PDMS</h1>
+      </div>
+      <div class="mobile-user">
+        Bem-vindo, <strong><%= userName %></strong><br />
+        <% if (userRole) { %>
+          <span><%= userRole %></span>
+        <% } %>
+      </div>
+      <form method="post" action="<%= gatewayBasePath %>/logout" class="mobile-logout">
+        <button type="submit">Sair</button>
+      </form>
+    </div>
+  </header>
+
+  <main class="user-edit-page">
+    <div class="user-edit-card">
+      <header class="user-edit-header">
+        <h1><%= mobileHeading %></h1>
+        <a class="user-edit-back" href="<%= closeTarget %>">Voltar ao desktop</a>
+      </header>
+
+      <article class="mobile-unavailable-card">
+        <h2>Vista desktop</h2>
+        <p><%= mobileMessage %></p>
+        <a class="user-edit-back" href="<%= closeTarget %>">Voltar ao desktop</a>
+      </article>
+    </div>
+  </main>
+</div>
+
+<div class="desktop-shell" aria-label="Desktop de administracao">
+  <header class="desktop-titlebar">
+    <div class="desktop-titlebar-left">
+      <form method="post" action="<%= gatewayBasePath %>/logout" class="traffic-light-logout" aria-label="Terminar sessao">
+        <button type="submit" class="ui-traffic-light-button red" title="Terminar sessao" aria-label="Terminar sessao"></button>
+      </form>
+      <a
+        href="<%= launcherTarget %>"
+        class="ui-traffic-light-button yellow"
+        title="Voltar ao launcher"
+        aria-label="Voltar ao launcher"
+      ></a>
+      <span class="ui-traffic-light green" aria-hidden="true"></span>
+      <strong class="desktop-brand">PDMS - Pedaço Decimal Management System</strong>
+    </div>
+
+    <div class="desktop-titlebar-center">
+      <span class="desktop-clock" id="desktopClock">--:--</span>
+    </div>
+
+    <div class="desktop-titlebar-right">
+      <span class="desktop-user">
+        <strong><%= userName %></strong>
+        <% if (userRole) { %><span class="desktop-user-role"><%= userRole %></span><% } %>
+      </span>
+    </div>
+  </header>
+
+  <main class="desktop-workspace">
+    <section class="desktop-icons" aria-label="Atalhos de administração">
+      <a href="<%= appRootPath %>/" class="desktop-icon" title="Voltar ao desktop" aria-label="Voltar ao desktop principal">
+        <span class="desktop-icon-face desktop-icon-folder">
+          <span class="desktop-icon-folder-main" aria-hidden="true">📁</span>
+          <span class="desktop-icon-folder-badge" aria-hidden="true">📋</span>
+        </span>
+        <span class="desktop-icon-label">Sessão</span>
+      </a>
+      <a href="<%= usersListPath %>" class="desktop-icon" title="Lista de Utilizadores" aria-label="Abrir lista de utilizadores">
+        <span class="desktop-icon-face desktop-icon-folder">
+          <span class="desktop-icon-folder-main" aria-hidden="true">📁</span>
+          <span class="desktop-icon-folder-badge" aria-hidden="true">👥</span>
+        </span>
+        <span class="desktop-icon-label">Utilizadores</span>
+      </a>
+      <a href="<%= appRootPath %>/" class="desktop-icon" title="Voltar à administração" aria-label="Voltar à administração">
+        <span class="desktop-icon-face desktop-icon-folder">
+          <span class="desktop-icon-folder-main" aria-hidden="true">📁</span>
+          <span class="desktop-icon-folder-badge" aria-hidden="true">☁️</span>
+        </span>
+        <span class="desktop-icon-label">OneDrive</span>
+      </a>
+    </section>
+  </main>
+
+  <nav class="desktop-dock" aria-label="Dock de modulos">
+    <a href="<%= appRootPath %>/" class="desktop-dock-item" title="Voltar ao desktop" aria-label="Voltar ao desktop principal">
+      <span class="desktop-dock-face desktop-icon-folder">
+        <span class="desktop-icon-folder-main" aria-hidden="true">📁</span>
+        <span class="desktop-icon-folder-badge" aria-hidden="true">📋</span>
+      </span>
+      <span class="desktop-dock-label">Sessão</span>
+    </a>
+
+    <a href="<%= usersListPath %>" class="desktop-dock-item <%= usersDockActive ? 'is-active' : '' %>" title="Lista de Utilizadores" aria-label="Lista de utilizadores <%= usersDockActive ? 'ativa' : '' %>">
+      <span class="desktop-dock-face desktop-icon-folder">
+        <span class="desktop-icon-folder-main" aria-hidden="true">📁</span>
+        <span class="desktop-icon-folder-badge" aria-hidden="true">👥</span>
+      </span>
+      <span class="desktop-dock-label">Utilizadores</span>
+    </a>
+
+    <a href="<%= appRootPath %>/" class="desktop-dock-item" title="Voltar à administração" aria-label="Voltar à administração">
+      <span class="desktop-dock-face desktop-icon-folder">
+        <span class="desktop-icon-folder-main" aria-hidden="true">📁</span>
+        <span class="desktop-icon-folder-badge" aria-hidden="true">☁️</span>
+      </span>
+      <span class="desktop-dock-label">OneDrive</span>
+    </a>
+
+    <div class="desktop-dock-sep" aria-hidden="true"></div>
+    <a class="dock-back" href="<%= launcherTarget %>" aria-label="Voltar ao launcher">◀</a>
+  </nav>
+
+  <div class="desktop-windows-container">
+    <%- include('./window-backdrop', { backdropHidden: false }) %>
+    <div class="desktop-window <%= windowCssClass %>" data-standalone-window="1">
+      <div class="desktop-window-titlebar has-traffic-controls">
+        <div class="desktop-window-titlebar-controls" aria-label="Controlo da janela">
+          <a
+            href="<%= closeTarget %>"
+            class="desktop-window-traffic-light red"
+            aria-label="Fechar vista e voltar ao desktop"
+            title="Fechar"
+          ></a>
+          <a
+            href="<%= launcherTarget %>"
+            class="desktop-window-traffic-light yellow"
+            aria-label="Voltar ao launcher"
+            title="Launcher"
+          ></a>
+          <span class="desktop-window-traffic-light green" aria-hidden="true"></span>
+        </div>
+        <strong class="desktop-window-title"><%= windowTitle %></strong>
+      </div>
+
+      <% if (windowMenuPartialPath) { %>
+        <%- include(windowMenuPartialPath, windowMenuLocals) %>
+      <% } %>
+
+      <div class="desktop-window-content">
+        <% if (windowBodyPartialPath) { %>
+          <%- include(windowBodyPartialPath, windowBodyLocals) %>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function attachDesktopClock() {
+    var clock = document.getElementById('desktopClock');
+    if (!clock) {
+      return;
+    }
+
+    function renderTime() {
+      var now = new Date();
+      clock.textContent = now.toLocaleTimeString('pt-PT', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    renderTime();
+    setInterval(renderTime, 1000);
+  })();
+</script>
+<script src="<%= basePath %>/scripts/standalone-window.js?v=<%= assetVersion %>"></script>

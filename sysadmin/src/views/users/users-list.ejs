@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= pageTitle %> | Sysadmin</title>
+    <link rel="stylesheet" href="<%= basePath %>/styles/style.css?v=<%= assetVersion %>" />
+  </head>
+  <body class="main-page bg-warm desktop-page" data-gateway-base-path="<%= gatewayBasePath %>" data-app-base-path="<%= appRootPath %>">
+    <%- include('../app/desktop-standalone-shell', {
+      standaloneActiveItem: 'users',
+      standaloneMobileHeading: 'Lista de Utilizadores',
+      standaloneMobileMessage: 'A listagem autónoma foi desenhada para o contexto desktop. Num ecrã pequeno, volte ao desktop ou use um dispositivo com largura superior.',
+      standaloneCloseHref: appRootPath + '/',
+      standaloneLauncherHref: gatewayBasePath + '/apps',
+      standaloneWindowClass: 'window-users-list window-table-content',
+      standaloneWindowMenuPartial: '../app/window-users-list-menu',
+      standaloneWindowBodyPartial: '../app/window-users-list',
+      standaloneWindowBodyLocals: {
+        usersList: usersList || [],
+        standaloneListPage: true,
+        usersListPath: usersListPath,
+        pagination: pagination,
+        tableFilters: tableFilters,
+        tableFilterOptions: tableFilterOptions,
+        sortBy: sortBy,
+        sortDir: sortDir
+      },
+      windowTitle: 'Lista de Utilizadores'
+    }) %>
+
+    <script src="<%= basePath %>/scripts/table-filters.js?v=<%= assetVersion %>"></script>
+  </body>
+</html>

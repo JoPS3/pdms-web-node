@@ -14,6 +14,18 @@ const APP_LABEL_BY_ID = {
   rh: 'RH'
 };
 
+function resolvePublicAppPrefix(appName, req) {
+  const originalUrl = String(req.originalUrl || '').trim();
+  const canonicalPrefix = `${basePath}/apps/${appName}`;
+  const legacyPrefix = `${basePath}/${appName}`;
+
+  if (originalUrl.includes(canonicalPrefix)) {
+    return canonicalPrefix;
+  }
+
+  return legacyPrefix;
+}
+
 function isConnectionRefused(error) {
   if (!error) {
     return false;
@@ -160,6 +172,7 @@ function buildProxyOptions(appName) {
       if (sessionToken) {
         proxyReqOpts.headers['Authorization'] = `Bearer ${sessionToken}`;
       }
+      proxyReqOpts.headers['X-Forwarded-Prefix'] = resolvePublicAppPrefix(appName, srcReq);
       const user = srcReq.authUser;
       if (user) {
         proxyReqOpts.headers['X-Gateway-User-Id'] = String(user.id || '');

@@ -93,6 +93,7 @@ appBasePaths.forEach((currentBasePath) => {
 // Rotas protegidas
 appBasePaths.forEach((currentBasePath) => {
   app.get(currentBasePath + '/', usersGuiController.getHomePage);
+  app.get(currentBasePath + '/users/list', usersGuiController.getUsersListPage);
   app.get(currentBasePath + '/users/export', usersGuiController.exportUsersList);
   app.get(currentBasePath + '/users/:userId/edit', usersGuiController.getEditUserPage);
 });

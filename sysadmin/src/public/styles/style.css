@@ -549,26 +549,71 @@ body {
     font-size: 1rem;
     line-height: normal;
   }
-  .desktop-window-close {
-    width: 28px;
-    height: 28px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    color: #fff;
-    background: transparent;
-    cursor: pointer;
-    line-height: 1;
-    transition: background 120ms ease, border-color 120ms ease;
+  .desktop-window-titlebar.has-traffic-controls {
+    justify-content: flex-start;
+    gap: 10px;
   }
-  .desktop-window-close:hover {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.5);
+  .desktop-window-titlebar-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .desktop-window-traffic-light {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    border: none;
+    padding: 0;
+  }
+  .desktop-window-traffic-light.red {
+    background: var(--traffic-red);
+    cursor: pointer;
+  }
+  .desktop-window-traffic-light.yellow {
+    background: var(--traffic-yellow);
+    cursor: pointer;
+  }
+  .desktop-window-traffic-light.green {
+    background: var(--traffic-green);
+  }
+  .desktop-window-titlebar .desktop-window-traffic-light.red {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: none;
+    line-height: 1;
+    font-size: 0;
+    box-shadow: none;
+    background: var(--traffic-red);
+  }
+  .desktop-window-titlebar .desktop-window-traffic-light.red:hover {
+    filter: saturate(1.15) brightness(1.05);
+    box-shadow: 0 0 0 2px rgba(253, 95, 87, 0.35);
+    transform: scale(1.15);
+  }
+  .desktop-window-titlebar .desktop-window-traffic-light.red:active {
+    filter: saturate(1.2) brightness(0.95);
+    box-shadow: 0 0 0 2px rgba(253, 95, 87, 0.5);
+    transform: scale(1.05);
+  }
+  .desktop-window-titlebar .desktop-window-traffic-light.yellow:hover {
+    filter: saturate(1.15) brightness(1.05);
+    box-shadow: 0 0 0 2px rgba(247, 191, 66, 0.35);
+    transform: scale(1.15);
+  }
+  .desktop-window-titlebar .desktop-window-traffic-light.yellow:active {
+    filter: saturate(1.2) brightness(0.95);
+    box-shadow: 0 0 0 2px rgba(247, 191, 66, 0.5);
+    transform: scale(1.05);
   }
   .desktop-window-content {
     position: relative;
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    padding: 8px;
     background: #fff;
   }
   .window-confirm-modal {
@@ -1128,9 +1173,9 @@ body.in-desktop-iframe .desktop-only-feature {
 }
 
 .users-launcher-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 140px));
-  gap: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
   align-content: start;
   justify-content: start;
   margin-top: 20px;
@@ -1142,46 +1187,28 @@ body.in-desktop-iframe .desktop-only-feature {
 }
 
 .users-launcher-icon {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 8px;
-  border-radius: 12px;
-  color: var(--ink);
-  text-decoration: none;
-  text-align: center;
+  font: inherit;
 }
 
-.users-launcher-icon:hover {
-  background: rgba(193, 84, 27, 0.08);
+.users-launcher-icon.desktop-icon {
+  width: 96px;
 }
 
-.users-launcher-icon.is-disabled {
-  opacity: 0.75;
-  pointer-events: none;
-}
-
-.users-launcher-glyph {
-  width: 68px;
-  height: 68px;
-  display: grid;
-  place-items: center;
-  border-radius: 18px;
-  background: #f4ecde;
-  border: 1px solid #d9ceb7;
-  font-size: 1.85rem;
-}
-
-.users-launcher-name {
-  font-size: 0.82rem;
-  font-weight: 600;
-  line-height: 1.2;
+.window-session-wrapper,
+.window-users-wrapper,
+.desktop-window.window-onedrive .desktop-window-content {
+  --desktop-overlay-a: rgba(234, 219, 192, 0.45);
+  --desktop-overlay-b: rgba(224, 201, 161, 0.55);
+  --desktop-panel-soft: rgba(154, 128, 88, 0.35);
+  --desktop-panel-border: rgba(128, 99, 59, 0.45);
+  --desktop-ink: #3c2f1f;
+  --desktop-user-ink: #6e5d47;
 }
 
 .users-launcher-caption {
   font-size: 0.74rem;
-  color: var(--muted);
+  color: var(--desktop-user-ink);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
 .onedrive-status-panel {

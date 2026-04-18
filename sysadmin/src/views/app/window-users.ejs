@@ -2,38 +2,44 @@
 
 <section class="window-users-wrapper">
   <div class="users-launcher-grid" aria-label="Atalhos de utilizadores">
-    <button
-      type="button"
-      class="users-launcher-icon"
-      data-open-window="users-list"
-      data-parent-window="users"
-      data-hide-window-on-open="1"
+    <a
+      href="<%= usersListPath %>"
+      class="users-launcher-icon desktop-icon"
       title="Lista de Utilizadores"
     >
-      <span class="users-launcher-glyph">👥</span>
-      <span class="users-launcher-name">Lista</span>
+      <span class="desktop-icon-face desktop-icon-folder">
+        <span class="desktop-icon-folder-main" aria-hidden="true">📁</span>
+        <span class="desktop-icon-folder-badge" aria-hidden="true">👥</span>
+      </span>
+      <span class="desktop-icon-label">Lista</span>
       <span class="users-launcher-caption">Abrir</span>
-    </button>
+    </a>
 
     <a
       href="#"
-      class="users-launcher-icon is-disabled"
+      class="users-launcher-icon desktop-icon is-disabled"
       aria-disabled="true"
       title="Perfis e Papéis (em breve)"
     >
-      <span class="users-launcher-glyph">🔑</span>
-      <span class="users-launcher-name">Perfis</span>
+      <span class="desktop-icon-face desktop-icon-folder">
+        <span class="desktop-icon-folder-main" aria-hidden="true">📁</span>
+        <span class="desktop-icon-folder-badge" aria-hidden="true">🔑</span>
+      </span>
+      <span class="desktop-icon-label">Perfis</span>
       <span class="users-launcher-caption">Em breve</span>
     </a>
 
     <a
       href="#"
-      class="users-launcher-icon is-disabled"
+      class="users-launcher-icon desktop-icon is-disabled"
       aria-disabled="true"
       title="Criar Utilizador (em breve)"
     >
-      <span class="users-launcher-glyph">➕</span>
-      <span class="users-launcher-name">Criar</span>
+      <span class="desktop-icon-face desktop-icon-folder">
+        <span class="desktop-icon-folder-main" aria-hidden="true">📁</span>
+        <span class="desktop-icon-folder-badge" aria-hidden="true">➕</span>
+      </span>
+      <span class="desktop-icon-label">Criar</span>
       <span class="users-launcher-caption">Em breve</span>
     </a>
   </div>

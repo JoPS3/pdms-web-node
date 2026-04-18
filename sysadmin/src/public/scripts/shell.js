@@ -9,6 +9,9 @@
     return String(document.body?.dataset?.appBasePath || '').replace(/\/+$/, '');
   };
 
+  const DOM_STATE_STORAGE_KEY = 'pdms:sysadmin:desktop-state';
+  const DOM_STATE_TTL_MS = 10 * 60 * 1000;
+
   // Estado global de windows
   const desktopShell = {
     overlay: null,
@@ -177,6 +180,11 @@
         if (this.activeWindow) {
           this._stopDrag(this.activeWindow);
         }
+      });
+
+      // Persist current desktop window state before leaving this page.
+      window.addEventListener('pagehide', () => {
+        this.saveDomStateSnapshot();
       });
     },
     
@@ -580,6 +588,7 @@
       
       const w = this.windows[windowId];
       w.element.hidden = false;
+      w.state.visible = true;
       this.overlay.hidden = false;
       this.activeWindow = windowId;
       this._bringToFront(windowId);
@@ -628,6 +637,8 @@
     },
 
     _reloadUsersListClean() {
+      this.saveDomStateSnapshot();
+
       const url = new URL(window.location.href);
       const params = url.searchParams;
       const keys = Array.from(params.keys());
@@ -646,6 +657,96 @@
 
       const nextUrl = url.pathname + (params.toString() ? `?${params.toString()}` : '') + url.hash;
       window.location.assign(nextUrl);
+    },
+
+    _buildDomStateSnapshot() {
+      const activeWindow = String(this.activeWindow || '').trim();
+      if (!activeWindow || !this.windows[activeWindow] || this.windows[activeWindow].element?.hidden) {
+        return null;
+      }
+
+      const parentWindow = String(this.windowParent[activeWindow] || '').trim() || null;
+      const hiddenParent = String(this.hiddenOnOpen[activeWindow] || '').trim() || null;
+
+      return {
+        version: 1,
+        savedAt: Date.now(),
+        pathName: window.location.pathname,
+        activeWindow,
+        parentWindow,
+        hideParent: Boolean(hiddenParent && parentWindow && hiddenParent === parentWindow)
+      };
+    },
+
+    saveDomStateSnapshot() {
+      try {
+        const snapshot = this._buildDomStateSnapshot();
+        if (!snapshot) {
+          sessionStorage.removeItem(DOM_STATE_STORAGE_KEY);
+          return false;
+        }
+        sessionStorage.setItem(DOM_STATE_STORAGE_KEY, JSON.stringify(snapshot));
+        return true;
+      } catch (_error) {
+        return false;
+      }
+    },
+
+    consumeDomStateSnapshot() {
+      try {
+        const raw = sessionStorage.getItem(DOM_STATE_STORAGE_KEY);
+        if (!raw) {
+          return null;
+        }
+
+        sessionStorage.removeItem(DOM_STATE_STORAGE_KEY);
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== 'object') {
+          return null;
+        }
+
+        const savedAt = Number(parsed.savedAt || 0);
+        if (!savedAt || (Date.now() - savedAt) > DOM_STATE_TTL_MS) {
+          return null;
+        }
+
+        const activeWindow = String(parsed.activeWindow || '').trim();
+        if (!activeWindow || !this.windows[activeWindow]) {
+          return null;
+        }
+
+        const parentWindow = String(parsed.parentWindow || '').trim() || null;
+        if (parentWindow && !this.windows[parentWindow]) {
+          return null;
+        }
+
+        return {
+          activeWindow,
+          parentWindow,
+          hideParent: Boolean(parsed.hideParent && parentWindow)
+        };
+      } catch (_error) {
+        return null;
+      }
+    },
+
+    restoreDomStateSnapshot() {
+      const snapshot = this.consumeDomStateSnapshot();
+      if (!snapshot) {
+        return false;
+      }
+
+      const openOptions = {
+        parentWindow: snapshot.parentWindow,
+        hideParent: snapshot.hideParent
+      };
+
+      if (snapshot.activeWindow === 'users-list') {
+        openOptions.skipRebuild = true;
+      }
+
+      this.openWindow(snapshot.activeWindow, openOptions);
+      return true;
     },
     
     _showWindowSection(windowId, sectionId) {
@@ -711,7 +812,7 @@
     
     _onTitlebarPointerDown(event, windowId) {
       if (event.button !== 0) return;
-      if (event.target.closest('.desktop-window-close')) return;
+      if (event.target.closest('.desktop-window-traffic-light.red')) return;
       
       const w = this.windows[windowId];
       this.activeWindow = windowId;

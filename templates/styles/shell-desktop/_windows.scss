@@ -69,21 +69,74 @@
     line-height: normal;
   }
 
-  .desktop-window-close {
-    width: 28px;
-    height: 28px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    color: #fff;
-    background: transparent;
-    cursor: pointer;
-    line-height: 1;
-    transition: background 120ms ease, border-color 120ms ease;
+  .desktop-window-titlebar.has-traffic-controls {
+    justify-content: flex-start;
+    gap: 10px;
   }
 
-  .desktop-window-close:hover {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.5);
+  .desktop-window-titlebar-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .desktop-window-traffic-light {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    border: none;
+    padding: 0;
+  }
+
+  .desktop-window-traffic-light.red {
+    background: var(--traffic-red);
+    cursor: pointer;
+  }
+
+  .desktop-window-traffic-light.yellow {
+    background: var(--traffic-yellow);
+    cursor: pointer;
+  }
+
+  .desktop-window-traffic-light.green {
+    background: var(--traffic-green);
+  }
+
+  .desktop-window-titlebar .desktop-window-traffic-light.red {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: none;
+    line-height: 1;
+    font-size: 0;
+    box-shadow: none;
+    background: var(--traffic-red);
+  }
+
+  .desktop-window-titlebar .desktop-window-traffic-light.red:hover {
+    filter: saturate(1.15) brightness(1.05);
+    box-shadow: 0 0 0 2px rgba(253, 95, 87, 0.35);
+    transform: scale(1.15);
+  }
+
+  .desktop-window-titlebar .desktop-window-traffic-light.red:active {
+    filter: saturate(1.2) brightness(0.95);
+    box-shadow: 0 0 0 2px rgba(253, 95, 87, 0.5);
+    transform: scale(1.05);
+  }
+
+  .desktop-window-titlebar .desktop-window-traffic-light.yellow:hover {
+    filter: saturate(1.15) brightness(1.05);
+    box-shadow: 0 0 0 2px rgba(247, 191, 66, 0.35);
+    transform: scale(1.15);
+  }
+
+  .desktop-window-titlebar .desktop-window-traffic-light.yellow:active {
+    filter: saturate(1.2) brightness(0.95);
+    box-shadow: 0 0 0 2px rgba(247, 191, 66, 0.5);
+    transform: scale(1.05);
   }
 
   .desktop-window-content {
@@ -91,6 +144,7 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    padding: 8px;
     background: #fff;
   }
 

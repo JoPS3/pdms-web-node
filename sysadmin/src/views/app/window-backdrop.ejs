@@ -1,2 +1,2 @@
 <!-- Overlay backdrop para escurecer desktop -->
-<div class="desktop-overlay" id="desktopOverlay" hidden></div>
+<div class="desktop-overlay" id="<%= typeof overlayId !== 'undefined' ? overlayId : 'desktopOverlay' %>" <%= (typeof backdropHidden !== 'undefined' && backdropHidden === false) ? '' : 'hidden' %>></div>

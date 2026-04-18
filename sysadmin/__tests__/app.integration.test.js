@@ -6,6 +6,7 @@ const mockAuthMode = {
 };
 
 const mockGetHomePage = jest.fn((req, res) => res.status(200).send('home-page'));
+const mockGetUsersListPage = jest.fn((req, res) => res.status(200).send('users-list-page'));
 const mockGetEditUserPage = jest.fn((req, res) => res.status(200).send('edit-user-page'));
 const mockGetSessionStatus = jest.fn((req, res) => res.status(200).json({ status: 'ok', route: 'get-session-status' }));
 const mockGetInternalSessionStatus = jest.fn((req, res) => res.status(200).json({ status: 'ok', route: 'session-status' }));
@@ -34,6 +35,7 @@ jest.mock('../src/controllers/onedrive.api.controller', () => ({
 
 jest.mock('../src/controllers/users.gui.controller', () => ({
   getHomePage: (req, res, next) => mockGetHomePage(req, res, next),
+  getUsersListPage: (req, res, next) => mockGetUsersListPage(req, res, next),
   getEditUserPage: (req, res, next) => mockGetEditUserPage(req, res, next),
   exportUsersList: (req, res, next) => mockExportUsersList(req, res, next)
 }));
@@ -116,6 +118,14 @@ describe('sysadmin app integration routes', () => {
     expect(response.status).toBe(200);
     expect(response.text).toContain('home-page');
     expect(mockGetHomePage).toHaveBeenCalledTimes(1);
+  });
+
+  test('GET users list delegates to users list controller', async () => {
+    const response = await request(app).get(`${basePath}/users/list`);
+
+    expect(response.status).toBe(200);
+    expect(response.text).toContain('users-list-page');
+    expect(mockGetUsersListPage).toHaveBeenCalledTimes(1);
   });
 
   test('GET edit user page delegates to auth controller', async () => {

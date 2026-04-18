@@ -85,6 +85,33 @@ describe('users.controller', () => {
     }));
   });
 
+  test('getUsersListPage renders users/users-list with pagination and filters', async () => {
+    const req = {
+      query: { page: '2', sortBy: 'role', sortDir: 'DESC' },
+      user: { id: 'u-1', userName: 'alice', role: 'ADMINISTRADOR' }
+    };
+    const res = createResMock();
+
+    listUsersWithPagination.mockResolvedValue({
+      rows: [{ id: 'u-2', userName: 'bob', role: 'OPERADOR' }],
+      pagination: { currentPage: 2, pageSize: 50, totalRecords: 1, totalPages: 1, from: 1, to: 1 },
+      sortBy: 'role',
+      sortDir: 'DESC'
+    });
+    getUsersTableFilterOptions.mockResolvedValue({ role: ['OPERADOR'] });
+
+    await usersController.getUsersListPage(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.render).toHaveBeenCalledWith('users/users-list.ejs', expect.objectContaining({
+      pageTitle: 'Lista de Utilizadores',
+      usersList: expect.any(Array),
+      pagination: expect.objectContaining({ currentPage: 2 }),
+      sortBy: 'role',
+      sortDir: 'DESC'
+    }));
+  });
+
   test('getEditUserPage renders users/user-edit when user exists', async () => {
     const req = {
       params: { userId: 'u-100' },
