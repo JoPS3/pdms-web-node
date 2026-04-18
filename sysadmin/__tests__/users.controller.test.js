@@ -50,7 +50,7 @@ describe('users.controller', () => {
     jest.clearAllMocks();
   });
 
-  test('getHomePage renders index with user metadata, session data, and users list', async () => {
+  test('getHomePage renders app/index with user metadata, session data, and users list', async () => {
     const req = {
       query: {},
       user: { id: 'u-1', userName: 'alice', email: 'alice@example.com', role: 'ADMINISTRADOR', roleId: 1 }
@@ -69,7 +69,7 @@ describe('users.controller', () => {
 
     expect(res.status).toHaveBeenCalledWith(200);
     expect(listUsersWithPagination).toHaveBeenCalledWith(1, 50, {}, 'userName', 'ASC');
-    expect(res.render).toHaveBeenCalledWith('index', expect.objectContaining({
+    expect(res.render).toHaveBeenCalledWith('app/index', expect.objectContaining({
       pageTitle: 'Utilizadores',
       userName: 'alice',
       userRole: 'ADMINISTRADOR',
@@ -85,7 +85,7 @@ describe('users.controller', () => {
     }));
   });
 
-  test('getEditUserPage renders user-edit when user exists', async () => {
+  test('getEditUserPage renders users/user-edit when user exists', async () => {
     const req = {
       params: { userId: 'u-100' },
       user: { id: 'u-admin', userName: 'admin', role: 'ADMINISTRADOR' }
@@ -104,7 +104,7 @@ describe('users.controller', () => {
     await usersController.getEditUserPage(req, res);
 
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.render).toHaveBeenCalledWith('user-edit', expect.objectContaining({
+    expect(res.render).toHaveBeenCalledWith('users/user-edit', expect.objectContaining({
       userToEdit: expect.objectContaining({ id: 'u-100' })
     }));
   });
@@ -121,6 +121,6 @@ describe('users.controller', () => {
     await usersController.getEditUserPage(req, res);
 
     expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.render).toHaveBeenCalledWith('404', expect.anything());
+    expect(res.render).toHaveBeenCalledWith('errors/404', expect.anything());
   });
 });

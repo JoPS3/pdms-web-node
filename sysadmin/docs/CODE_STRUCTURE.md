@@ -97,8 +97,44 @@ Browser → gateway proxy
       → users.dao.js: listDistinct*Options
     → users.service.js: listActiveUserRoles
       → users.dao.js: listActiveRoles
-  → res.render('index', { ... })
+    → res.render('app/index', { ... })
 ```
+
+  ---
+
+  ## Estrutura de views (padrao permanente)
+
+  No `sysadmin`, a arquitetura de UI segue o padrao global da shell:
+
+  ```
+  src/views/
+    app/
+      index.ejs
+      window-backdrop.ejs
+      window-frame.ejs
+    session/
+      window-session.ejs
+      window-session-info.ejs
+      window-session-password.ejs
+    users/
+      window-users.ejs
+      window-users-list.ejs
+      window-user-edit.ejs
+      user-edit.ejs
+    onedrive/
+      window-onedrive.ejs
+      window-onedrive-setup.ejs
+    errors/
+      404.ejs
+      error.ejs
+  ```
+
+  Regras de manutencao:
+
+  1. A shell principal e sempre `app/index.ejs`.
+  2. Cada icon do desktop/dock tem a sua propria pasta de views.
+  3. Views de erro ficam exclusivamente em `views/errors/`.
+  4. Nao voltar a introduzir `views/index.ejs`, `views/user-edit.ejs` ou `views/partials/desktop/`.
 
 ## Fluxo de uma request API tipica
 

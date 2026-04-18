@@ -99,13 +99,13 @@ appBasePaths.forEach((currentBasePath) => {
 
 // 404 Handler
 app.use((req, res) => {
-  res.status(404).render('404', { title: 'Not Found' });
+  res.status(404).render('errors/404', { title: 'Not Found' });
 });
 
 // Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).render('error', { title: 'Error', error: err.message });
+  res.status(500).render('errors/error', { title: 'Error', error: err.message });
 });
 
 module.exports = app;

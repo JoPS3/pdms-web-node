@@ -88,13 +88,29 @@ Aplicar na listagem de utilizadores do modulo sysadmin o mesmo modelo funcional 
 4. Reabertura de janela apos submit via query `openWindow`.
 
 ### Ficheiros envolvidos
-- `src/views/index.ejs`
-- `src/views/partials/desktop/window-users-list.ejs`
+- `src/views/app/index.ejs`
+- `src/views/users/window-users-list.ejs`
 - `src/public/scripts/table-filters.js`
 - `src/public/scripts/shell.js`
 - `src/public/styles/style.css`
 - `src/controllers/users.gui.controller.js`
 - `src/services/users-filters.service.js`
+
+### Estrutura de views adotada (padrao fixo)
+
+```
+src/views/
+  app/
+  session/
+  users/
+  onedrive/
+  errors/
+```
+
+Regra de arquitetura UI do modulo:
+1. `app/` para composicao da shell.
+2. Uma pasta por icon/area funcional interna (`session`, `users`, `onedrive`).
+3. `errors/` para paginas de erro renderizadas por `app.js` e controllers.
 
 ### Contrato implementado
 1. Query params suportados:

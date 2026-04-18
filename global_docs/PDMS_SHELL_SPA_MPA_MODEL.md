@@ -40,6 +40,37 @@ Cada modulo (`usuarios`, `mapas`, `compras`, `vendas`, `rh`, etc.) e responsavel
 
 A shell apenas encaminha para estas paginas via links.
 
+### 3) Estrutura canonica de views (padrao permanente)
+
+Para todas as apps com shell desktop/mobile, a organizacao de `views/` deve seguir o padrao:
+
+- `app/`: view principal da shell do modulo (launcher e composicao de janelas)
+- `<dominio>/`: uma pasta por icon/modulo interno (ex.: `session/`, `users/`, `onedrive/`)
+- `errors/`: views de erro (`404`, `500`, etc.)
+
+Exemplo canonico:
+
+```
+views/
+	app/
+		index.ejs
+	session/
+		...
+	users/
+		...
+	onedrive/
+		...
+	errors/
+		404.ejs
+		error.ejs
+```
+
+Regras obrigatorias deste padrao:
+
+1. `res.render()` deve usar path completo por pasta (`app/index`, `users/user-edit`, `errors/404`).
+2. Includes EJS devem apontar para as novas pastas de dominio, evitando pastas genericas antigas.
+3. Novas janelas/partials devem entrar na pasta do icon correspondente, nao em `partials/desktop` global.
+
 ## Modelo de Interacao
 
 ### Fluxo principal

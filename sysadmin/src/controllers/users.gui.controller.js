@@ -36,7 +36,7 @@ async function getHomePage(req, res) {
     };
   }
 
-  res.status(200).render('index', {
+  res.status(200).render('app/index', {
     pageTitle: 'Utilizadores',
     userName: req.user?.userName || 'Utilizador',
     userRole: req.user?.role || '',
@@ -92,7 +92,7 @@ async function exportUsersList(req, res) {
 async function getEditUserPage(req, res) {
   const userId = String(req.params.userId || '').trim();
   if (!userId) {
-    return res.status(400).render('error', {
+    return res.status(400).render('errors/error', {
       title: 'Erro',
       error: 'Identificador de utilizador invalido.'
     });
@@ -101,10 +101,10 @@ async function getEditUserPage(req, res) {
   try {
     const userToEdit = await getUserByIdForEdit(userId);
     if (!userToEdit) {
-      return res.status(404).render('404', { title: 'Not Found' });
+      return res.status(404).render('errors/404', { title: 'Not Found' });
     }
 
-    return res.status(200).render('user-edit', {
+    return res.status(200).render('users/user-edit', {
       pageTitle: 'Editar Utilizador',
       userName: req.user?.userName || 'Utilizador',
       userRole: req.user?.role || '',
@@ -113,7 +113,7 @@ async function getEditUserPage(req, res) {
     });
   } catch (error) {
     console.error('[sysadmin] Erro ao abrir view de edicao de utilizador:', error.message);
-    return res.status(500).render('error', {
+    return res.status(500).render('errors/error', {
       title: 'Erro',
       error: 'Nao foi possivel abrir a view de edicao do utilizador.'
     });

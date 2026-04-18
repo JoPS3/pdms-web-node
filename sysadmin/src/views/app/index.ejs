@@ -165,7 +165,7 @@
 
       <!-- Windows container (single DOM, state-driven visibility) -->
       <div class="desktop-windows-container">
-        <%- include('partials/desktop/window-backdrop') %>
+        <%- include('./window-backdrop') %>
         
         <!-- Session window with embedded content -->
         <div class="desktop-window window-session" id="window-session" hidden>
@@ -182,7 +182,7 @@
             </button>
           </div>
           <div class="desktop-window-content">
-            <%- include('partials/desktop/window-session', { session: session }) %>
+            <%- include('../session/window-session', { session: session }) %>
           </div>
         </div>
 
@@ -201,7 +201,7 @@
             </button>
           </div>
           <div class="desktop-window-content">
-            <%- include('partials/desktop/window-session-info', { session: session }) %>
+            <%- include('../session/window-session-info', { session: session }) %>
           </div>
         </div>
 
@@ -220,7 +220,7 @@
             </button>
           </div>
           <div class="desktop-window-content">
-            <%- include('partials/desktop/window-session-password') %>
+            <%- include('../session/window-session-password') %>
           </div>
         </div>
         
@@ -239,7 +239,7 @@
             </button>
           </div>
           <div class="desktop-window-content">
-            <%- include('partials/desktop/window-users', { session: session }) %>
+            <%- include('../users/window-users', { session: session }) %>
           </div>
         </div>
 
@@ -258,7 +258,7 @@
             </button>
           </div>
           <div class="desktop-window-content">
-            <%- include('partials/desktop/window-onedrive') %>
+            <%- include('../onedrive/window-onedrive') %>
           </div>
         </div>
 
@@ -277,7 +277,7 @@
             </button>
           </div>
           <div class="desktop-window-content">
-            <%- include('partials/desktop/window-onedrive-setup') %>
+            <%- include('../onedrive/window-onedrive-setup') %>
           </div>
         </div>
 
@@ -324,7 +324,7 @@
             </div>
           </nav>
           <div class="desktop-window-content">
-            <%- include('partials/desktop/window-users-list', { usersList: usersList || [] }) %>
+            <%- include('../users/window-users-list', { usersList: usersList || [] }) %>
           </div>
         </div>
 
@@ -343,7 +343,7 @@
             </button>
           </div>
           <div class="desktop-window-content">
-            <%- include('partials/desktop/window-user-edit') %>
+            <%- include('../users/window-user-edit') %>
           </div>
         </div>
       </div>
