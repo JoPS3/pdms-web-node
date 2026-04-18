@@ -1,16 +1,66 @@
 :root {
   --bg: #f6f4ee;
+  --white: #fff;
   --panel: #fffdf8;
+  --window-wallpaper-a: #fffdf8;
   --ink: #2f2a1f;
   --muted: #7a715f;
   --accent: #c1541b;
   --accent-2: #f1b463;
   --ok: #1f7a4a;
   --err: #b42318;
+
+  --warm-glow-a: #fff7e5;
+  --warm-glow-a-soft: rgba(255, 247, 229, 0);
+  --warm-glow-b: #ffe7c5;
+  --warm-glow-b-soft: rgba(255, 231, 197, 0);
+
   --desktop-wallpaper-a: #112032;
   --desktop-wallpaper-b: #284663;
   --desktop-wallpaper-c: #4f7f9b;
-  --desktop-panel: rgba(18, 29, 43, 0.72);
+  --desktop-ink: #edf3fb;
+  --desktop-user-ink: #d7e5f7;
+  --desktop-user-role-ink: rgba(215, 229, 247, 0.65);
+
+  --desktop-overlay-a: rgba(255, 255, 255, 0.16);
+  --desktop-overlay-b: rgba(190, 240, 255, 0.18);
+  --desktop-panel: rgba(18, 29, 43, 0.82);
+  --desktop-panel-border: rgba(255, 255, 255, 0.35);
   --desktop-panel-soft: rgba(255, 255, 255, 0.2);
   --desktop-glow: rgba(198, 228, 255, 0.35);
+
+  --desktop-control-border: rgba(255, 255, 255, 0.18);
+  --desktop-control-ink: rgba(255, 255, 255, 0.55);
+  --desktop-control-hover-bg: rgba(255, 80, 80, 0.25);
+  --desktop-control-hover-border: rgba(255, 80, 80, 0.5);
+  --desktop-control-hover-ink: #ffa0a0;
+
+  --traffic-red: #fd5f57;
+  --traffic-yellow: #febc2e;
+  --traffic-green: #28c840;
+
+  --mobile-header-shadow: rgba(0, 0, 0, 0.1);
+  --mobile-card-border: #ebe4d7;
+
+  --btn-primary-bg: linear-gradient(135deg, var(--accent), var(--accent-2));
+  --btn-primary-bg-hover: linear-gradient(135deg, var(--accent), var(--accent-2));
+  --btn-primary-hover-opacity: 0.9;
+  --btn-primary-ink: var(--white);
+
+  --btn-secondary-bg: linear-gradient(135deg, #f3eadb, #e2cead);
+  --btn-secondary-bg-hover: linear-gradient(135deg, #eadece, #d6c09e);
+  --btn-secondary-ink: var(--ink);
+  --btn-secondary-border: #d8c6ad;
+
+  --btn-ghost-bg: linear-gradient(135deg, rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.07));
+  --btn-ghost-bg-hover: linear-gradient(135deg, rgba(0, 0, 0, 0.07), rgba(0, 0, 0, 0.12));
+  --btn-ghost-ink: var(--ink);
+  --btn-ghost-border: rgba(0, 0, 0, 0.18);
+
+  --btn-danger-bg: linear-gradient(135deg, #b42318, #d4502a);
+  --btn-danger-bg-hover: linear-gradient(135deg, #901c14, #b42318);
+  --btn-danger-ink: var(--white);
+
+  --btn-focus-ring: rgba(193, 84, 27, 0.28);
+  --btn-disabled-opacity: 0.55;
 }

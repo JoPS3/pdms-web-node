@@ -1,0 +1,17 @@
+.mobile-apps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.mobile-app-card {
+  background: var(--white);
+  border: 1px solid var(--mobile-card-border);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.mobile-app-card h3,
+.mobile-app-card p {
+  margin: 0 0 10px;
+}

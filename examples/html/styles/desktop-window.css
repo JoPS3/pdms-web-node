@@ -1,0 +1,76 @@
+.desktop-window {
+  position: fixed;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  width: min(400px, calc(100vw - 32px));
+  background: var(--window-wallpaper-a);
+  border: 1px solid var(--desktop-panel-border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 24px 64px rgba(0, 0, 0, 0.55);
+  color: var(--ink);
+  user-select: none;
+}
+
+.desktop-window.is-dragging {
+  cursor: grabbing;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 40px 80px rgba(0, 0, 0, 0.65);
+}
+
+.desktop-window.is-active {
+  border-color: var(--desktop-glow);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 28px 72px rgba(0, 0, 0, 0.62),
+    0 0 0 1px rgba(198, 228, 255, 0.32);
+}
+
+.desktop-window-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 40px;
+  padding: 0 14px;
+  background: var(--desktop-panel);
+  border-bottom: 1px solid var(--desktop-panel-border);
+  backdrop-filter: blur(12px);
+  cursor: grab;
+  touch-action: none;
+}
+
+.desktop-window-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.desktop-window-title {
+  flex: 1;
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--desktop-ink);
+  margin-right: 52px;
+}
+
+.desktop-window-body {
+  flex: 1;
+  min-height: 0;
+  padding: 20px;
+  overflow-x: auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
+  overscroll-behavior: contain;
+}
+
+.desktop-window-body p {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}

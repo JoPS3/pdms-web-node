@@ -1,0 +1,31 @@
+:root {
+    --bg: #f6f4ee;
+    --ink: #2f2a1f;
+    --muted: #7a715f;
+    --accent: #c1541b;
+    --accent-2: #f1b463;
+    --desktop-wallpaper-a: #112032;
+    --desktop-wallpaper-b: #284663;
+    --desktop-wallpaper-c: #4f7f9b;
+    --desktop-panel: rgba(18, 29, 43, 0.72);
+    --desktop-panel-soft: rgba(255, 255, 255, 0.2);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 10% 10%, #fff7e5 0, #fff7e500 45%),
+        radial-gradient(circle at 90% 80%, #ffe7c5 0, #ffe7c500 40%),
+        var(--bg);
+}
+
+.main-page {
+    min-height: 100vh;
+}

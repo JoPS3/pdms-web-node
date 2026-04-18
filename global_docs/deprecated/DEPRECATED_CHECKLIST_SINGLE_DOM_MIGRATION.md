@@ -1,4 +1,16 @@
-# Checklist de Migracao Single-DOM (PDMS)
+# [DEPRECATED] Checklist de Migracao Single-DOM (PDMS)
+
+## Status
+- Deprecated em 2026-04-18.
+- Este checklist nao deve ser usado para novas implementacoes.
+
+## Motivo
+- A estrategia ativa passou para shell SPA (navegacao/menu) + apps MPA (funcionalidades reais).
+- O fluxo de migracao single-DOM por modulo nao representa mais o caminho principal.
+
+## Documento substituto
+- Ver `global_docs/PDMS_SHELL_SPA_MPA_MODEL.md`.
+- Manter este ficheiro apenas para referencia historica.
 
 ## Objetivo
 Aplicar o padrao de desktop-like em um unico DOM para modulos novos/existentes, mantendo navegacao de pagina separada da navegacao interna de janelas.
@@ -80,5 +92,5 @@ Aplicar o padrao de desktop-like em um unico DOM para modulos novos/existentes, 
 
 ## Nota de consistencia
 Este checklist segue o padrao documentado em:
-- `global_docs/PDMS_SINGLE_DOM_WINDOWS_STANDARD.md`
+- `global_docs/deprecated/DEPRECATED_PDMS_SINGLE_DOM_WINDOWS_STANDARD.md`
 - `auth/docs/DESKTOP_SINGLE_DOM_MODEL.md`

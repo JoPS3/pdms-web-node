@@ -10,6 +10,17 @@ Este documento e um esboco de trabalho para as proximas sessoes.
 - A mudanca proposta e estrutural interna: separar responsabilidades por tabela/feature e nao por "controller unico da app".
 - A separacao futura por servidores (uma app por host) nao exige SPA; exige fronteiras claras, contratos estaveis e baixo acoplamento.
 
+## Alinhamento com contrato backend atual
+
+Este blueprint deve ser executado em alinhamento com o contrato backend consolidado no gateway (reforco iniciado em 2026-04-17 e 2026-04-18):
+
+1. Autenticacao Bearer-first e validacao de sessao via gateway.
+2. Refresh fallback no gateway quando aplicavel.
+3. Separacao objetiva por camada: controller, service, dao, view.
+4. Ficheiros compactos e concisos como regra de manutencao.
+
+O objetivo nao e apenas reorganizar pastas, mas reduzir acoplamento e tornar cada camada previsivel.
+
 ## Principios de desenho
 1. Vertical slice por tabela/feature.
 2. Um controller por feature (evitar mega-controller da app).
@@ -171,6 +182,5 @@ Nota:
 3. Criar um "template de feature" para acelerar proximas migracoes.
 
 ## Documento relacionado
-- `global_docs/CHECKLIST_SINGLE_DOM_MIGRATION.md`
-- `global_docs/PDMS_SINGLE_DOM_WINDOWS_STANDARD.md`
+- `global_docs/PDMS_SHELL_SPA_MPA_MODEL.md`
 - `mapas/docs/TABLE_FILTER_GLOBAL_MODEL.md`

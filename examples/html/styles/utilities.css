@@ -1,0 +1,48 @@
+/* background */
+.bg-desktop {
+  background:
+    radial-gradient(circle at 20% 20%, var(--desktop-overlay-a), transparent 38%),
+    radial-gradient(circle at 84% 70%, var(--desktop-overlay-b), transparent 34%),
+    linear-gradient(145deg, var(--desktop-wallpaper-a), var(--desktop-wallpaper-b) 52%, var(--desktop-wallpaper-c));
+  color: var(--desktop-ink);
+}
+
+.bg-desktop-titlebar {
+  background: var(--desktop-panel);
+}
+
+.bg-mobile,
+.bg-warm {
+  background:
+    radial-gradient(circle at 10% 10%, var(--warm-glow-a) 0, var(--warm-glow-a-soft) 45%),
+    radial-gradient(circle at 90% 80%, var(--warm-glow-b) 0, var(--warm-glow-b-soft) 40%),
+    var(--bg);
+}
+
+/* display */
+.d-block { display: block; }
+.d-flex { display: flex; }
+.d-grid { display: grid; }
+
+/* flex/grid */
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.place-center { place-items: center; }
+
+/* spacing */
+.gap-10 { gap: 10px; }
+.gap-12 { gap: 12px; }
+.gap-16 { gap: 16px; }
+.gap-20 { gap: 20px; }
+.m-0 { margin: 0; }
+.mt-0 { margin-top: 0; }
+.p-24 { padding: 24px; }
+
+/* sizing */
+.min-h-screen { min-height: 100vh; }
+.w-full { width: 100%; }
+
+/* typography */
+.font-ui { font-family: "Trebuchet MS", "Segoe UI", sans-serif; }
+.text-ink { color: var(--ink); }

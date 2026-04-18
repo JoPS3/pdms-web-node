@@ -85,6 +85,50 @@ Documento global para padronizar a integracao entre o `pdms-gateway` e as apps d
 }
 ```
 
+## Contrato de Backend por Camada (obrigatorio)
+
+Para reduzir acoplamento e suportar evolucao consistente entre apps, cada modulo deve seguir separacao de responsabilidades objetiva.
+
+### Controller
+
+- Orquestra request/response.
+- Nao deve conter SQL, regras de persistencia ou transformacoes pesadas de dominio.
+- Deve delegar regra de negocio para service e acesso a dados para DAO.
+
+### Service
+
+- Centraliza regra de negocio e fluxos reutilizaveis.
+- Compoe chamadas a DAO e/ou integracoes externas.
+- Nao deve renderizar views nem manipular detalhes HTTP.
+
+### DAO
+
+- Responsavel apenas por acesso a dados.
+- Sem logica de apresentacao.
+- Sem conhecimento de camada de view.
+
+### View
+
+- Responsavel apenas por representacao.
+- Sem regra de negocio.
+- Sem acesso direto a dados persistidos.
+
+## Regra de Cohesao de Codigo
+
+- Preferir ficheiros compactos e concisos.
+- Evitar ficheiros agregadores gigantes por modulo.
+- Uma responsabilidade principal por ficheiro/componente.
+- Extrair cedo quando houver mistura de responsabilidades.
+
+## Referencia de Implementacao
+
+O gateway e a referencia atual do contrato backend consolidado para:
+
+- autenticacao e validacao de sessao;
+- refresh token fallback;
+- proxy canonico;
+- contrato de headers entre servicos.
+
 ## Regras para sub-apps
 
 1. Proteger todas as rotas de negocio com middleware de auth.

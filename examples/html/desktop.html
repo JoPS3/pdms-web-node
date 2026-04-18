@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Desktop Base</title>
+	<link rel="stylesheet" href="styles/base.css" />
+	<link rel="stylesheet" href="styles/root.css" />
+	<link rel="stylesheet" href="styles/utilities.css" />
+	<link rel="stylesheet" href="styles/buttons.css" />
+	<link rel="stylesheet" href="styles/desktop.css" />
+	<script src="scripts/desktop-windows.js" defer></script>
+	<script src="scripts/desktop-launcher.js" defer></script>
+</head>
+<body class="bg-warm">
+	<div class="desktop-shell bg-desktop d-block" aria-label="Desktop de aplicacoes">
+		<main class="desktop-workspace">
+			<header class="desktop-titlebar bg-desktop-titlebar d-flex">
+				<div class="desktop-titlebar-left">
+					<span class="ui-traffic-light red" aria-hidden="true"></span>
+					<span class="ui-traffic-light yellow" aria-hidden="true"></span>
+					<span class="ui-traffic-light green" aria-hidden="true"></span>
+					<strong class="desktop-brand">PDMS - Base Desktop</strong>
+				</div>
+				<div class="desktop-titlebar-center">
+					<span class="desktop-clock">--:--</span>
+				</div>
+				<div class="desktop-titlebar-right">
+					<span class="desktop-user">
+						<strong>Joao</strong>
+						<span class="desktop-user-role">ADMINISTRADOR</span>
+					</span>
+					<form method="post" action="#" class="desktop-titlebar-logout">
+						<button type="submit" title="Terminar sessao" aria-label="Terminar sessao">⏻</button>
+					</form>
+				</div>
+			</header>
+			<h1>Shell desktop com fundo proprio</h1>
+			<div class="desktop-icons">
+				<button type="button" class="desktop-icon" data-desktop-launcher-item data-app-id="mapas" data-window-target="win-exemplo">
+					<span class="desktop-icon-face" aria-hidden="true">🗺️</span>
+					<span class="desktop-icon-label">Mapas</span>
+				</button>
+				<button type="button" class="desktop-icon" data-desktop-launcher-item data-app-id="compras" data-window-target="win-exemplo">
+					<span class="desktop-icon-face" aria-hidden="true">🛒</span>
+					<span class="desktop-icon-label">Compras</span>
+				</button>
+				<button type="button" class="desktop-icon" data-desktop-launcher-item data-app-id="vendas" data-window-target="win-exemplo">
+					<span class="desktop-icon-face" aria-hidden="true">📊</span>
+					<span class="desktop-icon-label">Vendas</span>
+				</button>
+				<button type="button" class="desktop-icon" data-desktop-launcher-item data-app-id="rh" data-window-target="win-exemplo">
+					<span class="desktop-icon-face" aria-hidden="true">👥</span>
+					<span class="desktop-icon-label">Recursos Humanos</span>
+				</button>
+				<button type="button" class="desktop-icon" data-desktop-launcher-item data-app-id="utilizadores" data-window-target="win-exemplo">
+					<span class="desktop-icon-face" aria-hidden="true">👤</span>
+					<span class="desktop-icon-label">Utilizadores</span>
+				</button>
+				<button type="button" class="desktop-icon" data-desktop-launcher-item data-app-id="definicoes" data-window-target="win-exemplo">
+					<span class="desktop-icon-face" aria-hidden="true">⚙️</span>
+					<span class="desktop-icon-label">Definicoes</span>
+				</button>
+			</div>
+		</main>
+		<div class="desktop-window" id="win-exemplo" role="dialog" aria-label="Janela de exemplo" data-desktop-window data-app-id="mapas" data-open-width="460" data-open-height="360">
+			<div class="desktop-window-titlebar" data-desktop-window-handle>
+				<div class="desktop-window-controls">
+					<span class="ui-traffic-light red" aria-hidden="true"></span>
+					<span class="ui-traffic-light yellow" aria-hidden="true"></span>
+					<span class="ui-traffic-light green" aria-hidden="true"></span>
+				</div>
+				<span class="desktop-window-title">Janela de exemplo</span>
+			</div>
+			<div class="desktop-window-body">
+				<p>Conjunto de botoes padrao dentro de uma janela.</p>
+				<div class="btn-stack">
+					<button type="button" class="btn btn-primary btn-lg btn-block">btn-primary</button>
+					<button type="button" class="btn btn-secondary btn-lg btn-block">btn-secondary</button>
+					<button type="button" class="btn btn-ghost btn-lg btn-block">btn-ghost</button>
+					<button type="button" class="btn btn-danger btn-lg btn-block">btn-danger</button>
+				</div>
+			</div>
+		</div>
+		<nav class="desktop-dock" aria-label="Dock">
+			<button type="button" class="desktop-dock-item" title="Mapas" data-desktop-dock-item data-app-id="mapas" data-window-target="win-exemplo">
+				<span class="desktop-dock-face" aria-hidden="true">🗺️</span>
+				<span class="desktop-dock-label">Mapas</span>
+			</button>
+			<button type="button" class="desktop-dock-item" title="Compras" data-desktop-dock-item data-app-id="compras" data-window-target="win-exemplo">
+				<span class="desktop-dock-face" aria-hidden="true">🛒</span>
+				<span class="desktop-dock-label">Compras</span>
+			</button>
+			<button type="button" class="desktop-dock-item" title="Vendas" data-desktop-dock-item data-app-id="vendas" data-window-target="win-exemplo">
+				<span class="desktop-dock-face" aria-hidden="true">📊</span>
+				<span class="desktop-dock-label">Vendas</span>
+			</button>
+			<button type="button" class="desktop-dock-item" title="Recursos Humanos" data-desktop-dock-item data-app-id="rh" data-window-target="win-exemplo">
+				<span class="desktop-dock-face" aria-hidden="true">👥</span>
+				<span class="desktop-dock-label">RH</span>
+			</button>
+			<button type="button" class="desktop-dock-item" title="Utilizadores" data-desktop-dock-item data-app-id="utilizadores" data-window-target="win-exemplo">
+				<span class="desktop-dock-face" aria-hidden="true">👤</span>
+				<span class="desktop-dock-label">Utilizadores</span>
+			</button>
+			<div class="desktop-dock-sep" aria-hidden="true"></div>
+			<button type="button" class="desktop-dock-item" title="Definicoes" data-desktop-dock-item data-app-id="definicoes" data-window-target="win-exemplo">
+				<span class="desktop-dock-face" aria-hidden="true">⚙️</span>
+				<span class="desktop-dock-label">Definicoes</span>
+			</button>
+		</nav>
+	</div>
+</body>
+</html>

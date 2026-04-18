@@ -1,4 +1,16 @@
-# PDMS Standard: Single-DOM Desktop Windows
+# [DEPRECATED] PDMS Standard: Single-DOM Desktop Windows
+
+## Status
+- Deprecated em 2026-04-18.
+- Este documento deixou de ser contrato ativo de arquitetura.
+
+## Motivo
+- A estrategia atual do projeto adotou shell SPA para navegacao/launcher e apps MPA para funcionalidades reais.
+- O modelo de janelas single-DOM por modulo deixou de ser baseline obrigatoria.
+
+## Documento substituto
+- Ver `global_docs/PDMS_SHELL_SPA_MPA_MODEL.md` como referencia atual.
+- Manter este ficheiro apenas para contexto historico.
 
 ## Finalidade
 Este documento define o padrao global de UI desktop-like para os modulos PDMS. O objetivo e replicar uma experiencia consistente entre `auth`, `mapas`, `vendas`, `compras`, `rh` e futuros modulos.

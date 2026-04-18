@@ -1,0 +1,30 @@
+.desktop-shell {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.desktop-workspace {
+  position: fixed;
+  top: 48px;
+  right: 0;
+  bottom: 88px;
+  left: 0;
+  overflow: hidden;
+  padding: 24px;
+}
+
+.desktop-shell .btn-ghost {
+  color: var(--desktop-ink);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.desktop-window .btn-ghost {
+  color: var(--ink);
+}
+
+.desktop-shell .btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+}

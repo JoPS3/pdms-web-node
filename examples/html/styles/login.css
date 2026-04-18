@@ -1,0 +1,22 @@
+.login-card {
+  width: min(480px, 100%);
+  background: var(--window-wallpaper-a);
+  border: 1px solid var(--mobile-card-border);
+  border-radius: 14px;
+  padding: 22px;
+}
+
+.login-card-title {
+  margin: 0 0 8px;
+  font-size: 1.45rem;
+}
+
+.login-card-text {
+  margin: 0 0 18px;
+  color: var(--muted);
+}
+
+.login-btn-showcase {
+  display: grid;
+  gap: 12px;
+}

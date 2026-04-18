@@ -4,30 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Área de Trabalho</title>
+    <link rel="stylesheet" href="styles/base.css">
     <link rel="stylesheet" href="styles/root.css">
+    <link rel="stylesheet" href="styles/utilities.css">
+    <link rel="stylesheet" href="styles/buttons.css">
     <link rel="stylesheet" href="styles/desktop.css">
 </head>
-<body class="main-page">
-    <div class="desktop-shell" aria-label="Desktop de aplicações">
+<body class="bg-warm">
+    <div class="desktop-shell bg-desktop" aria-label="Desktop de aplicações">
         <main class="desktop-workspace">
-            <header class="desktop-titlebar">
-                <div class="titlebar-left">
-                    <span class="traffic-light red" aria-hidden="true"></span>
-                    <span class="traffic-light yellow" aria-hidden="true"></span>
-                    <span class="traffic-light green" aria-hidden="true"></span>
+            <header class="desktop-titlebar bg-desktop-titlebar d-flex">
+                <div class="desktop-titlebar-left">
+                    <span class="ui-traffic-light red" aria-hidden="true"></span>
+                    <span class="ui-traffic-light yellow" aria-hidden="true"></span>
+                    <span class="ui-traffic-light green" aria-hidden="true"></span>
                     <strong class="desktop-brand">PDMS - Modulo Mapas</strong>
                 </div>
-                <div class="titlebar-center">
+                <div class="desktop-titlebar-center">
                     <span class="desktop-clock" id="desktopClock">--:--</span>
                 </div>
 
-                <div class="titlebar-right">
+                <div class="desktop-titlebar-right">
                     <span class="desktop-user">
                         <strong>Joao</strong>
                         <span class="desktop-user-role">ADMINISTRADOR</span>
                     </span>
-                    <a class="titlebar-back" href="#" title="Voltar ao launcher">◀</a>
-                    <form method="post" action="#" class="titlebar-logout">
+                    <a class="desktop-titlebar-back" href="#" title="Voltar ao launcher">◀</a>
+                    <form method="post" action="#" class="desktop-titlebar-logout">
                         <button type="submit" title="Terminar sessao" aria-label="Terminar sessao">⏻</button>
                     </form>
                 </div>
