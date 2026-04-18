@@ -50,7 +50,7 @@ test('apps controller includes sysadmin desktop entry', () => {
   const authApp = res.viewData.apps.find((app) => app.id === 'sysadmin');
 
   expect(authApp).toBeTruthy();
-  expect(authApp.name).toBe('Utilizadores');
+  expect(authApp.name).toBe('Administração de Sistema');
   expect(authApp.icon).toBe('🔐');
 });
 

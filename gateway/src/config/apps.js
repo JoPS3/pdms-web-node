@@ -68,7 +68,7 @@ function getApps(runtime = {}, options = {}) {
     },
     {
       id: 'sysadmin',
-      name: 'Utilizadores',
+      name: 'Administração de Sistema',
       description: 'Gestão de utilizadores e acesso OneDrive',
       icon: '🔐',
       url: sysadminUrl
