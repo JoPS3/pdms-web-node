@@ -1,6 +1,6 @@
 const express = require('express');
 
-const oneDriveController = require('../controllers/onedrive.controller');
+const oneDriveController = require('../controllers/onedrive.api.controller');
 const { requireServiceSession } = require('../middlewares/service-auth.middleware');
 
 const router = express.Router();

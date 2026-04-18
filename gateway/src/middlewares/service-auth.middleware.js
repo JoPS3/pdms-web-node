@@ -1,4 +1,4 @@
-const AuthService = require('../services/AuthService');
+const AuthService = require('../services/auth.service');
 
 function parseSessionToken(req) {
   const authorization = String(req.headers.authorization || '').trim();

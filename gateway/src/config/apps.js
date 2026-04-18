@@ -33,8 +33,8 @@ function getApps(runtime = {}, options = {}) {
     return raw || withBasePath(fallbackPath);
   };
 
-  const usuariosUrl = String(process.env.APP_USUARIOS_URL_DEV || '').trim()
-    || withBasePath('/apps/usuarios');
+  const sysadminUrl = String(process.env.APP_SYSADMIN_URL_DEV || '').trim()
+    || withBasePath('/apps/sysadmin');
   const mapasUrl = byEnvOrDefault('APP_MAPAS_URL_DEV', '/apps/mapas');
 
   const apps = [
@@ -67,11 +67,11 @@ function getApps(runtime = {}, options = {}) {
       url: byEnvOrDefault('APP_RH_URL_DEV', '/apps/rh')
     },
     {
-      id: 'usuarios',
+      id: 'sysadmin',
       name: 'Utilizadores',
       description: 'Gestão de utilizadores e acesso OneDrive',
       icon: '🔐',
-      url: usuariosUrl
+      url: sysadminUrl
     }
   ];
 

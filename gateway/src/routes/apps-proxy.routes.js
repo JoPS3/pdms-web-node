@@ -1,6 +1,6 @@
 const express = require('express');
 const httpProxy = require('express-http-proxy');
-const { requireAuth } = require('../middlewares/auth.middleware');
+const { requireAuth } = require('../middlewares/session.middleware');
 const appsController = require('../controllers/apps.controller');
 
 const router = express.Router();
@@ -21,7 +21,7 @@ const router = express.Router();
 const getProxyUrl = (appName) => {
   const isDev = process.env.NODE_ENV === 'development';
   const ports = {
-    usuarios: process.env.USUARIOS_PORT_DEV || process.env.USUARIOS_PORT || 6001,
+    sysadmin: process.env.SYSADMIN_PORT_DEV || process.env.SYSADMIN_PORT || 6001,
     mapas: process.env.MAPAS_PORT_DEV || 6002,
     vendas: process.env.VENDAS_PORT_DEV || 6003,
     compras: process.env.COMPRAS_PORT_DEV || 6004,
@@ -29,7 +29,7 @@ const getProxyUrl = (appName) => {
   };
 
   const hostUrls = {
-    usuarios: process.env.USUARIOS_URL,
+    sysadmin: process.env.SYSADMIN_URL,
     mapas: process.env.MAPAS_URL,
     vendas: process.env.VENDAS_URL,
     compras: process.env.COMPRAS_URL,
@@ -134,11 +134,16 @@ function buildProxyOptions(appName) {
  * 
  * Route structure:
  * - GET /apps - List all available apps
- * - /usuarios/* - Proxy to usuarios service
- * - /mapas/* - Proxy to mapas service
- * - /vendas/* - Proxy to vendas service
- * - /compras/* - Proxy to compras service
- * - /rh/* - Proxy to rh service
+ * - /apps/sysadmin/* - Proxy to sysadmin service
+ * - /apps/mapas/* - Proxy to mapas service
+ * - /apps/vendas/* - Proxy to vendas service
+ * - /apps/compras/* - Proxy to compras service
+ * - /apps/rh/* - Proxy to rh service
+ * - /sysadmin/* - Legacy proxy alias for sysadmin service
+ * - /mapas/* - Legacy proxy alias for mapas service
+ * - /vendas/* - Legacy proxy alias for vendas service
+ * - /compras/* - Legacy proxy alias for compras service
+ * - /rh/* - Legacy proxy alias for rh service
  * 
  * All routes require authentication.
  */
@@ -147,12 +152,12 @@ function buildProxyOptions(appName) {
 router.get('/apps', requireAuth, appsController.listApps);
 
 // Proxy routes to apps - all require auth
-const apps = ['usuarios', 'mapas', 'vendas', 'compras', 'rh'];
+const apps = ['sysadmin', 'mapas', 'vendas', 'compras', 'rh'];
 apps.forEach(appName => {
   // Canonical routes used by desktop links.
   router.use(`/apps/${appName}`, requireAuth, httpProxy(getProxyUrl(appName), buildProxyOptions(appName)));
 
-  // Backward-compatible legacy routes.
+  // Legacy routes kept for compatibility across deployment topologies.
   router.use(`/${appName}`, requireAuth, httpProxy(getProxyUrl(appName), buildProxyOptions(appName)));
 });
 

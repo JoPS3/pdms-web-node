@@ -14,6 +14,7 @@
 
 - `GATEWAY_ACCESS_MODEL.md`: modelo atual de acesso, proxy canonico e autenticacao Bearer-first.
 - `PDMS_APP_INTEGRATION.md`: contrato de integracao entre gateway e sub-apps (source of truth operacional).
+- `CODE_CONVENTIONS.md`: convencoes de naming, estrutura de ficheiros e responsabilidades por camada (apendice ao contrato).
 - `PDMS_SHELL_SPA_MPA_MODEL.md`: estrategia atual de shell SPA (menu/janelas) e apps MPA (funcionalidades reais).
 - `TOKEN_EVOLUTION_MULTI_DOMAIN.md`: estado atual da evolucao de tokens e roadmap Phase 3.
 - `TABLE_CENTRIC_REFACTOR_BLUEPRINT.md`: blueprint estrutural por feature/tabela (controller/route/view por slice).

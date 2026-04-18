@@ -41,13 +41,13 @@ test('apps controller uses fallback user values', () => {
   expect(res.viewData.apps).toEqual([]);
 });
 
-test('apps controller includes usuarios desktop entry', () => {
+test('apps controller includes sysadmin desktop entry', () => {
   const req = createRequest({ role: 'ADMINISTRADOR' });
   const res = createResponseMock();
 
   listApps(req, res);
 
-  const authApp = res.viewData.apps.find((app) => app.id === 'usuarios');
+  const authApp = res.viewData.apps.find((app) => app.id === 'sysadmin');
 
   expect(authApp).toBeTruthy();
   expect(authApp.name).toBe('Utilizadores');

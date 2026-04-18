@@ -1,9 +1,9 @@
 const authController = require('../src/controllers/auth.gui.controller');
-const AuthService = require('../src/services/AuthService');
+const AuthService = require('../src/services/auth.service');
 const { basePath } = require('../src/config/runtime');
 const { createResponseMock } = require('./helpers/http-mocks');
 
-jest.mock('../src/services/AuthService');
+jest.mock('../src/services/auth.service');
 
 const appsUrl = `${basePath}/apps`;
 const loginUrl = `${basePath}/login`;

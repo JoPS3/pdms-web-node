@@ -4,12 +4,12 @@
  */
 
 const authController = require('../src/controllers/auth.api.controller');
-const AuthService = require('../src/services/AuthService');
-const SessionDAO = require('../src/daos/SessionDAO');
+const AuthService = require('../src/services/auth.service');
+const SessionDAO = require('../src/daos/session.dao');
 const { createResponseMock } = require('./helpers/http-mocks');
 
 // Mock AuthService apenas (SessionDAO será testado com a função real)
-jest.mock('../src/services/AuthService');
+jest.mock('../src/services/auth.service');
 
 describe('Phase 2: Token Refresh Endpoint', () => {
   beforeEach(() => {

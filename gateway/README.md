@@ -14,6 +14,7 @@ Referencia oficial:
 - `global_docs/GATEWAY_ACCESS_MODEL.md`
 - `global_docs/PDMS_APP_INTEGRATION.md`
 - `global_docs/AUTHENTICATION_ARCHITECTURE.md`
+- `global_docs/CODE_CONVENTIONS.md`
 
 ## O que inclui
 
@@ -35,11 +36,51 @@ npm run dev
 ```
 
 Abrir: `http://localhost:6000/pdms-new/login` (ou `PORT` + `BASE_PATH_DEV` configurados)
-
+- Estrutura de ficheiros por camadas com naming kebab-case (ver `global_docs/CODE_CONVENTIONS.md`)
 ## Configuracao de ambiente
 
 Este projeto le variaveis de `.env`.
 
+
+## Estrutura de ficheiros
+
+```
+src/
+	app.js                              Express app + middlewares + settings
+	server.js                           bootstrap: carrega .env, porta, inicia HTTP
+	controllers/
+		auth.gui.controller.js            login, set-password (renders)
+		auth.api.controller.js            validate-session, refresh-token (JSON)
+		onedrive.api.controller.js        OAuth callback + endpoints OneDrive (JSON/redirect)
+		apps.controller.js                launcher de apps (render)
+	services/
+		auth.service.js                   validacao de sessao, refresh de tokens, login
+		onedrive-auth.service.js          fluxo OAuth OneDrive, tokens, estado
+		onedrive/                         helpers internos de configuracao OneDrive
+	daos/
+		users.dao.js                      queries de utilizadores
+		session.dao.js                    queries de sessoes/tokens
+		onedrive.dao.js                   queries de estado OneDrive
+		onedrive-settings.dao.js          queries de configuracao OneDrive
+	middlewares/
+		session.middleware.js             requireAuth, parseSessionToken (GUI)
+		service-auth.middleware.js        validacao de requests inter-servico
+	routes/
+		index.routes.js                   rotas raiz e health
+		auth.routes.js                    /login, /logout, /validate-session, /refresh-token
+		apps-proxy.routes.js              /apps/* proxy para sub-apps
+		onedrive.routes.js                /onedrive/* fluxo OAuth
+	utils/
+		authTokens.js                     getAccessToken, getRefreshToken, setAuthCookies
+	config/
+		runtime.js                        basePath e configuracao de runtime
+	scheduler/
+		session-cleanup.js                limpeza periodica de sessoes expiradas
+	views/                              templates EJS (login, apps, erros)
+	public/                             estilos e scripts estaticos
+docs/
+	APPS_ROUTING_STANDARD.md           convencao de routing de apps
+```
 Exemplo:
 
 ```env

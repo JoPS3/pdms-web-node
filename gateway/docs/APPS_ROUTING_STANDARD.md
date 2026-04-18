@@ -130,4 +130,4 @@ All apps share the same gateway token contract:
 
 - `gateway/src/routes/apps-proxy.routes.js` - Centralized proxy configuration
 - `gateway/src/config/apps.js` - Apps metadata and URLs
-- `gateway/src/middlewares/auth.middleware.js` - Authentication enforcement
+- `gateway/src/middlewares/session.middleware.js` - Authentication enforcement

@@ -1,4 +1,4 @@
-const OneDriveSettingsDAO = require('../../daos/OneDriveSettingsDAO');
+const OneDriveSettingsDAO = require('../../daos/onedrive-settings.dao');
 const { decryptSettingsSecret } = require('./crypto.helpers');
 
 function buildRedirectUri() {

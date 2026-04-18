@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= pageTitle %> | PDMS Auth</title>
+    <link rel="stylesheet" href="<%= basePath %>/styles/style.css?v=<%= assetVersion %>" />
+  </head>
+  <body class="main-page desktop-page" data-gateway-base-path="<%= gatewayBasePath %>" data-app-base-path="<%= basePath %>">
+    <div class="mobile-shell">
+      <header class="mobile-header">
+        <div class="mobile-header-content">
+          <div>
+            <h1>PDMS Auth</h1>
+          </div>
+          <div class="mobile-user">
+            Sessao ativa de <strong><%= userName %></strong><br />
+            <% if (userRole) { %>
+              <span><%= userRole %></span>
+            <% } %>
+          </div>
+          <a class="mobile-back" href="<%= gatewayBasePath %>/apps">Launcher</a>
+        </div>
+      </header>
+
+      <main class="mobile-main">
+        <h2>Centro de Autenticacao</h2>
+        <div class="mobile-unavailable-card">
+          <p>Esta aplicacao e dedicada a fluxos autenticados e endpoints internos.</p>
+          <p><strong>ID de utilizador:</strong> <%= userId || 'n/d' %></p>
+          <p>
+            <a class="mobile-back" href="<%= basePath %>/">Abrir utilizadores</a>
+          </p>
+        </div>
+      </main>
+    </div>
+
+    <div class="desktop-shell" aria-label="Desktop de modulos">
+      <header class="desktop-titlebar">
+        <div class="titlebar-left">
+          <form method="post" action="<%= gatewayBasePath %>/logout" class="traffic-light-logout" aria-label="Terminar sessao">
+            <button type="submit" class="traffic-light-button red" title="Terminar sessao" aria-label="Terminar sessao"></button>
+          </form>
+          <span class="traffic-light yellow" aria-hidden="true"></span>
+          <span class="traffic-light green" aria-hidden="true"></span>
+          <strong class="desktop-brand">PDMS - Modulo Auth</strong>
+        </div>
+
+        <div class="titlebar-center">
+          <span class="desktop-clock" id="desktopClock">--:--</span>
+        </div>
+
+        <div class="titlebar-right">
+          <span class="desktop-user">
+            <strong><%= userName %></strong>
+            <% if (userRole) { %><span class="desktop-user-role"><%= userRole %></span><% } %>
+          </span>
+          <a class="titlebar-back" href="<%= gatewayBasePath %>/apps" title="Voltar ao launcher">◀</a>
+        </div>
+      </header>
+
+      <main class="desktop-workspace">
+        <section class="desktop-icons" aria-label="Atalhos de auth">
+          <button
+            type="button"
+            class="desktop-icon"
+            data-open-window="session"
+            title="Sessão"
+            aria-label="Abrir sessão"
+          >
+            <span class="desktop-icon-glyph desktop-icon-folder">
+              <span class="desktop-icon-folder-main" aria-hidden="true">📁</span>
+              <span class="desktop-icon-folder-badge" aria-hidden="true">🔐</span>
+            </span>
+            <span class="desktop-icon-name">Sessão</span>
+          </button>
+          <button
+            type="button"
+            class="desktop-icon"
+            data-open-window="users"
+            title="Utilizadores"
+            aria-label="Abrir utilizadores"
+          >
+            <span class="desktop-icon-glyph desktop-icon-folder">
+              <span class="desktop-icon-folder-main" aria-hidden="true">📁</span>
+              <span class="desktop-icon-folder-badge" aria-hidden="true">👥</span>
+            </span>
+            <span class="desktop-icon-name">Utilizadores</span>
+          </button>
+          <button
+            type="button"
+            class="desktop-icon"
+            data-open-window="onedrive"
+            title="OneDrive"
+            aria-label="Abrir ligação OneDrive"
+          >
+            <span class="desktop-icon-glyph desktop-icon-folder">
+              <span class="desktop-icon-folder-main" aria-hidden="true">📁</span>
+              <span class="desktop-icon-folder-badge" aria-hidden="true">☁️</span>
+            </span>
+            <span class="desktop-icon-name">OneDrive</span>
+          </button>
+        </section>
+      </main>
+
+      <nav class="desktop-dock" aria-label="Dock de modulos">
+        <div class="dock-inner">
+          <button
+            type="button"
+            class="dock-item"
+            data-open-window="session"
+            title="Sessão"
+            aria-label="Abrir sessão"
+          >
+            <span class="dock-item-glyph">📋</span>
+          </button>
+          <button
+            type="button"
+            class="dock-item"
+            data-open-window="users"
+            title="Utilizadores"
+            aria-label="Abrir utilizadores"
+          >
+            <span class="dock-item-glyph">👥</span>
+          </button>
+          <button
+            type="button"
+            class="dock-item"
+            data-open-window="onedrive"
+            title="OneDrive"
+            aria-label="Abrir ligação OneDrive"
+          >
+            <span class="dock-item-glyph">☁️</span>
+          </button>
+          <a class="dock-back" href="<%= gatewayBasePath %>/apps" aria-label="Voltar ao launcher">◀</a>
+        </div>
+      </nav>
+
+      <!-- Windows container (single DOM, state-driven visibility) -->
+      <div class="desktop-windows-container">
+        <%- include('partials/desktop/window-backdrop') %>
+        
+        <!-- Session window with embedded content -->
+        <div class="desktop-window window-session" id="window-session" hidden>
+          <div class="desktop-window-titlebar">
+            <strong class="desktop-window-title">Sessão</strong>
+            <button
+              type="button"
+              class="desktop-window-close"
+              data-close-window="session"
+              aria-label="Fechar janela"
+              title="Fechar"
+            >
+              ×
+            </button>
+          </div>
+          <div class="desktop-window-content">
+            <%- include('partials/desktop/window-session', { session: session }) %>
+          </div>
+        </div>
+
+        <!-- Session info child window (smaller than session launcher) -->
+        <div class="desktop-window window-session-info" id="window-session-info" hidden>
+          <div class="desktop-window-titlebar">
+            <strong class="desktop-window-title">Detalhes de Sessão</strong>
+            <button
+              type="button"
+              class="desktop-window-close"
+              data-close-window="session-info"
+              aria-label="Fechar janela"
+              title="Fechar"
+            >
+              ×
+            </button>
+          </div>
+          <div class="desktop-window-content">
+            <%- include('partials/desktop/window-session-info', { session: session }) %>
+          </div>
+        </div>
+
+        <!-- Session password child window -->
+        <div class="desktop-window window-session-password" id="window-session-password" hidden>
+          <div class="desktop-window-titlebar">
+            <strong class="desktop-window-title">Mudar Password</strong>
+            <button
+              type="button"
+              class="desktop-window-close"
+              data-close-window="session-password"
+              aria-label="Fechar janela"
+              title="Fechar"
+            >
+              ×
+            </button>
+          </div>
+          <div class="desktop-window-content">
+            <%- include('partials/desktop/window-session-password') %>
+          </div>
+        </div>
+        
+        <!-- Users window with embedded content -->
+        <div class="desktop-window window-users" id="window-users" hidden>
+          <div class="desktop-window-titlebar">
+            <strong class="desktop-window-title">Utilizadores</strong>
+            <button
+              type="button"
+              class="desktop-window-close"
+              data-close-window="users"
+              aria-label="Fechar janela"
+              title="Fechar"
+            >
+              ×
+            </button>
+          </div>
+          <div class="desktop-window-content">
+            <%- include('partials/desktop/window-users', { session: session }) %>
+          </div>
+        </div>
+
+        <!-- OneDrive window -->
+        <div class="desktop-window window-onedrive" id="window-onedrive" hidden>
+          <div class="desktop-window-titlebar">
+            <strong class="desktop-window-title">OneDrive</strong>
+            <button
+              type="button"
+              class="desktop-window-close"
+              data-close-window="onedrive"
+              aria-label="Fechar janela"
+              title="Fechar"
+            >
+              ×
+            </button>
+          </div>
+          <div class="desktop-window-content">
+            <%- include('partials/desktop/window-onedrive') %>
+          </div>
+        </div>
+
+        <!-- OneDrive Setup window -->
+        <div class="desktop-window window-onedrive-setup" id="window-onedrive-setup" hidden>
+          <div class="desktop-window-titlebar">
+            <strong class="desktop-window-title">OneDrive — Configurar OAuth</strong>
+            <button
+              type="button"
+              class="desktop-window-close"
+              data-close-window="onedrive-setup"
+              aria-label="Fechar janela"
+              title="Fechar"
+            >
+              ×
+            </button>
+          </div>
+          <div class="desktop-window-content">
+            <%- include('partials/desktop/window-onedrive-setup') %>
+          </div>
+        </div>
+
+        <!-- Users list child window -->
+        <div class="desktop-window window-users-list window-table-content" id="window-users-list" hidden>
+          <div class="desktop-window-titlebar">
+            <strong class="desktop-window-title">Lista de Utilizadores</strong>
+            <button
+              type="button"
+              class="desktop-window-close"
+              data-close-window="users-list"
+              aria-label="Fechar janela"
+              title="Fechar"
+            >
+              ×
+            </button>
+          </div>
+          <nav class="window-menu" data-users-list-menu>
+            <div class="window-menu-item">
+              <button type="button" class="window-menu-trigger">Ficheiro</button>
+              <div class="window-menu-dropdown">
+                <a href="#" class="window-menu-option" data-menu-action="refresh">Atualizar listagem</a>
+                <a href="#" class="window-menu-option" data-menu-action="first-page">Ir para primeira pagina</a>
+                <a href="#" class="window-menu-option" data-menu-action="export-csv">Exportar filtrados (CSV)</a>
+                <a href="#" class="window-menu-option" data-menu-action="export-odf">Exportar filtrados (ODF)</a>
+              </div>
+            </div>
+
+            <div class="window-menu-item">
+              <button type="button" class="window-menu-trigger">Ordenar</button>
+              <div class="window-menu-dropdown">
+                <a href="#" class="window-menu-option" data-menu-action="sort" data-sort-by="userName" data-sort-dir="ASC">Utilizador (A-Z)</a>
+                <a href="#" class="window-menu-option" data-menu-action="sort" data-sort-by="userName" data-sort-dir="DESC">Utilizador (Z-A)</a>
+                <a href="#" class="window-menu-option" data-menu-action="sort" data-sort-by="role" data-sort-dir="ASC">Perfil (A-Z)</a>
+                <a href="#" class="window-menu-option" data-menu-action="sort" data-sort-by="role" data-sort-dir="DESC">Perfil (Z-A)</a>
+              </div>
+            </div>
+
+            <div class="window-menu-item">
+              <button type="button" class="window-menu-trigger">Filtros</button>
+              <div class="window-menu-dropdown">
+                <a href="#" class="window-menu-option" data-menu-action="clear-filters">Limpar todos os filtros</a>
+              </div>
+            </div>
+          </nav>
+          <div class="desktop-window-content">
+            <%- include('partials/desktop/window-users-list', { usersList: usersList || [] }) %>
+          </div>
+        </div>
+
+        <!-- User edit child window (opens from users list row double-click) -->
+        <div class="desktop-window window-user-edit" id="window-user-edit" hidden>
+          <div class="desktop-window-titlebar">
+            <strong class="desktop-window-title">Editar Utilizador</strong>
+            <button
+              type="button"
+              class="desktop-window-close"
+              data-close-window="user-edit"
+              aria-label="Fechar janela"
+              title="Fechar"
+            >
+              ×
+            </button>
+          </div>
+          <div class="desktop-window-content">
+            <%- include('partials/desktop/window-user-edit') %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function attachDesktopClock() {
+        var clock = document.getElementById('desktopClock');
+        if (!clock) {
+          return;
+        }
+
+        function renderTime() {
+          var now = new Date();
+          clock.textContent = now.toLocaleTimeString('pt-PT', {
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+        }
+
+        renderTime();
+        setInterval(renderTime, 1000);
+      })();
+    </script>
+
+    <!-- Global shell script: manages windows, overlay, drag, state -->
+    <script src="<%= basePath %>/scripts/shell.js?v=<%= assetVersion %>"></script>
+
+    <script>
+      (function restoreDesktopWindowFromQuery() {
+        function restoreWindow() {
+          if (!window.matchMedia('(min-width: 1024px)').matches) {
+            return;
+          }
+
+          var shell = window.desktopShell;
+          if (!shell || typeof shell.openWindow !== 'function') {
+            return;
+          }
+
+          var params = new URLSearchParams(window.location.search || '');
+          var target = params.get('openWindow');
+          var openOrigin = params.get('owSrc');
+
+          function clearOpenWindowParam() {
+            params.delete('openWindow');
+            params.delete('owSrc');
+            var query = params.toString();
+            var nextUrl = window.location.pathname + (query ? ('?' + query) : '') + window.location.hash;
+            window.history.replaceState({}, '', nextUrl);
+          }
+
+          if (target === 'users-list') {
+            if (openOrigin !== 'auth') {
+              debugLog('ignored users-list restore due to invalid origin', {
+                openOrigin: openOrigin
+              });
+              clearOpenWindowParam();
+              return;
+            }
+
+            debugLog('opening users-list from query restore', {
+              openOrigin: openOrigin
+            });
+
+            shell.openWindow('users-list', {
+              parentWindow: 'users',
+              hideParent: true,
+              skipRebuild: true
+            });
+            clearOpenWindowParam();
+          } else if (target === 'users' || target === 'session' || target === 'session-info' || target === 'session-password') {
+            debugLog('opening top-level window from query restore', {
+              target: target
+            });
+            shell.openWindow(target);
+            clearOpenWindowParam();
+          }
+        }
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', restoreWindow);
+        } else {
+          restoreWindow();
+        }
+      })();
+    </script>
+
+    <!-- Table filter system for users list -->
+    <script src="<%= basePath %>/scripts/table-filters.js?v=<%= assetVersion %>"></script>
+  </body>
+</html>

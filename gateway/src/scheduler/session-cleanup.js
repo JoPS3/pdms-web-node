@@ -1,4 +1,4 @@
-const SessionDAO = require('../daos/SessionDAO');
+const SessionDAO = require('../daos/session.dao');
 
 /**
  * Scheduler para limpeza de sessões expiradas
