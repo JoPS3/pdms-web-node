@@ -1,0 +1,110 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.12),
+    0 1px 3px rgba(0, 0, 0, 0.12);
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.12),
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    0 0 0 3px var(--btn-focus-ring);
+}
+
+.btn:disabled,
+.btn.is-disabled {
+  opacity: var(--btn-disabled-opacity);
+  cursor: not-allowed;
+  pointer-events: none;
+  transform: none;
+}
+
+.btn-primary {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-ink);
+}
+
+.btn-primary:hover {
+  background: var(--btn-primary-bg-hover);
+  opacity: var(--btn-primary-hover-opacity);
+}
+
+.btn-secondary {
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-ink);
+  border-color: var(--btn-secondary-border);
+}
+
+.btn-secondary:hover {
+  background: var(--btn-secondary-bg-hover);
+}
+
+.btn-ghost {
+  background: var(--btn-ghost-bg);
+  color: var(--btn-ghost-ink);
+  border-color: var(--btn-ghost-border);
+}
+
+.btn-ghost:hover {
+  background: var(--btn-ghost-bg-hover);
+}
+
+.btn-danger {
+  background: var(--btn-danger-bg);
+  color: var(--btn-danger-ink);
+}
+
+.btn-danger:hover {
+  background: var(--btn-danger-bg-hover);
+}
+
+.btn-sm {
+  min-height: 34px;
+  padding: 7px 11px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.btn-lg {
+  min-height: 46px;
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-size: 1rem;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.btn-stack {
+  display: grid;
+  gap: 12px;
+}

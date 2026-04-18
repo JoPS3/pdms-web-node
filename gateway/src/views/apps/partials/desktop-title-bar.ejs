@@ -1,22 +1,21 @@
 <header class="desktop-titlebar">
-  <div class="titlebar-left">
-    <span class="traffic-light red" aria-hidden="true"></span>
-    <span class="traffic-light yellow" aria-hidden="true"></span>
-    <span class="traffic-light green" aria-hidden="true"></span>
+  <div class="desktop-titlebar-left">
+    <form method="post" action="<%= basePath %>/logout" class="traffic-light-logout" aria-label="Terminar sessão">
+      <button type="submit" class="ui-traffic-light-button red" title="Terminar sessão" aria-label="Terminar sessão"></button>
+    </form>
+    <span class="ui-traffic-light yellow" aria-hidden="true"></span>
+    <span class="ui-traffic-light green" aria-hidden="true"></span>
     <strong class="desktop-brand">PDMS - Pedaço Decimal Management System</strong>
   </div>
 
-  <div class="titlebar-center">
+  <div class="desktop-titlebar-center">
     <span class="desktop-clock" id="desktopClock">--:--</span>
   </div>
 
-  <div class="titlebar-right">
+  <div class="desktop-titlebar-right">
     <span class="desktop-user">
       <strong><%= userName %></strong>
       <% if (userRole) { %><span class="desktop-user-role"><%= userRole %></span><% } %>
     </span>
-    <form method="post" action="<%= basePath %>/logout" class="titlebar-logout">
-      <button type="submit" title="Terminar sessão">⏻</button>
-    </form>
   </div>
 </header>

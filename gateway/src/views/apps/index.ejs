@@ -6,8 +6,8 @@
     <title><%= pageTitle %> | Gateway</title>
     <link rel="stylesheet" href="<%= basePath %>/styles/app.css" />
   </head>
-  <body class="main-page">
-    <div class="mobile-shell">
+  <body class="main-page bg-warm">
+    <div class="mobile-shell bg-mobile">
       <header class="mobile-header">
         <div class="mobile-header-content">
           <div>
@@ -30,21 +30,21 @@
 
         <div class="mobile-apps-grid">
           <% apps.forEach((app) => { %>
-            <div class="mobile-app-card">
+            <article class="ui-card ui-card--mobile ui-card--compact">
               <h3><%= app.icon %> <%= app.name %></h3>
               <p><%= app.description %></p>
-              <a href="<%= app.url %>"><%= app.url === '#' ? 'Em breve' : 'Abrir' %></a>
-            </div>
+              <a href="<%= app.url %>" class="btn <%= app.url === '#' ? 'btn-secondary is-disabled' : 'btn-primary' %>"><%= app.url === '#' ? 'Em breve' : 'Abrir' %></a>
+            </article>
           <% }) %>
         </div>
       </main>
 
       <footer class="mobile-footer">
-        <p style="margin: 0;">&copy; 2026 Pedaço Decimal Unipessoal Lda</p>
+        <p class="m-0">&copy; 2026 Pedaço Decimal Unipessoal Lda</p>
       </footer>
     </div>
 
-    <div class="desktop-shell" aria-label="Desktop de aplicações">
+    <div class="desktop-shell bg-desktop" aria-label="Desktop de aplicações">
       <%- include('./partials/desktop-title-bar', { userName, userRole, basePath }) %>
 
       <main class="desktop-workspace">
@@ -54,25 +54,6 @@
       <%- include('./partials/desktop-dock', { apps, basePath }) %>
     </div>
 
-    <script>
-      (function attachDesktopClock() {
-        var clock = document.getElementById('desktopClock');
-
-        if (!clock) {
-          return;
-        }
-
-        function renderTime() {
-          var now = new Date();
-          clock.textContent = now.toLocaleTimeString('pt-PT', {
-            hour: '2-digit',
-            minute: '2-digit'
-          });
-        }
-
-        renderTime();
-        setInterval(renderTime, 1000);
-      })();
-    </script>
+    <script src="<%= basePath %>/scripts/shell-clock.js" defer></script>
   </body>
 </html>

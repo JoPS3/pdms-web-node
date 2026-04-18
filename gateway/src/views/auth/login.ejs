@@ -6,72 +6,24 @@
     <title><%= pageTitle %> | Gateway</title>
     <link rel="stylesheet" href="<%= basePath %>/styles/app.css" />
   </head>
-  <body>
-    <main class="card">
-      <h1>Entrar</h1>
+  <body class="d-grid place-center bg-warm p-24" data-base-path="<%= basePath %>">
+    <main class="ui-card ui-card--mobile">
+      <h1 class="ui-card__title">Entrar</h1>
       <form id="login-form">
-        <label for="username">Utilizador</label>
-        <input id="username" name="username" autocomplete="username" required autofocus />
+        <label for="username" class="auth-label">Utilizador</label>
+        <input id="username" name="username" class="auth-input" autocomplete="username" required autofocus />
 
-        <button type="submit">Continuar</button>
+        <button type="submit" class="btn btn-primary btn-lg btn-block auth-submit">Continuar</button>
       </form>
 
-      <div id="status" class="status">
+      <div id="status" class="status auth-status">
         <% if (errorMessage) { %>
         <span class="error"><%= errorMessage %></span>
         <% } %>
       </div>
-      <p class="hint">Apenas utilizadores autorizados podem entrar. Introduza o seu utilizador para continuar.</p>
+      <p class="ui-card__hint">Apenas utilizadores autorizados podem entrar. Introduza o seu utilizador para continuar.</p>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
-    <script>
-      (function initLoginForm() {
-        const form = document.getElementById('login-form');
-        const statusDiv = document.getElementById('status');
-        const basePath = '<%= basePath %>';
-
-        form.addEventListener('submit', async (e) => {
-          e.preventDefault();
-
-          const username = document.getElementById('username').value.trim();
-          if (!username) {
-            showError('Introduza um utilizador para continuar.');
-            return;
-          }
-
-          try {
-            const response = await axios.post(`${basePath}/login`, { username });
-
-            if (response.status === 200 && response.data.status === 'ok') {
-              window.location.href = response.data.redirect || `${basePath}/login`;
-            }
-          } catch (error) {
-            const errorMsg =
-              error.response?.data?.error ||
-              error.response?.data?.errorMessage ||
-              error.message ||
-              'Erro ao processar login. Tente novamente.';
-            showError(errorMsg);
-          }
-        });
-
-        function showError(message) {
-          statusDiv.innerHTML = `<span class="error">${escapeHtml(message)}</span>`;
-        }
-
-        function escapeHtml(text) {
-          const map = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#039;'
-          };
-          return text.replace(/[&<>"']/g, (m) => map[m]);
-        }
-      })();
-    </script>
+    <script src="<%= basePath %>/scripts/auth-forms.js" defer></script>
   </body>
 </html>

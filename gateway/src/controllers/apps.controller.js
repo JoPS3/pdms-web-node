@@ -18,7 +18,7 @@ function listApps(req, res) {
   return res.render('apps/index', {
     pageTitle: 'Aplicações',
     user,
-    apps: getApps({ host, protocol, isProxied }),
+    apps: getApps({ host, protocol, isProxied }, { role: user?.role }),
     userName: user?.userName || 'Utilizador',
     userEmail: user?.email || '',
     userRole: user?.role || ''

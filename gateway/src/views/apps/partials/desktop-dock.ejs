@@ -1,18 +1,18 @@
 <nav class="desktop-dock" aria-label="Dock de aplicações">
-  <div class="dock-inner">
-    <% apps.forEach((app) => { %>
-      <a
-        class="dock-item <%= app.url === '#' ? 'is-disabled' : '' %>"
-        href="<%= app.url %>"
-        title="<%= app.name %>"
-        aria-label="Abrir <%= app.name %>"
-      >
-        <span class="dock-item-glyph"><%= app.icon %></span>
-      </a>
-    <% }) %>
+  <% apps.forEach((app) => { %>
+    <a
+      class="desktop-dock-item <%= app.url === '#' ? 'is-disabled' : '' %>"
+      href="<%= app.url %>"
+      title="<%= app.name %>"
+      aria-label="Abrir <%= app.name %>"
+    >
+      <span class="desktop-dock-face"><%= app.icon %></span>
+      <span class="desktop-dock-label"><%= app.name %></span>
+    </a>
+  <% }) %>
 
-    <form method="post" action="<%= basePath %>/logout" class="dock-logout">
-      <button type="submit" aria-label="Terminar sessão">⏻</button>
-    </form>
-  </div>
+  <div class="desktop-dock-sep" aria-hidden="true"></div>
+  <form method="post" action="<%= basePath %>/logout" class="dock-logout">
+    <button type="submit" aria-label="Terminar sessão">⏻</button>
+  </form>
 </nav>

@@ -42,7 +42,9 @@
     <div class="desktop-shell" aria-label="Desktop de Vendas">
       <header class="desktop-titlebar">
         <div class="titlebar-left">
-          <span class="traffic-light red" aria-hidden="true"></span>
+          <form method="post" action="<%= gatewayBasePath %>/logout" class="traffic-light-logout" aria-label="Terminar sessao">
+            <button type="submit" class="traffic-light-button red" title="Terminar sessao" aria-label="Terminar sessao"></button>
+          </form>
           <span class="traffic-light yellow" aria-hidden="true"></span>
           <span class="traffic-light green" aria-hidden="true"></span>
           <strong class="desktop-brand">PDMS - Modulo Vendas</strong>
@@ -58,9 +60,6 @@
             <% if (userRole) { %><span class="desktop-user-role"><%= userRole %></span><% } %>
           </span>
           <a class="titlebar-back" href="<%= gatewayBasePath %>/apps" title="Voltar ao launcher">◀</a>
-          <form method="post" action="<%= gatewayBasePath %>/logout" class="titlebar-logout">
-            <button type="submit" title="Terminar sessao" aria-label="Terminar sessao">⏻</button>
-          </form>
         </div>
       </header>
 

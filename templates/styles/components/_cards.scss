@@ -1,0 +1,50 @@
+.ui-card {
+  --ui-card-bg: var(--card-bg-default);
+  --ui-card-border: var(--card-border-default);
+  --ui-card-radius: var(--card-radius-default);
+  --ui-card-padding: var(--card-padding-default);
+  --ui-card-max-width: var(--card-max-width-default);
+  --ui-card-shadow: var(--card-shadow-default);
+
+  width: min(var(--ui-card-max-width), 100%);
+  background: var(--ui-card-bg);
+  border: 1px solid var(--ui-card-border);
+  border-radius: var(--ui-card-radius);
+  padding: var(--ui-card-padding);
+  box-shadow: var(--ui-card-shadow);
+}
+
+.ui-card--mobile {
+  --ui-card-bg: var(--card-mobile-bg);
+  --ui-card-border: var(--card-mobile-border);
+  --ui-card-radius: var(--card-mobile-radius);
+  --ui-card-padding: var(--card-mobile-padding);
+  --ui-card-max-width: var(--card-mobile-max-width);
+  --ui-card-shadow: none;
+}
+
+.ui-card--compact {
+  --ui-card-padding: 16px;
+  --ui-card-radius: 12px;
+}
+
+.ui-card--elevated {
+  --ui-card-shadow: 0 14px 40px rgba(61, 47, 26, 0.1);
+}
+
+.ui-card__title {
+  margin: 0 0 var(--card-title-gap-default);
+  font-size: var(--card-title-size-default);
+}
+
+.ui-card__lead {
+  margin: 0 0 var(--card-lead-gap-default);
+  color: var(--card-lead-color-default);
+}
+
+.ui-card__hint {
+  margin-top: var(--card-hint-gap-default);
+  font-size: var(--card-hint-size-default);
+  line-height: var(--card-hint-line-default);
+  color: var(--card-hint-color-default);
+}

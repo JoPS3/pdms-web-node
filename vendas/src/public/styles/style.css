@@ -1,18 +1,76 @@
 :root {
   --bg: #f6f4ee;
+  --white: #fff;
   --panel: #fffdf8;
+  --window-wallpaper-a: #fffdf8;
   --ink: #2f2a1f;
   --muted: #7a715f;
   --accent: #c1541b;
   --accent-2: #f1b463;
   --ok: #1f7a4a;
   --err: #b42318;
+  --warm-glow-a: #fff7e5;
+  --warm-glow-a-soft: rgba(255, 247, 229, 0);
+  --warm-glow-b: #ffe7c5;
+  --warm-glow-b-soft: rgba(255, 231, 197, 0);
   --desktop-wallpaper-a: #112032;
   --desktop-wallpaper-b: #284663;
   --desktop-wallpaper-c: #4f7f9b;
-  --desktop-panel: rgba(18, 29, 43, 0.72);
+  --desktop-ink: #edf3fb;
+  --desktop-user-ink: #d7e5f7;
+  --desktop-user-role-ink: rgba(215, 229, 247, 0.65);
+  --desktop-overlay-a: rgba(255, 255, 255, 0.16);
+  --desktop-overlay-b: rgba(190, 240, 255, 0.18);
+  --desktop-panel: rgba(18, 29, 43, 0.82);
+  --desktop-panel-border: rgba(255, 255, 255, 0.35);
   --desktop-panel-soft: rgba(255, 255, 255, 0.2);
   --desktop-glow: rgba(198, 228, 255, 0.35);
+  --desktop-control-border: rgba(255, 255, 255, 0.18);
+  --desktop-control-ink: rgba(255, 255, 255, 0.55);
+  --desktop-control-hover-bg: rgba(255, 80, 80, 0.25);
+  --desktop-control-hover-border: rgba(255, 80, 80, 0.5);
+  --desktop-control-hover-ink: #ffa0a0;
+  --traffic-red: #fd5f57;
+  --traffic-yellow: #febc2e;
+  --traffic-green: #28c840;
+  --mobile-header-shadow: rgba(0, 0, 0, 0.1);
+  --mobile-card-border: #ebe4d7;
+  --card-bg-default: var(--panel);
+  --card-border-default: #eadfca;
+  --card-radius-default: 14px;
+  --card-padding-default: 20px;
+  --card-max-width-default: 560px;
+  --card-shadow-default: 0 12px 34px rgba(61, 47, 26, 0.08);
+  --card-title-size-default: 1.45rem;
+  --card-title-gap-default: 8px;
+  --card-lead-gap-default: 14px;
+  --card-lead-color-default: var(--muted);
+  --card-hint-gap-default: 14px;
+  --card-hint-size-default: 0.92rem;
+  --card-hint-line-default: 1.45;
+  --card-hint-color-default: var(--muted);
+  --card-mobile-bg: var(--window-wallpaper-a);
+  --card-mobile-border: var(--mobile-card-border);
+  --card-mobile-radius: 14px;
+  --card-mobile-padding: 22px;
+  --card-mobile-max-width: 480px;
+  --btn-primary-bg: linear-gradient(135deg, var(--accent), var(--accent-2));
+  --btn-primary-bg-hover: linear-gradient(135deg, var(--accent), var(--accent-2));
+  --btn-primary-hover-opacity: 0.9;
+  --btn-primary-ink: var(--white);
+  --btn-secondary-bg: linear-gradient(135deg, #f3eadb, #e2cead);
+  --btn-secondary-bg-hover: linear-gradient(135deg, #eadece, #d6c09e);
+  --btn-secondary-ink: var(--ink);
+  --btn-secondary-border: #d8c6ad;
+  --btn-ghost-bg: linear-gradient(135deg, rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.07));
+  --btn-ghost-bg-hover: linear-gradient(135deg, rgba(0, 0, 0, 0.07), rgba(0, 0, 0, 0.12));
+  --btn-ghost-ink: var(--ink);
+  --btn-ghost-border: rgba(0, 0, 0, 0.18);
+  --btn-danger-bg: linear-gradient(135deg, #b42318, #d4502a);
+  --btn-danger-bg-hover: linear-gradient(135deg, #901c14, #b42318);
+  --btn-danger-ink: var(--white);
+  --btn-focus-ring: rgba(193, 84, 27, 0.28);
+  --btn-disabled-opacity: 0.55;
 }
 
 * {
@@ -24,7 +82,6 @@ body {
   font-family: "Trebuchet MS", "Segoe UI", sans-serif;
   color: var(--ink);
   min-height: 100vh;
-  background: radial-gradient(circle at 10% 10%, #fff7e5 0, rgba(255, 247, 229, 0) 45%), radial-gradient(circle at 90% 80%, #ffe7c5 0, rgba(255, 231, 197, 0) 40%), var(--bg);
 }
 
 .main-page {
@@ -79,8 +136,10 @@ body {
     padding: 0 18px;
     backdrop-filter: blur(12px);
     background: var(--desktop-panel);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    border-bottom: 1px solid var(--desktop-panel-border);
   }
+  .desktop-titlebar-left,
+  .desktop-titlebar-right,
   .titlebar-left,
   .titlebar-right {
     flex: 1;
@@ -89,28 +148,61 @@ body {
     align-items: center;
     gap: 10px;
   }
+  .desktop-titlebar-center,
   .titlebar-center {
     display: flex;
     align-items: center;
   }
+  .desktop-titlebar-right,
   .titlebar-right {
     justify-content: flex-end;
     align-items: center;
   }
+  .ui-traffic-light,
   .traffic-light {
     width: 12px;
     height: 12px;
     border-radius: 50%;
     display: inline-block;
   }
+  .ui-traffic-light-button,
+  .traffic-light-button {
+    width: 12px;
+    height: 12px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    display: inline-block;
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.15s ease, filter 0.15s ease;
+  }
+  .ui-traffic-light.red,
   .traffic-light.red {
-    background: #fd5f57;
+    background: var(--traffic-red);
   }
+  .ui-traffic-light.yellow,
   .traffic-light.yellow {
-    background: #febc2e;
+    background: var(--traffic-yellow);
   }
+  .ui-traffic-light.green,
   .traffic-light.green {
-    background: #28c840;
+    background: var(--traffic-green);
+  }
+  .ui-traffic-light-button.red,
+  .traffic-light-button.red {
+    background: var(--traffic-red);
+  }
+  .ui-traffic-light-button.red:hover,
+  .traffic-light-button.red:hover {
+    filter: saturate(1.15) brightness(1.05);
+    box-shadow: 0 0 0 2px rgba(253, 95, 87, 0.35);
+    transform: scale(1.15);
+  }
+  .ui-traffic-light-button.red:active,
+  .traffic-light-button.red:active {
+    filter: saturate(1.2) brightness(0.95);
+    box-shadow: 0 0 0 2px rgba(253, 95, 87, 0.5);
+    transform: scale(1.05);
   }
   .desktop-brand {
     letter-spacing: 0.02em;
@@ -127,36 +219,39 @@ body {
     flex-direction: column;
     align-items: flex-end;
     font-size: 0.85rem;
-    color: #d7e5f7;
+    color: var(--desktop-user-ink);
     line-height: 1.3;
   }
   .desktop-user strong {
     font-weight: 600;
-    color: #edf3fb;
+    color: var(--desktop-ink);
   }
   .desktop-user-role {
     font-size: 0.75rem;
-    color: rgba(215, 229, 247, 0.65);
+    color: var(--desktop-user-role-ink);
     letter-spacing: 0.04em;
     text-transform: capitalize;
   }
+  .desktop-titlebar-back,
   .titlebar-back {
-    width: 28px;
-    height: 28px;
-    padding: 0;
-    line-height: 1;
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    color: rgba(255, 255, 255, 0.75);
     text-decoration: none;
+    color: var(--desktop-control-ink);
+    border: 1px solid var(--desktop-control-border);
+    border-radius: 8px;
+    padding: 2px 8px;
   }
+  .desktop-titlebar-logout,
   .titlebar-logout {
     display: flex;
     align-items: center;
     margin: 0;
   }
+  .traffic-light-logout {
+    display: flex;
+    align-items: center;
+    margin: 0;
+  }
+  .desktop-titlebar-logout button,
   .titlebar-logout button {
     width: 28px;
     height: 28px;
@@ -165,116 +260,178 @@ body {
     display: grid;
     place-items: center;
     border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    color: rgba(255, 255, 255, 0.82);
+    border: 1px solid var(--desktop-control-border);
+    color: var(--desktop-control-ink);
     background: transparent;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 1rem;
     transition: all 0.15s;
   }
+  .desktop-titlebar-logout button:hover,
   .titlebar-logout button:hover {
-    background: rgba(193, 84, 27, 0.25);
-    border-color: rgba(241, 180, 99, 0.6);
-    color: #fff;
+    background: var(--desktop-control-hover-bg);
+    border-color: var(--desktop-control-hover-border);
+    color: var(--desktop-control-hover-ink);
   }
 }
 @media (min-width: 1024px) {
   .desktop-icons {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
-    align-content: start;
-    gap: 20px 18px;
-    max-width: 720px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
   }
   .desktop-icon {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 8px;
+    width: 80px;
+    padding: 14px 8px 12px;
+    background: var(--desktop-overlay-a);
+    border: 1px solid var(--desktop-panel-soft);
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 2px 8px rgba(0, 0, 0, 0.25);
+    color: var(--desktop-ink);
+    font: inherit;
+    font-size: 0.72rem;
+    font-weight: 600;
+    transition: background 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease;
     text-decoration: none;
-    color: #f2f7ff;
-    border-radius: 12px;
-    padding: 10px 8px;
-    transition: background 120ms ease;
-    border: none;
-    background: transparent;
     cursor: pointer;
-    font-family: "Trebuchet MS", "Segoe UI", Tahoma, sans-serif;
-    font-size: inherit;
   }
   .desktop-icon:hover {
-    background: rgba(255, 255, 255, 0.12);
+    background: var(--desktop-overlay-b);
+    transform: translateY(-2px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 6px 16px rgba(0, 0, 0, 0.3);
+  }
+  .desktop-icon:active {
+    transform: translateY(0);
+  }
+  .desktop-icon.is-active {
+    background: var(--desktop-overlay-b);
+    border-color: var(--desktop-panel-border);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 6px 16px rgba(0, 0, 0, 0.35);
   }
   .desktop-icon.is-disabled {
     opacity: 0.5;
     pointer-events: none;
   }
+  .desktop-icon-face,
   .desktop-icon-glyph {
-    width: 68px;
-    height: 68px;
-    border-radius: 18px;
-    display: grid;
-    place-items: center;
-    background: rgba(255, 255, 255, 0.14);
-    border: 1px solid rgba(255, 255, 255, 0.24);
     font-size: 2rem;
-    box-shadow: 0 8px 14px rgba(0, 0, 0, 0.22);
+    line-height: 1;
   }
+  .desktop-icon-label,
   .desktop-icon-name {
-    font-family: "Trebuchet MS", "Segoe UI", Tahoma, sans-serif;
-    font-size: 0.8rem;
+    font-size: 0.72rem;
     text-align: center;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.38);
+    line-height: 1.2;
+    color: var(--desktop-user-ink);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
   }
   .desktop-dock {
     position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 30;
-    display: flex;
-    justify-content: center;
-    padding: 0 16px 18px;
-  }
-  .dock-inner {
+    left: 50%;
+    bottom: 16px;
+    transform: translateX(-50%);
+    z-index: 20;
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    border-radius: 18px;
-    background: rgba(17, 29, 42, 0.72);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.38);
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--desktop-panel);
+    border: 1px solid var(--desktop-panel-border);
+    border-radius: 20px;
+    backdrop-filter: blur(16px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 8px 32px rgba(0, 0, 0, 0.4);
   }
+  .desktop-dock-item,
   .dock-item,
   .dock-logout button,
   .dock-back {
-    width: 48px;
-    height: 48px;
-    display: grid;
-    place-items: center;
-    border-radius: 14px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 12px;
+    color: var(--desktop-ink);
+    font: inherit;
+    font-size: 0.65rem;
+    font-weight: 600;
     text-decoration: none;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.12);
-    color: #f5fbff;
     cursor: pointer;
-    font-family: "Segoe UI", Tahoma, Verdana, sans-serif;
-    font-size: inherit;
+    transition: background 0.15s ease, transform 0.12s ease;
   }
-  .dock-item:hover,
-  .dock-logout button:hover,
+  .desktop-dock-item:hover,
+  .dock-item,
   .dock-back:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0 0 2px var(--desktop-glow);
+    background: var(--desktop-overlay-a);
+    transform: scale(1.18);
   }
+  .dock-logout button:hover {
+    background: var(--desktop-control-hover-bg);
+    border: 1px solid var(--desktop-control-hover-border);
+    color: var(--desktop-control-hover-ink);
+    transform: scale(1.18);
+  }
+  .desktop-dock-item:active,
+  .dock-item:active,
+  .dock-back:active {
+    transform: scale(1.05);
+  }
+  .dock-logout button:active {
+    background: rgba(255, 80, 80, 0.35);
+    border: 1px solid rgba(255, 80, 80, 0.65);
+    color: #ffd4d4;
+    transform: scale(1.05);
+  }
+  .desktop-dock-item.is-active,
+  .dock-item.is-active {
+    background: var(--desktop-overlay-a);
+    border: 1px solid var(--desktop-panel-border);
+  }
+  .desktop-dock-item.is-disabled,
   .dock-item.is-disabled {
     opacity: 0.45;
     pointer-events: none;
   }
+  .desktop-dock-face,
   .dock-item-glyph {
-    font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
-    font-size: 1.45rem;
+    font-size: 1.8rem;
+    line-height: 1;
+  }
+  .desktop-dock-label {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    color: var(--desktop-user-ink);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    background: var(--desktop-panel);
+    border: 1px solid var(--desktop-panel-border);
+    border-radius: 6px;
+    padding: 2px 8px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+  .desktop-dock-item:hover .desktop-dock-label {
+    opacity: 1;
+  }
+  .desktop-dock-sep,
+  .dock-inner-sep {
+    width: 1px;
+    height: 40px;
+    background: var(--desktop-panel-border);
+    margin: 0 4px;
+    align-self: center;
   }
 }
 @media (min-width: 1024px) {
@@ -687,6 +844,7 @@ thead th {
 
 .mobile-shell {
   display: block;
+  min-height: 100vh;
 }
 
 .mobile-header {
@@ -744,6 +902,15 @@ thead th {
 .mobile-app-card h3,
 .mobile-app-card p {
   margin: 0 0 10px;
+}
+
+.mobile-apps-grid .ui-card h3,
+.mobile-apps-grid .ui-card p {
+  margin: 0 0 10px;
+}
+
+.mobile-apps-grid .ui-card .btn {
+  margin-top: 4px;
 }
 
 .mobile-app-card a {

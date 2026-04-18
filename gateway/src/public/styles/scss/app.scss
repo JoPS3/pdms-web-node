@@ -1,5 +1,9 @@
 @use "../../../../../templates/styles/tokens";
 @use "../../../../../templates/styles/globals";
+@use "../../../../../templates/styles/utilities";
+@use "../../../../../templates/styles/components/cards";
+@use "../../../../../templates/styles/components/buttons";
+@use "../../../../../templates/styles/components/error-pages";
 @use "../../../../../templates/styles/shell-desktop/shell" as desktop-shell;
 @use "../../../../../templates/styles/shell-desktop/titlebar" as desktop-titlebar;
 @use "../../../../../templates/styles/shell-desktop/launcher" as desktop-launcher;
@@ -7,4 +11,3 @@
 @use "../../../../../templates/styles/shell-mobile/navigation" as mobile-navigation;
 @use "../../../../../templates/styles/shell-mobile/launcher" as mobile-launcher;
 @use "auth";
-@use "errors";

@@ -1,4 +1,29 @@
-function getApps(runtime = {}) {
+const APP_ACCESS_BY_ROLE = {
+  ADMINISTRADOR: '*',
+  ADMIN: '*'
+};
+
+function normalizeRole(role) {
+  return String(role || '').trim().toUpperCase();
+}
+
+function filterAppsByRole(apps, role) {
+  const normalizedRole = normalizeRole(role);
+  const allowed = APP_ACCESS_BY_ROLE[normalizedRole];
+
+  if (allowed === '*') {
+    return apps;
+  }
+
+  if (!Array.isArray(allowed) || allowed.length === 0) {
+    return [];
+  }
+
+  const allowedSet = new Set(allowed);
+  return apps.filter((app) => allowedSet.has(app.id));
+}
+
+function getApps(runtime = {}, options = {}) {
   const basePathDev = String(process.env.BASE_PATH_DEV || '').replace(/\/+$/, '');
   const withBasePath = (path) => `${basePathDev}${path}`;
   void runtime;
@@ -12,7 +37,7 @@ function getApps(runtime = {}) {
     || withBasePath('/apps/usuarios');
   const mapasUrl = byEnvOrDefault('APP_MAPAS_URL_DEV', '/apps/mapas');
 
-  return [
+  const apps = [
     {
       id: 'mapas',
       name: 'Mapas',
@@ -49,8 +74,11 @@ function getApps(runtime = {}) {
       url: usuariosUrl
     }
   ];
+
+  return filterAppsByRole(apps, options.role);
 }
 
 module.exports = {
-  getApps
+  getApps,
+  filterAppsByRole
 };

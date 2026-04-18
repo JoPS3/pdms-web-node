@@ -1,58 +1,36 @@
-body {
-  display: grid;
-  place-items: center;
-  padding: 24px;
-}
-
-.card {
-  width: min(440px, 100%);
-  background: var(--panel);
-  border: 1px solid #eadfca;
-  border-radius: 18px;
-  padding: 28px;
-  box-shadow: 0 14px 40px #3d2f1a1a;
-}
-
-h1 {
-  margin: 0 0 6px;
-  font-size: 1.9rem;
-}
-
-label {
+.auth-label {
   display: block;
   margin: 14px 0 6px;
   font-weight: 700;
 }
 
-input {
+.auth-input {
   width: 100%;
-  border: 1px solid #d6c8ac;
+  border: 1px solid var(--btn-secondary-border);
   border-radius: 10px;
   padding: 12px;
   font-size: 1rem;
-  background: #fff;
+  background: var(--white);
 }
 
-.card button {
-  width: 100%;
+.auth-input:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--btn-focus-ring);
+  border-color: var(--accent);
+}
+
+.auth-submit {
   margin-top: 18px;
-  border: none;
-  border-radius: 10px;
-  padding: 12px;
-  font-size: 1rem;
-  font-weight: 700;
-  color: #fff;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  cursor: pointer;
 }
 
-.card button:hover {
-  opacity: 0.9;
+.auth-status {
+  min-height: 22px;
+  margin-top: 12px;
 }
 
-.hint {
-  margin-top: 14px;
-  font-size: 0.92rem;
-  line-height: 1.45;
-  color: var(--muted);
+.auth-status .error,
+.status .error {
+  color: var(--err);
+  font-weight: 600;
 }
+

@@ -1,0 +1,33 @@
+.ui-error-code {
+  margin: 0;
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--err);
+}
+
+.ui-error-title {
+  margin: 8px 0 14px;
+  font-size: 1.5rem;
+  color: var(--ink);
+}
+
+.ui-error-message {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.ui-error-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.ui-error-hint {
+  margin-top: 24px;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}

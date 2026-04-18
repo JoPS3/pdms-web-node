@@ -12,9 +12,11 @@
     padding: 0 18px;
     backdrop-filter: blur(12px);
     background: var(--desktop-panel);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    border-bottom: 1px solid var(--desktop-panel-border);
   }
 
+  .desktop-titlebar-left,
+  .desktop-titlebar-right,
   .titlebar-left,
   .titlebar-right {
     flex: 1;
@@ -24,16 +26,19 @@
     gap: 10px;
   }
 
+  .desktop-titlebar-center,
   .titlebar-center {
     display: flex;
     align-items: center;
   }
 
+  .desktop-titlebar-right,
   .titlebar-right {
     justify-content: flex-end;
     align-items: center;
   }
 
+  .ui-traffic-light,
   .traffic-light {
     width: 12px;
     height: 12px;
@@ -41,9 +46,45 @@
     display: inline-block;
   }
 
-  .traffic-light.red { background: #fd5f57; }
-  .traffic-light.yellow { background: #febc2e; }
-  .traffic-light.green { background: #28c840; }
+  .ui-traffic-light-button,
+  .traffic-light-button {
+    width: 12px;
+    height: 12px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    display: inline-block;
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.15s ease, filter 0.15s ease;
+  }
+
+  .ui-traffic-light.red,
+  .traffic-light.red { background: var(--traffic-red); }
+
+  .ui-traffic-light.yellow,
+  .traffic-light.yellow { background: var(--traffic-yellow); }
+
+  .ui-traffic-light.green,
+  .traffic-light.green { background: var(--traffic-green); }
+
+  .ui-traffic-light-button.red,
+  .traffic-light-button.red {
+    background: var(--traffic-red);
+  }
+
+  .ui-traffic-light-button.red:hover,
+  .traffic-light-button.red:hover {
+    filter: saturate(1.15) brightness(1.05);
+    box-shadow: 0 0 0 2px rgba(253, 95, 87, 0.35);
+    transform: scale(1.15);
+  }
+
+  .ui-traffic-light-button.red:active,
+  .traffic-light-button.red:active {
+    filter: saturate(1.2) brightness(0.95);
+    box-shadow: 0 0 0 2px rgba(253, 95, 87, 0.5);
+    transform: scale(1.05);
+  }
 
   .desktop-brand {
     letter-spacing: 0.02em;
@@ -62,41 +103,45 @@
     flex-direction: column;
     align-items: flex-end;
     font-size: 0.85rem;
-    color: #d7e5f7;
+    color: var(--desktop-user-ink);
     line-height: 1.3;
   }
 
   .desktop-user strong {
     font-weight: 600;
-    color: #edf3fb;
+    color: var(--desktop-ink);
   }
 
   .desktop-user-role {
     font-size: 0.75rem;
-    color: rgba(215, 229, 247, 0.65);
+    color: var(--desktop-user-role-ink);
     letter-spacing: 0.04em;
     text-transform: capitalize;
   }
 
+  .desktop-titlebar-back,
   .titlebar-back {
-    width: 28px;
-    height: 28px;
-    padding: 0;
-    line-height: 1;
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    color: rgba(255, 255, 255, 0.75);
     text-decoration: none;
+    color: var(--desktop-control-ink);
+    border: 1px solid var(--desktop-control-border);
+    border-radius: 8px;
+    padding: 2px 8px;
   }
 
+  .desktop-titlebar-logout,
   .titlebar-logout {
     display: flex;
     align-items: center;
     margin: 0;
   }
 
+  .traffic-light-logout {
+    display: flex;
+    align-items: center;
+    margin: 0;
+  }
+
+  .desktop-titlebar-logout button,
   .titlebar-logout button {
     width: 28px;
     height: 28px;
@@ -105,17 +150,18 @@
     display: grid;
     place-items: center;
     border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    color: rgba(255, 255, 255, 0.82);
+    border: 1px solid var(--desktop-control-border);
+    color: var(--desktop-control-ink);
     background: transparent;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 1rem;
     transition: all 0.15s;
   }
 
+  .desktop-titlebar-logout button:hover,
   .titlebar-logout button:hover {
-    background: rgba(193, 84, 27, 0.25);
-    border-color: rgba(241, 180, 99, 0.6);
-    color: #fff;
+    background: var(--desktop-control-hover-bg);
+    border-color: var(--desktop-control-hover-border);
+    color: var(--desktop-control-hover-ink);
   }
 }
