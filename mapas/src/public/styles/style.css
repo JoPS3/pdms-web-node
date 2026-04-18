@@ -192,6 +192,10 @@ body {
   .traffic-light-button.red {
     background: var(--traffic-red);
   }
+  .ui-traffic-light-button.yellow,
+  .traffic-light-button.yellow {
+    background: var(--traffic-yellow);
+  }
   .ui-traffic-light-button.red:hover,
   .traffic-light-button.red:hover {
     filter: saturate(1.15) brightness(1.05);
@@ -202,6 +206,18 @@ body {
   .traffic-light-button.red:active {
     filter: saturate(1.2) brightness(0.95);
     box-shadow: 0 0 0 2px rgba(253, 95, 87, 0.5);
+    transform: scale(1.05);
+  }
+  .ui-traffic-light-button.yellow:hover,
+  .traffic-light-button.yellow:hover {
+    filter: saturate(1.1) brightness(1.02);
+    box-shadow: 0 0 0 2px rgba(254, 188, 46, 0.35);
+    transform: scale(1.15);
+  }
+  .ui-traffic-light-button.yellow:active,
+  .traffic-light-button.yellow:active {
+    filter: saturate(1.15) brightness(0.96);
+    box-shadow: 0 0 0 2px rgba(254, 188, 46, 0.5);
     transform: scale(1.05);
   }
   .desktop-brand {
@@ -330,6 +346,48 @@ body {
     color: var(--desktop-user-ink);
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
   }
+  .desktop-icon-folder {
+    position: relative;
+  }
+  .desktop-icon-folder-main {
+    line-height: 1;
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.28));
+  }
+  .desktop-icon-folder-badge {
+    position: absolute;
+    right: 7px;
+    bottom: 7px;
+    min-width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    padding: 0 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    background: rgba(10, 22, 36, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.42);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  }
+  .desktop-dock-face,
+  .dock-item-glyph {
+    font-size: 1.8rem;
+    line-height: 1;
+  }
+  .desktop-dock-face.desktop-icon-folder .desktop-icon-folder-main {
+    font-size: 1.45rem;
+  }
+  .desktop-dock-face.desktop-icon-folder .desktop-icon-folder-badge {
+    right: -1px;
+    bottom: -1px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 2px;
+    font-size: 0.62rem;
+    border-width: 1px;
+  }
+}
+@media (min-width: 1024px) {
   .desktop-dock {
     position: fixed;
     left: 50%;
@@ -400,11 +458,6 @@ body {
   .dock-item.is-disabled {
     opacity: 0.45;
     pointer-events: none;
-  }
-  .desktop-dock-face,
-  .dock-item-glyph {
-    font-size: 1.8rem;
-    line-height: 1;
   }
   .desktop-dock-label {
     position: absolute;

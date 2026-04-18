@@ -3,64 +3,77 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><%= pageTitle %> | PDMS Auth</title>
+    <title><%= pageTitle %> | Sysadmin</title>
     <link rel="stylesheet" href="<%= basePath %>/styles/style.css?v=<%= assetVersion %>" />
   </head>
-  <body class="main-page desktop-page" data-gateway-base-path="<%= gatewayBasePath %>" data-app-base-path="<%= basePath %>">
-    <div class="mobile-shell">
+  <body class="main-page bg-warm desktop-page" data-gateway-base-path="<%= gatewayBasePath %>" data-app-base-path="<%= basePath %>">
+    <div class="mobile-shell bg-mobile">
       <header class="mobile-header">
         <div class="mobile-header-content">
           <div>
-            <h1>PDMS Auth</h1>
+            <h1>PDMS</h1>
           </div>
           <div class="mobile-user">
-            Sessao ativa de <strong><%= userName %></strong><br />
+            Bem-vindo, <strong><%= userName %></strong><br />
             <% if (userRole) { %>
               <span><%= userRole %></span>
             <% } %>
           </div>
-          <a class="mobile-back" href="<%= gatewayBasePath %>/apps">Launcher</a>
+          <form method="post" action="<%= gatewayBasePath %>/logout" class="mobile-logout">
+            <button type="submit">Sair</button>
+          </form>
         </div>
       </header>
 
       <main class="mobile-main">
-        <h2>Centro de Autenticacao</h2>
-        <div class="mobile-unavailable-card">
-          <p>Esta aplicacao e dedicada a fluxos autenticados e endpoints internos.</p>
-          <p><strong>ID de utilizador:</strong> <%= userId || 'n/d' %></p>
-          <p>
-            <a class="mobile-back" href="<%= basePath %>/">Abrir utilizadores</a>
-          </p>
+        <h2>Administração de Sistema</h2>
+
+        <div class="mobile-apps-grid">
+          <article class="ui-card ui-card--mobile ui-card--compact">
+            <h3>👥 Utilizadores</h3>
+            <p>Gestão de utilizadores, perfis e permissões de acesso.</p>
+            <a href="<%= basePath %>/" class="btn btn-primary">Abrir</a>
+          </article>
+
+          <article class="ui-card ui-card--mobile ui-card--compact">
+            <h3>☁️ OneDrive</h3>
+            <p>Estado e configuração da ligação ao OneDrive para operações internas.</p>
+            <a href="<%= basePath %>/" class="btn btn-secondary">Abrir na área de administração</a>
+          </article>
         </div>
       </main>
     </div>
 
     <div class="desktop-shell" aria-label="Desktop de modulos">
       <header class="desktop-titlebar">
-        <div class="titlebar-left">
+        <div class="desktop-titlebar-left">
           <form method="post" action="<%= gatewayBasePath %>/logout" class="traffic-light-logout" aria-label="Terminar sessao">
-            <button type="submit" class="traffic-light-button red" title="Terminar sessao" aria-label="Terminar sessao"></button>
+            <button type="submit" class="ui-traffic-light-button red" title="Terminar sessao" aria-label="Terminar sessao"></button>
           </form>
-          <span class="traffic-light yellow" aria-hidden="true"></span>
-          <span class="traffic-light green" aria-hidden="true"></span>
-          <strong class="desktop-brand">PDMS - Modulo Auth</strong>
+          <a
+            href="<%= gatewayBasePath %>/apps"
+            class="ui-traffic-light-button yellow"
+            title="Voltar ao launcher"
+            aria-label="Voltar ao launcher"
+          ></a>
+          <span class="ui-traffic-light green" aria-hidden="true"></span>
+          <strong class="desktop-brand">PDMS - Pedaço Decimal Management System</strong>
         </div>
 
-        <div class="titlebar-center">
+        <div class="desktop-titlebar-center">
           <span class="desktop-clock" id="desktopClock">--:--</span>
         </div>
 
-        <div class="titlebar-right">
+        <div class="desktop-titlebar-right">
           <span class="desktop-user">
             <strong><%= userName %></strong>
             <% if (userRole) { %><span class="desktop-user-role"><%= userRole %></span><% } %>
           </span>
-          <a class="titlebar-back" href="<%= gatewayBasePath %>/apps" title="Voltar ao launcher">◀</a>
         </div>
       </header>
 
       <main class="desktop-workspace">
-        <section class="desktop-icons" aria-label="Atalhos de auth">
+        <section class="desktop-icons" aria-label="Atalhos de administração">
           <button
             type="button"
             class="desktop-icon"
@@ -68,11 +81,11 @@
             title="Sessão"
             aria-label="Abrir sessão"
           >
-            <span class="desktop-icon-glyph desktop-icon-folder">
+            <span class="desktop-icon-face desktop-icon-folder">
               <span class="desktop-icon-folder-main" aria-hidden="true">📁</span>
-              <span class="desktop-icon-folder-badge" aria-hidden="true">🔐</span>
+              <span class="desktop-icon-folder-badge" aria-hidden="true">📋</span>
             </span>
-            <span class="desktop-icon-name">Sessão</span>
+            <span class="desktop-icon-label">Sessão</span>
           </button>
           <button
             type="button"
@@ -81,11 +94,11 @@
             title="Utilizadores"
             aria-label="Abrir utilizadores"
           >
-            <span class="desktop-icon-glyph desktop-icon-folder">
+            <span class="desktop-icon-face desktop-icon-folder">
               <span class="desktop-icon-folder-main" aria-hidden="true">📁</span>
               <span class="desktop-icon-folder-badge" aria-hidden="true">👥</span>
             </span>
-            <span class="desktop-icon-name">Utilizadores</span>
+            <span class="desktop-icon-label">Utilizadores</span>
           </button>
           <button
             type="button"
@@ -94,46 +107,60 @@
             title="OneDrive"
             aria-label="Abrir ligação OneDrive"
           >
-            <span class="desktop-icon-glyph desktop-icon-folder">
+            <span class="desktop-icon-face desktop-icon-folder">
               <span class="desktop-icon-folder-main" aria-hidden="true">📁</span>
               <span class="desktop-icon-folder-badge" aria-hidden="true">☁️</span>
             </span>
-            <span class="desktop-icon-name">OneDrive</span>
+            <span class="desktop-icon-label">OneDrive</span>
           </button>
         </section>
       </main>
 
       <nav class="desktop-dock" aria-label="Dock de modulos">
-        <div class="dock-inner">
-          <button
-            type="button"
-            class="dock-item"
-            data-open-window="session"
-            title="Sessão"
-            aria-label="Abrir sessão"
-          >
-            <span class="dock-item-glyph">📋</span>
-          </button>
-          <button
-            type="button"
-            class="dock-item"
-            data-open-window="users"
-            title="Utilizadores"
-            aria-label="Abrir utilizadores"
-          >
-            <span class="dock-item-glyph">👥</span>
-          </button>
-          <button
-            type="button"
-            class="dock-item"
-            data-open-window="onedrive"
-            title="OneDrive"
-            aria-label="Abrir ligação OneDrive"
-          >
-            <span class="dock-item-glyph">☁️</span>
-          </button>
-          <a class="dock-back" href="<%= gatewayBasePath %>/apps" aria-label="Voltar ao launcher">◀</a>
-        </div>
+        <button
+          type="button"
+          class="desktop-dock-item"
+          data-open-window="session"
+          title="Sessão"
+          aria-label="Abrir sessão"
+        >
+          <span class="desktop-dock-face desktop-icon-folder">
+            <span class="desktop-icon-folder-main" aria-hidden="true">📁</span>
+            <span class="desktop-icon-folder-badge" aria-hidden="true">📋</span>
+          </span>
+          <span class="desktop-dock-label">Sessão</span>
+        </button>
+
+        <button
+          type="button"
+          class="desktop-dock-item"
+          data-open-window="users"
+          title="Utilizadores"
+          aria-label="Abrir utilizadores"
+        >
+          <span class="desktop-dock-face desktop-icon-folder">
+            <span class="desktop-icon-folder-main" aria-hidden="true">📁</span>
+            <span class="desktop-icon-folder-badge" aria-hidden="true">👥</span>
+          </span>
+          <span class="desktop-dock-label">Utilizadores</span>
+        </button>
+
+        <button
+          type="button"
+          class="desktop-dock-item"
+          data-open-window="onedrive"
+          title="OneDrive"
+          aria-label="Abrir ligação OneDrive"
+        >
+          <span class="desktop-dock-face desktop-icon-folder">
+            <span class="desktop-icon-folder-main" aria-hidden="true">📁</span>
+            <span class="desktop-icon-folder-badge" aria-hidden="true">☁️</span>
+          </span>
+          <span class="desktop-dock-label">OneDrive</span>
+        </button>
+
+        <div class="desktop-dock-sep" aria-hidden="true"></div>
+        <a class="dock-back" href="<%= gatewayBasePath %>/apps" aria-label="Voltar ao launcher">◀</a>
       </nav>
 
       <!-- Windows container (single DOM, state-driven visibility) -->

@@ -72,6 +72,11 @@
     background: var(--traffic-red);
   }
 
+  .ui-traffic-light-button.yellow,
+  .traffic-light-button.yellow {
+    background: var(--traffic-yellow);
+  }
+
   .ui-traffic-light-button.red:hover,
   .traffic-light-button.red:hover {
     filter: saturate(1.15) brightness(1.05);
@@ -83,6 +88,20 @@
   .traffic-light-button.red:active {
     filter: saturate(1.2) brightness(0.95);
     box-shadow: 0 0 0 2px rgba(253, 95, 87, 0.5);
+    transform: scale(1.05);
+  }
+
+  .ui-traffic-light-button.yellow:hover,
+  .traffic-light-button.yellow:hover {
+    filter: saturate(1.1) brightness(1.02);
+    box-shadow: 0 0 0 2px rgba(254, 188, 46, 0.35);
+    transform: scale(1.15);
+  }
+
+  .ui-traffic-light-button.yellow:active,
+  .traffic-light-button.yellow:active {
+    filter: saturate(1.15) brightness(0.96);
+    box-shadow: 0 0 0 2px rgba(254, 188, 46, 0.5);
     transform: scale(1.05);
   }
 
