@@ -31,3 +31,76 @@
   font-size: 0.92rem;
   line-height: 1.45;
 }
+
+.error-mobile-page {
+  min-height: 100vh;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: radial-gradient(circle at 10% 10%, var(--warm-glow-a) 0, var(--warm-glow-a-soft) 45%), radial-gradient(circle at 90% 80%, var(--warm-glow-b) 0, var(--warm-glow-b-soft) 40%), var(--bg);
+}
+
+.error-mobile-card {
+  width: min(var(--card-mobile-max-width), 100%);
+}
+
+.error-desktop-page {
+  min-height: 100vh;
+  margin: 0;
+  display: grid;
+  grid-template-rows: 48px 1fr;
+  background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.16), transparent 38%), radial-gradient(circle at 84% 70%, rgba(190, 240, 255, 0.18), transparent 34%), linear-gradient(145deg, var(--desktop-wallpaper-a), var(--desktop-wallpaper-b) 52%, var(--desktop-wallpaper-c));
+  color: var(--desktop-ink);
+}
+
+.error-desktop-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 16px;
+  backdrop-filter: blur(12px);
+  background: var(--desktop-panel);
+  border-bottom: 1px solid var(--desktop-panel-border);
+}
+
+.error-desktop-lights {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.error-desktop-brand {
+  font-size: 0.93rem;
+  letter-spacing: 0.03em;
+  color: rgba(237, 243, 251, 0.9);
+}
+
+.error-desktop-workspace {
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.error-desktop-card {
+  width: min(680px, 100%);
+  background: rgba(17, 27, 38, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 16px;
+  box-shadow: 0 20px 44px rgba(8, 17, 28, 0.42);
+  padding: 26px;
+}
+
+.error-desktop-card .ui-error-title {
+  color: var(--desktop-ink);
+}
+
+.error-desktop-card .ui-error-message,
+.error-desktop-card .ui-error-hint {
+  color: rgba(237, 243, 251, 0.84);
+}
+
+.error-desktop-card .ui-error-actions {
+  margin-top: 22px;
+}

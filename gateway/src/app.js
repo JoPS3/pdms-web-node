@@ -91,6 +91,20 @@ function isConnectionRefused(error) {
   return String(error.message || '').toUpperCase().includes('ECONNREFUSED');
 }
 
+function isMobileRequest(req) {
+  const chMobile = String(req.headers?.['sec-ch-ua-mobile'] || '').trim();
+  if (chMobile === '?1' || chMobile === '1') {
+    return true;
+  }
+
+  const userAgent = String(req.headers?.['user-agent'] || '').toLowerCase();
+  return /mobile|android|iphone|ipad|ipod|windows phone|opera mini/i.test(userAgent);
+}
+
+function resolveErrorView(req, baseViewName) {
+  return isMobileRequest(req) ? `errors/${baseViewName}` : `errors/${baseViewName}-desktop`;
+}
+
 app.use((error, req, res, _next) => {
   if (res.headersSent) {
     return;
@@ -103,7 +117,7 @@ app.use((error, req, res, _next) => {
 
   if (acceptsHtml) {
     if (unavailable) {
-      return res.status(statusCode).render('errors/503', {
+      return res.status(statusCode).render(resolveErrorView(req, '503'), {
         basePath,
         appName: 'unknown',
         appLabel: 'serviço solicitado',
@@ -111,7 +125,7 @@ app.use((error, req, res, _next) => {
       });
     }
 
-    return res.status(statusCode).render('errors/500', {
+    return res.status(statusCode).render(resolveErrorView(req, '500'), {
       basePath
     });
   }
@@ -126,7 +140,7 @@ app.use((error, req, res, _next) => {
 
 // Error handlers
 app.use((req, res) => {
-  res.status(404).render('errors/404', {
+  res.status(404).render(resolveErrorView(req, '404'), {
     basePath
   });
 });
